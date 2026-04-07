@@ -1,0 +1,526 @@
+from app.analyzer import (
+    apply_gemini_primary_review,
+    build_fallback_style_overview,
+    build_result_status,
+    derive_public_verdict,
+    publicize_result,
+    style_key_for_score,
+    style_label_for_score,
+    style_score_display,
+)
+from app.models import AnalysisSignal, ResolvedPage
+
+
+def make_page() -> ResolvedPage:
+    return ResolvedPage(
+        title="検証用ページ",
+        site_name="Example News",
+        input_source="manual_text",
+        extraction_note="manual input",
+        text_preview="検証用の本文プレビューです。",
+        extracted_chars=120,
+        analysis_text="これは検証用の本文です。十分な長さがあり、解析対象として扱えます。",
+    )
+
+
+def make_style_overview(score: int) -> dict:
+    return {
+        "status": "テスト用",
+        "summary": "書き振り評価のテストです。",
+        "score": score,
+        "score_display": style_score_display(score),
+        "label": style_label_for_score(score),
+        "key": style_key_for_score(score),
+        "note": None,
+        "model": "test-style",
+        "highlights": [],
+        "signals": [],
+    }
+
+
+def test_fallback_style_overview_ignores_non_style_signals() -> None:
+    style_signal = AnalysisSignal(title="強い見出し", score_delta=10, tone="リスク上昇", detail="断定的です。")
+    non_style_signal = AnalysisSignal(title="引用リンクなし", score_delta=18, tone="リスク上昇", detail="出典不足です。")
+
+    style_only = build_fallback_style_overview([style_signal])
+    mixed = build_fallback_style_overview([style_signal, non_style_signal])
+
+    assert style_only.score == mixed.score
+    assert [signal.title for signal in mixed.signals] == ["強い見出し"]
+
+
+def test_build_result_status_escalates_only_at_style_score_80_or_above() -> None:
+    assert build_result_status("自動判定", "概ね整合", 70, {}, {"score": 79}) == "自動判定"
+    assert build_result_status("自動判定", "概ね整合", 70, {}, {"score": 80}) == "要人手確認"
+
+
+def test_public_verdict_is_not_changed_by_style_score_but_status_is() -> None:
+    page = make_page()
+    payload = {
+        "risk_score": 35,
+        "confidence": "中程度",
+        "confidence_score": 60,
+        "status": "自動判定",
+        "summary": "整合しています。",
+        "labels": [],
+        "reasons": ["テスト理由"],
+        "domain": "一般",
+        "verification_links": [],
+        "caution_level": "ほぼ正確",
+        "model_used": "heuristic+gemini-evidence+gemini-style",
+        "signal_breakdown": [],
+        "evidence_overview": {
+            "status": "Gemini根拠比較済み",
+            "summary": "外部根拠は大筋で整合しています。",
+            "assessment_status": "概ね整合",
+            "assessment_summary": "外部根拠は大筋で整合しています。",
+            "links": [],
+            "grounding_sources": [],
+            "claim_reviews": [],
+            "grounding_queries": [],
+            "retrieved_urls": [],
+        },
+    }
+
+    low_style = publicize_result(page, {**payload, "style_overview": make_style_overview(30)}, {})
+    high_style = publicize_result(page, {**payload, "style_overview": make_style_overview(95)}, {})
+
+    assert low_style.verdict == "ほぼ正確"
+    assert high_style.verdict == "ほぼ正確"
+    assert low_style.status == "自動判定"
+    assert high_style.status == "人による確認推奨"
+
+
+def test_fact_check_source_is_capped_at_mostly_accurate_without_official_source() -> None:
+    verdict = derive_public_verdict(
+        risk_score=8,
+        confidence_score=90,
+        labels=[],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": True,
+            "trusted_source": True,
+            "correction_article": True,
+        },
+        evidence_overview={},
+    )
+    assert verdict == "ほぼ正確"
+
+
+def test_strong_grounded_alignment_can_be_accurate_without_official_source() -> None:
+    verdict = derive_public_verdict(
+        risk_score=68,
+        confidence_score=44,
+        labels=["出典不明", "信頼できる一次ソース未確認", "大筋で整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+        },
+        evidence_overview={
+            "assessment_status": "概ね整合",
+            "grounding_sources": [
+                {"title": "factcheckcenter.jp", "url": "https://vertexaisearch.cloud.google.com/example-1"},
+                {"title": "factcheckcenter.jp", "url": "https://vertexaisearch.cloud.google.com/example-2"},
+                {"title": "note.com", "url": "https://vertexaisearch.cloud.google.com/example-3"},
+            ],
+            "claim_reviews": [
+                {"claim": "claim", "verdict": "概ね整合", "reason": "supported"},
+            ],
+        },
+    )
+    assert verdict == "正確"
+
+
+def test_single_official_grounding_source_can_make_supported_research_claim_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=68,
+        confidence_score=42,
+        labels=["出典不明", "信頼できる一次ソース未確認", "大筋で整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+        },
+        evidence_overview={
+            "assessment_status": "概ね整合",
+            "grounding_sources": [
+                {"title": "hokudai.ac.jp", "url": "https://vertexaisearch.cloud.google.com/example-1"},
+                {"title": "kidsport.jp", "url": "https://vertexaisearch.cloud.google.com/example-2"},
+            ],
+            "claim_reviews": [
+                {"claim": "claim", "verdict": "概ね整合", "reason": "supported"},
+            ],
+        },
+    )
+    assert verdict == "正確"
+
+
+def test_report_backed_claim_review_can_promote_supported_case_to_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=52,
+        confidence_score=44,
+        labels=["出典不明", "信頼できる一次ソース未確認", "大筋で整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+        },
+        evidence_overview={
+            "assessment_status": "概ね整合",
+            "grounding_sources": [],
+            "claim_reviews": [
+                {
+                    "claim": "小泉氏の動画は本人の発言である",
+                    "verdict": "概ね整合",
+                    "reason": "日本ファクトチェックセンターが公式アカウント上の本人発言だと確認している。",
+                },
+            ],
+        },
+    )
+    assert verdict == "正確"
+
+
+def test_contextual_caveat_in_claim_review_keeps_case_mostly_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=52,
+        confidence_score=46,
+        labels=["出典不明", "信頼できる一次ソース未確認", "大筋で整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+        },
+        evidence_overview={
+            "assessment_status": "概ね整合",
+            "grounding_sources": [],
+            "claim_reviews": [
+                {
+                    "claim": "CDCが死亡者はいないと発表した",
+                    "verdict": "概ね整合",
+                    "reason": "公式見解とは整合するが、接種後死亡と因果関係ありの死亡は区別する必要がある。ただし表現には注意が必要。",
+                },
+            ],
+        },
+    )
+    assert verdict == "ほぼ正確"
+
+
+def test_three_grounding_sources_can_promote_supported_case_to_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=68,
+        confidence_score=45,
+        labels=["出典不明", "信頼できる一次ソース未確認", "大筋で整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+        },
+        evidence_overview={
+            "assessment_status": "概ね整合",
+            "grounding_sources": [
+                {"title": "news-a.example", "url": "https://example.com/a"},
+                {"title": "news-b.example", "url": "https://example.com/b"},
+                {"title": "news-c.example", "url": "https://example.com/c"},
+            ],
+            "claim_reviews": [
+                {
+                    "claim": "claim",
+                    "verdict": "概ね整合",
+                    "reason": "複数の情報源で確認されています。",
+                },
+            ],
+        },
+    )
+    assert verdict == "正確"
+
+
+def test_two_generic_grounding_sources_are_not_enough_for_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=68,
+        confidence_score=45,
+        labels=["出典不明", "信頼できる一次ソース未確認", "大筋で整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+        },
+        evidence_overview={
+            "assessment_status": "概ね整合",
+            "grounding_sources": [
+                {"title": "news-a.example", "url": "https://example.com/a"},
+                {"title": "news-b.example", "url": "https://example.com/b"},
+            ],
+            "claim_reviews": [
+                {
+                    "claim": "claim",
+                    "verdict": "概ね整合",
+                    "reason": "確認されています。",
+                },
+            ],
+        },
+    )
+    assert verdict == "ほぼ正確"
+
+
+def test_non_core_caveat_with_supported_fact_can_still_be_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=60,
+        confidence_score=47,
+        labels=["出典不明", "信頼できる一次ソース未確認", "大筋で整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+        },
+        evidence_overview={
+            "assessment_status": "概ね整合",
+            "grounding_sources": [
+                {"title": "site-a.example", "url": "https://example.com/a"},
+                {"title": "site-b.example", "url": "https://example.com/b"},
+                {"title": "site-c.example", "url": "https://example.com/c"},
+            ],
+            "claim_reviews": [
+                {
+                    "claim": "square watermelon",
+                    "verdict": "概ね整合",
+                    "reason": "複数の情報源で実在が確認されました。ただし、食用には適さないとされています。",
+                },
+            ],
+        },
+    )
+    assert verdict == "正確"
+
+
+def test_value_judgment_claim_review_does_not_promote_to_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=50,
+        confidence_score=50,
+        labels=["出典不明", "信頼できる一次ソース未確認", "大筋で整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+        },
+        evidence_overview={
+            "assessment_status": "概ね整合",
+            "grounding_sources": [],
+            "claim_reviews": [
+                {
+                    "claim": "115億円分余剰とは全くの無駄遣いです",
+                    "verdict": "概ね整合",
+                    "reason": "会計検査院の報告で余剰在庫は確認できるが、無駄遣いという評価表現は残る。",
+                },
+            ],
+        },
+    )
+    assert verdict == "ほぼ正確"
+
+
+def test_non_trusted_low_risk_without_evidence_stays_unknown() -> None:
+    verdict = derive_public_verdict(
+        risk_score=36,
+        confidence_score=69,
+        labels=[],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+        },
+        evidence_overview={},
+    )
+    assert verdict == "判断保留"
+
+
+def test_non_trusted_low_risk_with_stronger_confidence_can_remain_mostly_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=32,
+        confidence_score=72,
+        labels=[],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+        },
+        evidence_overview={},
+    )
+    assert verdict == "ほぼ正確"
+
+
+def test_high_risk_source_gap_escalates_to_false_when_no_evidence_status() -> None:
+    verdict = derive_public_verdict(
+        risk_score=80,
+        confidence_score=45,
+        labels=["出典不明", "信頼できる一次ソース未確認"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+        },
+        evidence_overview={},
+    )
+    assert verdict == "誤り"
+
+
+def test_fact_check_source_can_remain_mostly_accurate_in_mid_risk_band() -> None:
+    verdict = derive_public_verdict(
+        risk_score=46,
+        confidence_score=58,
+        labels=["信頼できる一次ソース未確認", "追加確認が必要"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": True,
+            "trusted_source": True,
+            "correction_article": False,
+        },
+        evidence_overview={},
+    )
+    assert verdict == "ほぼ正確"
+
+
+def test_non_trusted_mid_risk_low_confidence_escalates_to_inaccurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=46,
+        confidence_score=59,
+        labels=["判定不能", "追加確認が必要"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+        },
+        evidence_overview={},
+    )
+    assert verdict == "不正確"
+
+
+def test_non_trusted_high_confidence_near_unknown_boundary_can_stay_mostly_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=44,
+        confidence_score=73,
+        labels=["追加確認が必要"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+        },
+        evidence_overview={},
+    )
+    assert verdict == "ほぼ正確"
+
+
+def test_counterevidence_with_source_gap_can_move_to_inaccurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=92,
+        confidence_score=53,
+        labels=["反証情報あり", "出典不明", "信頼できる一次ソース未確認"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+        },
+        evidence_overview={"assessment_status": "反証あり"},
+    )
+    assert verdict == "不正確"
+
+
+def test_counterevidence_without_source_gap_can_be_inaccurate_before_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=77,
+        confidence_score=60,
+        labels=["反証情報あり"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+        },
+        evidence_overview={"assessment_status": "反証あり"},
+    )
+    assert verdict == "不正確"
+
+
+def test_counterevidence_without_source_gap_can_be_false_with_slightly_lower_threshold() -> None:
+    verdict = derive_public_verdict(
+        risk_score=78,
+        confidence_score=50,
+        labels=["反証情報あり"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+        },
+        evidence_overview={"assessment_status": "反証あり"},
+    )
+    assert verdict == "誤り"
+
+
+def test_apply_gemini_primary_review_blends_seed_scores_and_summary() -> None:
+    seed = {
+        "risk_score": 72,
+        "confidence": "判定不能",
+        "confidence_score": 40,
+        "status": "自動判定",
+        "summary": "heuristic summary",
+        "labels": ["判定不能"],
+        "reasons": ["heuristic reason"],
+        "domain": "一般",
+        "caution_level": "不正確",
+        "signal_breakdown": [],
+        "source_profile": {},
+    }
+    llm_output = {
+        "primary_review": {
+            "domain": "医療",
+            "risk_score": 18,
+            "confidence_score": 82,
+            "summary": "Gemini の一次判定です。",
+            "labels": ["反証情報あり", "unknown label"],
+            "reasons": ["Gemini reason"],
+        }
+    }
+
+    merged = apply_gemini_primary_review(seed, llm_output)
+
+    assert merged["primary_review_raw_risk_score"] == 18
+    assert merged["risk_score"] == 60
+    assert merged["confidence_score"] == 50
+    assert merged["status"] == "Gemini一次判定"
+    assert merged["summary"] == "Gemini の一次判定です。"
+    assert merged["domain"] == "医療"
+    assert merged["labels"] == ["反証情報あり", "判定不能"]
+    assert merged["reasons"] == ["Gemini reason", "heuristic reason"]
+
+
+def test_apply_gemini_primary_review_keeps_seed_when_primary_review_missing() -> None:
+    seed = {
+        "risk_score": 35,
+        "confidence": "モデルの確信度",
+        "confidence_score": 60,
+        "status": "自動判定",
+        "summary": "heuristic summary",
+        "labels": [],
+        "reasons": ["heuristic reason"],
+        "domain": "一般",
+        "caution_level": "ほぼ正確",
+        "signal_breakdown": [],
+        "source_profile": {},
+    }
+
+    merged = apply_gemini_primary_review(seed, {})
+
+    assert merged is seed

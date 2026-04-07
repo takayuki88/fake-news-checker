@@ -1,0 +1,16 @@
+・matplotlib
+fake-news-checker/Ver2 での手順は、予測生成 → 評価 → 可視化 の 3 段階です。
+
+まず作業ディレクトリに移動して、依存を入れます。
+cd C:\Users\oneuk\OneDrive\Desktop\datamix\講義\05_インテグレーションステップ\fake-news-checker\Ver2
+python -m pip install -r requirements.txt
+
+次に、100件の real dataset で予測結果を作ります。
+python -m app.dataset_runner --dataset real --output-json .\predictions_real.json
+
+その予測 JSON を評価して、性能測定結果を JSON に保存します。ここで Accuracy、各クラスの Precision / Recall / F1、Macro F1、Weighted F1、Confusion Matrix、さらに 誤り を陽性にした二値評価が出ます。
+python -m app.evaluation .\predictions_real.json --truth-key expected.verdict --pred-key predicted.verdict --output-json .\eval_real.json
+
+最後に、評価結果を matplotlib と seaborn で可視化します。
+python .\scripts\plot_evaluation.py .\eval_real.json
+これで eval_real_plots フォルダに次の画像が出ます。

@@ -1,0 +1,1706 @@
+{
+  "meta": {
+    "name": "real_article_dataset_balanced100",
+    "version": 1,
+    "curated_on": "2026-03-29",
+    "language": "ja",
+    "description": "公開 verdict 5区分を評価するための 100 件データセットです。analysis_text は人手要約または評価用の中心命題で、元記事の全文転載ではありません。",
+    "notes": [
+      "この dataset は 5区分で合計100件です。内訳は 正確20 / ほぼ正確20 / 判断保留20 / 不正確20 / 誤り20 です。",
+      "正確 / ほぼ正確 は既存の実在記事ベース要約から選抜したケースです。",
+      "判断保留 / 不正確 / 誤り は verdict 境界の評価用に整えた curated case です。",
+      "判定対象は analysis_text の中心命題です。"
+    ],
+    "verdict_distribution": {
+      "正確": 20,
+      "ほぼ正確": 20,
+      "判断保留": 20,
+      "不正確": 20,
+      "誤り": 20
+    }
+  },
+  "cases": [
+    {
+      "id": "balanced-accurate-01-balanced-accurate-01-balanced-accurate-01-balanced-trust-01-real-trust-mhlw-vaccine-choice",
+      "title": "新型コロナワクチン接種は本人の意思に基づく",
+      "site_name": "厚生労働省",
+      "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/vaccine_qa.html",
+      "purpose": "実在の公的ページを要約した信頼寄りケース",
+      "analysis_text": "厚生労働省のQ&Aでは、新型コロナワクチン接種は強制ではなく、接種を受けるかどうかは本人の意思に基づくとしている。2024年度以降の定期接種は高齢者などが対象で、希望者は任意接種として自費で受けられる。",
+      "reference_urls": [
+        "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/vaccine_qa.html"
+      ],
+      "expected": {
+        "verdict": "正確",
+        "domain": "医療"
+      },
+      "snapshot_overrides": {
+        "has_published_at": true,
+        "reference_link_count": 3,
+        "extraction_score": 88
+      }
+    },
+    {
+      "id": "balanced-accurate-02-balanced-accurate-02-balanced-accurate-02-balanced-trust-02-real-trust-jma-tsunami-warning",
+      "title": "気象庁は地震発生後おおむね3分を目標に津波警報・注意報を発表する",
+      "site_name": "気象庁",
+      "source_url": "https://www.jma.go.jp/jma/kishou/know/jishin/joho/tsunamiinfo.html",
+      "purpose": "実在の公的ページを要約した信頼寄りケース",
+      "analysis_text": "気象庁の説明では、地震発生時には規模と位置を速やかに推定し、おおむね3分を目標に大津波警報、津波警報、津波注意報を発表する。警報には予想される津波の高さと第一波到達予想時刻も含まれる。",
+      "reference_urls": [
+        "https://www.jma.go.jp/jma/kishou/know/jishin/joho/tsunamiinfo.html"
+      ],
+      "expected": {
+        "verdict": "正確",
+        "domain": "災害"
+      },
+      "snapshot_overrides": {
+        "has_published_at": true,
+        "reference_link_count": 2,
+        "extraction_score": 90
+      }
+    },
+    {
+      "id": "balanced-accurate-03-balanced-accurate-03-balanced-accurate-03-balanced-trust-03-real-trust-boj-apr-policy",
+      "title": "日銀は2024年4月会合で無担保コール翌日物を0から0.1%程度で推移するよう促す方針を示した",
+      "site_name": "日本銀行",
+      "source_url": "https://www.boj.or.jp/mopo/mpmdeci/state_2024/k240426a.htm",
+      "purpose": "実在の公的ページを要約した信頼寄りケース",
+      "analysis_text": "日本銀行の2024年4月26日公表文では、次回会合までの金融市場調節方針として、無担保コールレート翌日物を0から0.1%程度で推移するよう促すと決定したとしている。",
+      "reference_urls": [
+        "https://www.boj.or.jp/mopo/mpmdeci/state_2024/k240426a.htm"
+      ],
+      "expected": {
+        "verdict": "正確",
+        "domain": "金融"
+      },
+      "snapshot_overrides": {
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 86
+      }
+    },
+    {
+      "id": "balanced-accurate-04-balanced-accurate-04-balanced-accurate-04-balanced-trust-04-real-fake-bleach-cure",
+      "title": "漂白剤や消毒液を体内に入れても新型コロナの予防・治療はできず危険である",
+      "site_name": "WHO",
+      "source_url": "https://www.who.int/emergencies/diseases/novel-coronavirus-2019/advice-for-public/myth-busters",
+      "purpose": "実在の公的ページを要約した信頼寄りケース",
+      "analysis_text": "WHOは、漂白剤や消毒液を飲んだり体内に入れたりしても新型コロナを予防・治療することはできず、危険だと明確に説明している。体内のウイルスを除去する効果はなく、健康被害の恐れがあるとしている。",
+      "reference_urls": [
+        "https://www.who.int/emergencies/diseases/novel-coronavirus-2019/advice-for-public/myth-busters"
+      ],
+      "expected": {
+        "verdict": "正確",
+        "domain": "医療"
+      },
+      "snapshot_overrides": {
+        "has_published_at": true,
+        "reference_link_count": 2,
+        "extraction_score": 88
+      }
+    },
+    {
+      "id": "balanced-accurate-05-balanced-accurate-05-balanced-accurate-05-balanced-trust-05-real-trust-mhlw-routine-target-elderly",
+      "title": "65歳以上は2024年度以降の定期接種の対象",
+      "site_name": "厚生労働省",
+      "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/vaccine_qa_archive.html",
+      "purpose": "実在の公的Q&Aを要約した信頼寄りケース",
+      "analysis_text": "厚生労働省のQ&Aでは、2024年4月以降の新型コロナワクチン定期接種は65歳以上の人が対象と説明している。",
+      "expected": {
+        "verdict": "正確",
+        "domain": "医療"
+      }
+    },
+    {
+      "id": "balanced-accurate-06-balanced-accurate-06-balanced-accurate-06-balanced-trust-06-real-trust-mhlw-routine-target-underlying",
+      "title": "60〜64歳でも一定の基礎疾患があれば定期接種の対象になる",
+      "site_name": "厚生労働省",
+      "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/vaccine_qa_archive.html",
+      "purpose": "実在の公的Q&Aを要約した信頼寄りケース",
+      "analysis_text": "厚生労働省のQ&Aでは、60〜64歳でも心臓や呼吸器などに重い障害がある人は定期接種の対象になると説明している。",
+      "expected": {
+        "verdict": "正確",
+        "domain": "医療"
+      }
+    },
+    {
+      "id": "balanced-accurate-07-balanced-accurate-07-balanced-accurate-07-balanced-trust-07-real-trust-mhlw-optional-selfpay",
+      "title": "定期接種の対象外で接種を希望する人は任意接種として自費になる",
+      "site_name": "厚生労働省",
+      "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/vaccine_qa_archive.html",
+      "purpose": "実在の公的Q&Aを要約した信頼寄りケース",
+      "analysis_text": "厚生労働省のQ&Aでは、2024年4月以降に定期接種の対象外で接種を希望する人は、任意接種として自費で受けることになると説明している。",
+      "expected": {
+        "verdict": "正確",
+        "domain": "医療"
+      }
+    },
+    {
+      "id": "balanced-accurate-08-balanced-accurate-08-balanced-accurate-08-balanced-trust-08-real-trust-mhlw-no-effort-obligation",
+      "title": "2024年度以降の定期接種には努力義務や自治体からの接種勧奨規定はない",
+      "site_name": "厚生労働省",
+      "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/vaccine_qa_archive.html",
+      "purpose": "実在の公的Q&Aを要約した信頼寄りケース",
+      "analysis_text": "厚生労働省のQ&Aでは、2024年4月以降の定期接種について、接種を受ける努力義務や自治体からの接種勧奨の規定はないと説明している。",
+      "expected": {
+        "verdict": "正確",
+        "domain": "医療"
+      }
+    },
+    {
+      "id": "balanced-accurate-09-balanced-accurate-09-balanced-accurate-09-balanced-trust-09-real-trust-mhlw-booster-after-3months",
+      "title": "追加接種は前回接種から3か月以上あければ可能",
+      "site_name": "厚生労働省",
+      "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/vaccine_qa_archive.html",
+      "purpose": "実在の公的Q&Aを要約した信頼寄りケース",
+      "analysis_text": "厚生労働省のQ&Aでは、追加接種は前回接種完了から3か月以上経過すれば可能と整理している。",
+      "expected": {
+        "verdict": "正確",
+        "domain": "医療"
+      }
+    },
+    {
+      "id": "balanced-accurate-10-balanced-accurate-10-balanced-accurate-10-balanced-trust-10-real-trust-mhlw-public-funding-ended-mar2024",
+      "title": "全額公費による新型コロナワクチン接種は2024年3月末で終了した",
+      "site_name": "厚生労働省",
+      "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/vaccine_qa_archive.html",
+      "purpose": "実在の公的Q&Aを要約した信頼寄りケース",
+      "analysis_text": "厚生労働省のQ&Aでは、新型コロナワクチンの全額公費による接種は2024年3月31日で終了したと説明している。",
+      "expected": {
+        "verdict": "正確",
+        "domain": "医療"
+      }
+    },
+    {
+      "id": "balanced-accurate-11-balanced-accurate-11-balanced-accurate-11-balanced-trust-11-real-trust-mhlw-xbb-6months",
+      "title": "2024年3月時点ではXBB.1.5対応1価ワクチンを生後6か月以上で使用可能としていた",
+      "site_name": "厚生労働省",
+      "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/vaccine_qa_archive.html",
+      "purpose": "実在の公的Q&Aを要約した信頼寄りケース",
+      "analysis_text": "厚生労働省の2024年3月時点Q&Aでは、XBB.1.5対応1価ワクチンは生後6か月以上の人に使用可能としていた。",
+      "expected": {
+        "verdict": "正確",
+        "domain": "医療"
+      }
+    },
+    {
+      "id": "balanced-accurate-12-balanced-accurate-12-balanced-accurate-12-balanced-trust-12-real-trust-mhlw-same-brand-second-dose",
+      "title": "初回接種の2回目は原則として1回目と同じワクチンを使う",
+      "site_name": "厚生労働省",
+      "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/vaccine_qa_archive.html",
+      "purpose": "実在の公的Q&Aを要約した信頼寄りケース",
+      "analysis_text": "厚生労働省のQ&Aでは、初回接種の2回目は原則として1回目に接種したものと同一のワクチンを使う必要があると説明している。",
+      "expected": {
+        "verdict": "正確",
+        "domain": "医療"
+      }
+    },
+    {
+      "id": "balanced-accurate-13-balanced-accurate-13-balanced-accurate-13-balanced-trust-13-real-trust-jma-warning-within-3min",
+      "title": "気象庁は津波警報・注意報を地震発生から約3分で出すことを目標としている",
+      "site_name": "気象庁",
+      "source_url": "https://www.jma.go.jp/jma/kishou/know/jishin/joho/tsunamiinfo.html",
+      "purpose": "実在の公的解説を要約した信頼寄りケース",
+      "analysis_text": "気象庁は、津波による災害の発生が予想される場合、地震発生から約3分で津波警報・注意報を発表することを目標としている。",
+      "expected": {
+        "verdict": "正確",
+        "domain": "災害"
+      }
+    },
+    {
+      "id": "balanced-accurate-14-balanced-accurate-14-balanced-accurate-14-balanced-trust-14-real-trust-jma-warning-some-2min",
+      "title": "日本近海の一部地震では津波警報等を約2分で発表することを目標としている",
+      "site_name": "気象庁",
+      "source_url": "https://www.jma.go.jp/jma/kishou/know/jishin/joho/tsunamiinfo.html",
+      "purpose": "実在の公的解説を要約した信頼寄りケース",
+      "analysis_text": "気象庁は、日本近海で発生する一部の地震については、津波警報や注意報を約2分で発表することを目標としている。",
+      "expected": {
+        "verdict": "正確",
+        "domain": "災害"
+      }
+    },
+    {
+      "id": "balanced-accurate-15-balanced-accurate-15-balanced-accurate-15-balanced-trust-15-real-trust-jma-giant-earthquake-max-assumption",
+      "title": "巨大地震では最大の津波想定をもとに津波警報・注意報を発表する",
+      "site_name": "気象庁",
+      "source_url": "https://www.jma.go.jp/jma/kishou/know/jishin/joho/tsunamiinfo.html",
+      "purpose": "実在の公的解説を要約した信頼寄りケース",
+      "analysis_text": "気象庁は、マグニチュード8を超える巨大地震では、精度の高い規模推定が難しいため、その海域で最大の津波想定をもとに警報や注意報を発表すると説明している。",
+      "expected": {
+        "verdict": "正確",
+        "domain": "災害"
+      }
+    },
+    {
+      "id": "balanced-accurate-16-balanced-accurate-16-balanced-accurate-16-balanced-trust-16-real-trust-jma-giant-word-huge",
+      "title": "巨大地震の第一報では『巨大』『高い』という言葉で非常事態を伝えることがある",
+      "site_name": "気象庁",
+      "source_url": "https://www.jma.go.jp/jma/kishou/know/jishin/tsunami/kaizen/about_kaizen_gaiyou.html",
+      "purpose": "実在の公的解説を要約した信頼寄りケース",
+      "analysis_text": "気象庁は、巨大地震の第一報では予想される津波の高さを『巨大』『高い』という言葉で発表し、非常事態を伝える場合があると説明している。",
+      "expected": {
+        "verdict": "正確",
+        "domain": "災害"
+      }
+    },
+    {
+      "id": "balanced-accurate-17-balanced-accurate-17-balanced-accurate-17-balanced-trust-17-real-trust-jma-evacuate-after-strong-shaking",
+      "title": "強い揺れや長い揺れを感じたら津波警報を待たずに避難すべきだとしている",
+      "site_name": "気象庁",
+      "source_url": "https://www.jma.go.jp/jma/kishou/know/jishin/tsunami_bosai/index.html",
+      "purpose": "実在の公的防災ページを要約した信頼寄りケース",
+      "analysis_text": "気象庁の津波防災ページは、海辺で強い揺れや長い揺れを感じたら、津波警報を待たずに高台などへ避難するよう呼びかけている。",
+      "expected": {
+        "verdict": "正確",
+        "domain": "災害"
+      }
+    },
+    {
+      "id": "balanced-accurate-18-balanced-accurate-18-balanced-accurate-18-balanced-trust-18-real-trust-jma-first-wave-not-biggest",
+      "title": "津波は第一波より後から来る波の方が高いことがある",
+      "site_name": "気象庁",
+      "source_url": "https://www.jma.go.jp/jma/kishou/know/jishin/tsunami/kaizen/about_kaizen_gaiyou.html",
+      "purpose": "実在の公的解説を要約した信頼寄りケース",
+      "analysis_text": "気象庁は、津波は何度も繰り返し襲い、後から来る波の方が高くなることがあると説明している。",
+      "expected": {
+        "verdict": "正確",
+        "domain": "災害"
+      }
+    },
+    {
+      "id": "balanced-accurate-19-balanced-accurate-19-balanced-accurate-19-balanced-trust-19-real-trust-jma-observed-does-not-mean-safe",
+      "title": "『観測中』の表示は安全を意味せず、最大波と誤解しないための措置である",
+      "site_name": "気象庁",
+      "source_url": "https://www.jma.go.jp/jma/kishou/know/jishin/tsunami/kaizen/about_kaizen_gaiyou.html",
+      "purpose": "実在の公的解説を要約した信頼寄りケース",
+      "analysis_text": "気象庁は、大津波警報や津波警報が出ているときに『観測中』と表示するのは、観測値を最大波と誤解させないためであり、安全になったという意味ではないと説明している。",
+      "expected": {
+        "verdict": "正確",
+        "domain": "災害"
+      }
+    },
+    {
+      "id": "balanced-accurate-20-balanced-accurate-20-balanced-accurate-20-balanced-trust-20-real-trust-jma-arrival-may-lag-over-hour",
+      "title": "予報区で最も早い到達時刻より1時間以上遅れて津波が来る場所もある",
+      "site_name": "気象庁",
+      "source_url": "https://www.jma.go.jp/jma/kishou/know/jishin/joho/tsunamiinfo.html",
+      "purpose": "実在の公的解説を要約した信頼寄りケース",
+      "analysis_text": "気象庁は、津波到達予想時刻は各予報区で最も早い時刻であり、場所によっては1時間以上遅れて津波が来ることもあると説明している。",
+      "expected": {
+        "verdict": "正確",
+        "domain": "災害"
+      }
+    },
+    {
+      "id": "balanced-mostly-01-balanced-mostly-01-balanced-mostly-01-balanced-mostly-01-real-mostly-factcheck-infertility",
+      "title": "新型コロナワクチンが不妊を引き起こす証拠は確認されていない",
+      "site_name": "FactCheck.org",
+      "source_url": "https://www.factcheck.org/2021/02/scicheck-no-evidence-vaccines-impact-fertility/",
+      "purpose": "実在のファクトチェック記事を要約した概ね正確ケース",
+      "analysis_text": "FactCheck.orgは、承認済みの新型コロナワクチンが不妊を引き起こす証拠はないと説明している。臨床試験や接種後の安全性監視で不妊は確認されておらず、専門家団体も根拠のない主張だとしている。",
+      "reference_urls": [
+        "https://www.factcheck.org/2021/02/scicheck-no-evidence-vaccines-impact-fertility/"
+      ],
+      "expected": {
+        "verdict": "ほぼ正確",
+        "domain": "医療"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 3,
+        "extraction_score": 80
+      }
+    },
+    {
+      "id": "balanced-mostly-02-balanced-mostly-02-balanced-mostly-02-balanced-mostly-02-real-mostly-cnbc-boj-sep-hold",
+      "title": "2024年9月の日銀会合では政策金利が0.25%程度に据え置かれた",
+      "site_name": "CNBC",
+      "source_url": "https://www.cnbc.com/2024/09/20/bank-of-japan-keeps-benchmark-interest-rate-steady-as-it-treads-cautiously-on-normalizing-policy-.html",
+      "purpose": "実在の報道記事を要約した概ね正確ケース",
+      "analysis_text": "2024年9月の報道では、日本銀行は2日間の会合を終え、政策金利を0.25%程度に据え置いた。報道は、日銀が超緩和策の正常化を慎重に進めているという文脈で伝えている。",
+      "reference_urls": [
+        "https://www.cnbc.com/2024/09/20/bank-of-japan-keeps-benchmark-interest-rate-steady-as-it-treads-cautiously-on-normalizing-policy-.html"
+      ],
+      "expected": {
+        "verdict": "ほぼ正確",
+        "domain": "金融"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 75
+      }
+    },
+    {
+      "id": "balanced-mostly-03-balanced-mostly-03-balanced-mostly-03-balanced-mostly-03-real-uncertain-reuters-poll-yearend",
+      "title": "ロイターポールでは過半数のエコノミストが日銀の年内追加利上げ見送りを予想していた",
+      "site_name": "Investing.com",
+      "source_url": "https://www.investing.com/news/economy-news/boj-to-forgo-another-rate-hike-by-yearend-say-slim-majority-of-economists-reuters-poll-3662550",
+      "purpose": "実在の報道記事を要約した概ね正確ケース",
+      "analysis_text": "2024年10月のロイターポールでは、エコノミストの過半数が日銀は年内の追加利上げを見送ると予想していた。この記事は、将来を断定するのではなく、その時点の予想分布を伝える内容として構成されている。",
+      "reference_urls": [
+        "https://www.investing.com/news/economy-news/boj-to-forgo-another-rate-hike-by-yearend-say-slim-majority-of-economists-reuters-poll-3662550"
+      ],
+      "expected": {
+        "verdict": "ほぼ正確",
+        "domain": "金融"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 72
+      }
+    },
+    {
+      "id": "balanced-mostly-04-balanced-mostly-04-balanced-mostly-04-balanced-mostly-04-real-uncertain-reuters-debate-next-week",
+      "title": "ロイターは、日銀が次回会合で利上げを検討する可能性があると報じた",
+      "site_name": "CNBC",
+      "source_url": "https://www.cnbc.com/2024/07/25/boj-to-weigh-rate-hike-next-week-detail-plan-to-halve-bond-buying-reuters.html",
+      "purpose": "実在の報道記事を要約した概ね正確ケース",
+      "analysis_text": "2024年7月下旬のロイター報道では、日銀が次回会合で利上げを議論する可能性があると伝えられた。この記事は、会合前の観測や関係筋情報を伝える報道として読むのが自然で、会合結果そのものを先に断定する書き方ではない。",
+      "reference_urls": [
+        "https://www.cnbc.com/2024/07/25/boj-to-weigh-rate-hike-next-week-detail-plan-to-halve-bond-buying-reuters.html"
+      ],
+      "expected": {
+        "verdict": "ほぼ正確",
+        "domain": "金融"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 72
+      }
+    },
+    {
+      "id": "balanced-mostly-05-balanced-mostly-05-balanced-mostly-05-balanced-mostly-05-real-caution-covid-detecting-microchip",
+      "title": "米政府が体内埋め込み型の新型コロナ検知マイクロチップを開発したという主張はミスリード",
+      "site_name": "Snopes",
+      "source_url": "https://www.snopes.com/fact-check/covid-detecting-microchip/",
+      "purpose": "実在のファクトチェック記事を要約した概ね正確ケース",
+      "analysis_text": "Snopesは、米政府が体内に埋め込む新型コロナ検知マイクロチップを開発したという主張はミスリードだと説明している。実際には感染兆候をとらえる生体センサー研究はあったが、マイクロチップではなく、新型コロナ対策として開発されたものでも、ウイルスを特定する装置でもない。",
+      "reference_urls": [
+        "https://www.snopes.com/fact-check/covid-detecting-microchip/"
+      ],
+      "expected": {
+        "verdict": "ほぼ正確",
+        "domain": "医療"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 2,
+        "extraction_score": 78
+      }
+    },
+    {
+      "id": "balanced-mostly-06-balanced-mostly-06-balanced-mostly-06-balanced-mostly-06-real-caution-vaccine-passport-microchip",
+      "title": "体内マイクロチップがワクチンパスポートカードを公式に置き換えるという主張はミスリード",
+      "site_name": "Snopes",
+      "source_url": "https://www.snopes.com/fact-check/microchip-vaccine-passport/",
+      "purpose": "実在のファクトチェック記事を要約した概ね正確ケース",
+      "analysis_text": "Snopesは、体内に埋め込むマイクロチップがワクチンパスポートカードを置き換え、各国で公式運用されるという主張はミスリードだと整理している。スウェーデンで任意利用のデジタルインプラント事例はあったが、公的なカードの正式置き換えではなく、広く義務化された事実も確認できない。",
+      "reference_urls": [
+        "https://www.snopes.com/fact-check/microchip-vaccine-passport/"
+      ],
+      "expected": {
+        "verdict": "ほぼ正確",
+        "domain": "医療"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 2,
+        "extraction_score": 78
+      }
+    },
+    {
+      "id": "balanced-mostly-07-balanced-mostly-07-balanced-mostly-07-balanced-mostly-07-real-fake-pet-scanner-microchip",
+      "title": "ペット用スキャナーでワクチン由来のマイクロチップが検出されたという主張に根拠はない",
+      "site_name": "Snopes",
+      "source_url": "https://www.snopes.com/fact-check/covid-vaccine-pet-microchip/",
+      "purpose": "実在のファクトチェック記事を要約した概ね正確ケース",
+      "analysis_text": "Snopesは、ペット用スキャナーを腕に当てると新型コロナワクチン由来のマイクロチップが検出されたという主張に根拠はないと説明している。元動画はジョークとして投稿されたもので、ワクチンにマイクロチップが含まれている根拠も示されていない。",
+      "reference_urls": [
+        "https://www.snopes.com/fact-check/covid-vaccine-pet-microchip/"
+      ],
+      "expected": {
+        "verdict": "ほぼ正確",
+        "domain": "医療"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 2,
+        "extraction_score": 80
+      }
+    },
+    {
+      "id": "balanced-mostly-08-balanced-mostly-08-balanced-mostly-08-balanced-mostly-08-real-fake-vaccine-shedding",
+      "title": "ワクチンの“シェディング”で未接種者に不妊や流産が起きるという主張に科学的根拠は確認されていない",
+      "site_name": "FactCheck.org",
+      "source_url": "https://www.factcheck.org/2021/05/scicheck-covid-19-vaccines-spike-protein-only-get-into-those-who-receive-it-no-shedding/",
+      "purpose": "実在のファクトチェック記事を要約した概ね正確ケース",
+      "analysis_text": "FactCheck.orgは、接種した人の近くにいるだけでワクチン由来のスパイクタンパク質や有害物質が周囲に広がり、未接種者の不妊や流産などを引き起こすという主張には科学的根拠が確認されていないと説明している。使用されている新型コロナワクチンに、そのような生物学的経路があるという証拠は示されていない。",
+      "reference_urls": [
+        "https://www.factcheck.org/2021/05/scicheck-covid-19-vaccines-spike-protein-only-get-into-those-who-receive-it-no-shedding/"
+      ],
+      "expected": {
+        "verdict": "ほぼ正確",
+        "domain": "医療"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 2,
+        "extraction_score": 82
+      }
+    },
+    {
+      "id": "balanced-mostly-09-balanced-mostly-09-balanced-mostly-09-balanced-mostly-09-real-unconfirmed-vaccine-life55",
+      "title": "30歳でワクチンを3回打つと55歳までしか生きられないという主張に裏付けは確認されていない",
+      "site_name": "日本ファクトチェックセンター",
+      "source_url": "https://www.factcheckcenter.jp/fact-check/health/fact-check-health-no-evidence-covid-vaccines-shorten-life-expectancy/",
+      "purpose": "実在のファクトチェック記事を要約した概ね正確ケース",
+      "analysis_text": "日本ファクトチェックセンターは、30歳の人が新型コロナワクチンを3回打つと55歳までしか生きられないという査読付きデータがあるとの主張に、十分な裏付けは確認されていないと説明している。論文名や掲載誌名などの具体的な出典は示されておらず、主張を支持する信頼できる根拠も確認できない。",
+      "reference_urls": [
+        "https://www.factcheckcenter.jp/fact-check/health/fact-check-health-no-evidence-covid-vaccines-shorten-life-expectancy/"
+      ],
+      "expected": {
+        "verdict": "ほぼ正確",
+        "domain": "医療"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 2,
+        "extraction_score": 80
+      }
+    },
+    {
+      "id": "balanced-mostly-10-balanced-mostly-10-balanced-mostly-10-balanced-mostly-10-real-unconfirmed-expo-legionella",
+      "title": "万博会場のレジオネラ菌と学級閉鎖多発の因果関係を示す十分な公開根拠は確認されていない",
+      "site_name": "日本ファクトチェックセンター",
+      "source_url": "https://www.factcheckcenter.jp/baseless-gray-judgment-facts/",
+      "purpose": "実在のファクトチェック記事を要約した概ね正確ケース",
+      "analysis_text": "日本ファクトチェックセンターは、大阪・関西万博の会場でレジオネラ菌入り殺虫剤をまいたせいで子どもに肺炎症状が出て学級閉鎖が相次いでいるという情報について、因果関係を示す十分な公開根拠は確認されていないと整理している。虫よけ製品の提供やレジオネラ属菌の検出といった断片的な事実はあっても、学級閉鎖の多発との結び付きは確認できないとしている。",
+      "reference_urls": [
+        "https://www.factcheckcenter.jp/baseless-gray-judgment-facts/"
+      ],
+      "expected": {
+        "verdict": "ほぼ正確",
+        "domain": "一般"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 2,
+        "extraction_score": 78
+      }
+    },
+    {
+      "id": "balanced-mostly-11-balanced-mostly-11-balanced-mostly-11-balanced-mostly-11-real-mostly-fc-patient-tracking-devices-no",
+      "title": "COVID-19ワクチンに患者追跡デバイスは入っていない",
+      "site_name": "FactCheck.org",
+      "source_url": "https://www.factcheck.org/2020/12/covid-19-vaccines-dont-have-patient-tracking-devices/",
+      "purpose": "実在のファクトチェック記事を要約した概ね正確ケース",
+      "analysis_text": "FactCheck.orgは、COVID-19ワクチンに患者追跡デバイスが入っているという主張は誤りだと説明している。",
+      "expected": {
+        "verdict": "ほぼ正確",
+        "domain": "医療"
+      }
+    },
+    {
+      "id": "balanced-mostly-12-balanced-mostly-12-balanced-mostly-12-balanced-mostly-12-real-mostly-fc-vial-chip-dose-only",
+      "title": "話題になったチップは患者ではなくワクチン容器の用量情報を扱う構想だった",
+      "site_name": "FactCheck.org",
+      "source_url": "https://www.factcheck.org/2020/12/covid-19-vaccines-dont-have-patient-tracking-devices/",
+      "purpose": "実在のファクトチェック記事を要約した概ね正確ケース",
+      "analysis_text": "FactCheck.orgは、誤解の元になったチップ技術は患者を追跡するものではなく、ワクチン容器の用量情報に関する構想だったと説明している。",
+      "expected": {
+        "verdict": "ほぼ正確",
+        "domain": "医療"
+      }
+    },
+    {
+      "id": "balanced-mostly-13-balanced-mostly-13-balanced-mostly-13-balanced-mostly-13-real-mostly-fc-electronic-pill-not-proof",
+      "title": "電子薬の話はCOVID-19ワクチンにマイクロチップが入っている証拠にはならない",
+      "site_name": "FactCheck.org",
+      "source_url": "https://www.factcheck.org/2022/05/scicheck-pfizer-ceo-not-referencing-covid-19-vaccines-contrary-to-false-impression-in-posts-about-microchips/",
+      "purpose": "実在のファクトチェック記事を要約した概ね正確ケース",
+      "analysis_text": "FactCheck.orgは、電子薬に関する古い映像はCOVID-19ワクチンにマイクロチップが入っている証拠ではないと説明している。",
+      "expected": {
+        "verdict": "ほぼ正確",
+        "domain": "医療"
+      }
+    },
+    {
+      "id": "balanced-mostly-14-balanced-mostly-14-balanced-mostly-14-balanced-mostly-14-real-mostly-fc-ingredients-public-no-chip",
+      "title": "承認済みCOVID-19ワクチンの成分一覧は公開されておりマイクロチップは含まれない",
+      "site_name": "FactCheck.org",
+      "source_url": "https://www.factcheck.org/2022/05/scicheck-pfizer-ceo-not-referencing-covid-19-vaccines-contrary-to-false-impression-in-posts-about-microchips/",
+      "purpose": "実在のファクトチェック記事を要約した概ね正確ケース",
+      "analysis_text": "FactCheck.orgは、承認済みCOVID-19ワクチンの成分一覧は公開されており、マイクロチップは含まれていないと説明している。",
+      "expected": {
+        "verdict": "ほぼ正確",
+        "domain": "医療"
+      }
+    },
+    {
+      "id": "balanced-mostly-15-balanced-mostly-15-balanced-mostly-15-balanced-mostly-15-real-mostly-fc-magnet-videos-bogus",
+      "title": "磁石が腕に付く動画はワクチンマイクロチップ説の根拠にならない",
+      "site_name": "FactCheck.org",
+      "source_url": "https://www.factcheck.org/2021/05/scicheck-magnet-videos-refuel-bogus-claim-of-vaccine-microchips/",
+      "purpose": "実在のファクトチェック記事を要約した概ね正確ケース",
+      "analysis_text": "FactCheck.orgは、接種後に磁石が腕に付くという動画は、ワクチンにマイクロチップが入っている証拠にならないと説明している。",
+      "expected": {
+        "verdict": "ほぼ正確",
+        "domain": "医療"
+      }
+    },
+    {
+      "id": "balanced-mostly-16-balanced-mostly-16-balanced-mostly-16-balanced-mostly-16-real-mostly-fc-vaccine-ingredients-not-magnetic",
+      "title": "ワクチン成分に磁石が付くような性質のものは含まれていない",
+      "site_name": "FactCheck.org",
+      "source_url": "https://www.factcheck.org/2021/05/scicheck-magnet-videos-refuel-bogus-claim-of-vaccine-microchips/",
+      "purpose": "実在のファクトチェック記事を要約した概ね正確ケース",
+      "analysis_text": "FactCheck.orgは、認可されたワクチン成分には、磁石が皮膚に付く原因となるようなものは含まれていないと説明している。",
+      "expected": {
+        "verdict": "ほぼ正確",
+        "domain": "医療"
+      }
+    },
+    {
+      "id": "balanced-mostly-17-balanced-mostly-17-balanced-mostly-17-balanced-mostly-17-real-mostly-fc-male-infertility-no-evidence",
+      "title": "COVID-19ワクチンが男性不妊を引き起こす証拠はない",
+      "site_name": "FactCheck.org",
+      "source_url": "https://www.factcheck.org/2021/06/scicheck-research-rebuts-baseless-claims-linking-covid-19-vaccines-to-male-infertility/",
+      "purpose": "実在のファクトチェック記事を要約した概ね正確ケース",
+      "analysis_text": "FactCheck.orgは、COVID-19ワクチンが男性不妊を引き起こすという主張には証拠がないと説明している。",
+      "expected": {
+        "verdict": "ほぼ正確",
+        "domain": "医療"
+      }
+    },
+    {
+      "id": "balanced-mostly-18-balanced-mostly-18-balanced-mostly-18-balanced-mostly-18-real-mostly-fc-sperm-no-significant-decrease",
+      "title": "接種前後で精子指標に有意な低下は確認されなかった",
+      "site_name": "FactCheck.org",
+      "source_url": "https://www.factcheck.org/2021/06/scicheck-research-rebuts-baseless-claims-linking-covid-19-vaccines-to-male-infertility/",
+      "purpose": "実在のファクトチェック記事を要約した概ね正確ケース",
+      "analysis_text": "FactCheck.orgは、研究で接種前後の男性に有意な精子パラメータ低下は確認されなかったと説明している。",
+      "expected": {
+        "verdict": "ほぼ正確",
+        "domain": "医療"
+      }
+    },
+    {
+      "id": "balanced-mostly-19-balanced-mostly-19-balanced-mostly-19-balanced-mostly-19-real-mostly-fc-menstrual-small-temporary",
+      "title": "ワクチン接種後の月経周期変化は小さく一時的だとする研究がある",
+      "site_name": "FactCheck.org",
+      "source_url": "https://www.factcheck.org/2023/02/covid-19-vaccines-can-slightly-alter-menstrual-cycle-temporarily-but-dont-harm-fertility/",
+      "purpose": "実在のファクトチェック記事を要約した概ね正確ケース",
+      "analysis_text": "FactCheck.orgは、COVID-19ワクチン接種後の月経周期変化は小さく一時的で、長く続くものではないと説明している。",
+      "expected": {
+        "verdict": "ほぼ正確",
+        "domain": "医療"
+      }
+    },
+    {
+      "id": "balanced-mostly-20-balanced-mostly-20-balanced-mostly-20-balanced-mostly-20-real-mostly-fc-menstrual-no-fertility-harm",
+      "title": "月経周期の一時的変化はあっても妊孕性への悪影響は確認されていない",
+      "site_name": "FactCheck.org",
+      "source_url": "https://www.factcheck.org/2023/02/covid-19-vaccines-can-slightly-alter-menstrual-cycle-temporarily-but-dont-harm-fertility/",
+      "purpose": "実在のファクトチェック記事を要約した概ね正確ケース",
+      "analysis_text": "FactCheck.orgは、月経周期の一時的変化を示す研究があっても、妊孕性への悪影響は確認されていないと説明している。",
+      "expected": {
+        "verdict": "ほぼ正確",
+        "domain": "医療"
+      }
+    },
+    {
+      "id": "gray-health-supplement-01",
+      "title": "新しい睡眠サプリが慢性的な不眠を改善するとする小規模データが出ている",
+      "site_name": "健康トレンド通信",
+      "purpose": "5区分評価用の追加確認ケース",
+      "analysis_text": "健康トレンド通信は、新しい睡眠サプリが慢性的な不眠を改善すると伝えるが、根拠は小規模モニターと利用者アンケートにとどまり、対照群付き試験や長期追跡データはそろっていない。現時点では結論を急げない。",
+      "expected": {
+        "verdict": "判断保留",
+        "domain": "医療"
+      },
+      "source_url": "https://claims.example/gray/health-supplement",
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 67
+      }
+    },
+    {
+      "id": "gray-health-supplement-02",
+      "title": "新しい睡眠サプリが慢性的な不眠を改善するとの見方はあるが専門家評価は割れている",
+      "site_name": "健康トレンド通信",
+      "purpose": "5区分評価用の追加確認ケース",
+      "analysis_text": "健康トレンド通信は、新しい睡眠サプリが慢性的な不眠を改善するとの見方を紹介している。ただし材料は小規模モニターと利用者アンケートが中心で、対照群付き試験や長期追跡データはそろっていないため、評価は分かれている。",
+      "expected": {
+        "verdict": "判断保留",
+        "domain": "医療"
+      },
+      "source_url": "https://claims.example/gray/health-supplement",
+      "snapshot_overrides": {
+        "has_author": false,
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 67
+      }
+    },
+    {
+      "id": "gray-health-supplement-03",
+      "title": "新しい睡眠サプリが慢性的な不眠を改善するという速報はあるが確定材料が足りない",
+      "site_name": "健康トレンド通信",
+      "purpose": "5区分評価用の追加確認ケース",
+      "analysis_text": "健康トレンド通信によれば、新しい睡眠サプリが慢性的な不眠を改善する可能性が示唆されているが、現段階の材料は小規模モニターと利用者アンケートに偏っている。対照群付き試験や長期追跡データはそろっていないため、追加確認が必要だ。",
+      "expected": {
+        "verdict": "判断保留",
+        "domain": "医療"
+      },
+      "source_url": "https://claims.example/gray/health-supplement",
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 67
+      }
+    },
+    {
+      "id": "gray-health-supplement-04",
+      "title": "新しい睡眠サプリが慢性的な不眠を改善するを示す材料と否定材料が混在している",
+      "site_name": "健康トレンド通信",
+      "purpose": "5区分評価用の追加確認ケース",
+      "analysis_text": "健康トレンド通信は、新しい睡眠サプリが慢性的な不眠を改善すると見る材料を挙げる一方で、反対の材料も残っている。主な根拠は小規模モニターと利用者アンケートで、対照群付き試験や長期追跡データはそろっていない。",
+      "expected": {
+        "verdict": "判断保留",
+        "domain": "医療"
+      },
+      "source_url": "https://claims.example/gray/health-supplement",
+      "snapshot_overrides": {
+        "has_author": false,
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 67
+      }
+    },
+    {
+      "id": "gray-health-supplement-05",
+      "title": "新しい睡眠サプリが慢性的な不眠を改善すると言い切るには因果関係が不明確",
+      "site_name": "健康トレンド通信",
+      "purpose": "5区分評価用の追加確認ケース",
+      "analysis_text": "健康トレンド通信は、新しい睡眠サプリが慢性的な不眠を改善すると示唆するが、今のところ確認できるのは小規模モニターと利用者アンケートまでだ。対照群付き試験や長期追跡データはそろっていないため、断定は難しい。",
+      "expected": {
+        "verdict": "判断保留",
+        "domain": "医療"
+      },
+      "source_url": "https://claims.example/gray/health-supplement",
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 67
+      }
+    },
+    {
+      "id": "gray-rates-next-meeting-01",
+      "title": "次回会合で追加利上げが見送られるとする小規模データが出ている",
+      "site_name": "マーケット観測ノート",
+      "purpose": "5区分評価用の追加確認ケース",
+      "analysis_text": "マーケット観測ノートは、次回会合で追加利上げが見送られると伝えるが、根拠は市場関係者の聞き取りと一部アナリスト予想にとどまり、公表資料や決定文はまだ出ていない。現時点では結論を急げない。",
+      "expected": {
+        "verdict": "判断保留",
+        "domain": "金融"
+      },
+      "source_url": "https://claims.example/gray/rates-next-meeting",
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 67
+      }
+    },
+    {
+      "id": "gray-rates-next-meeting-02",
+      "title": "次回会合で追加利上げが見送られるとの見方はあるが専門家評価は割れている",
+      "site_name": "マーケット観測ノート",
+      "purpose": "5区分評価用の追加確認ケース",
+      "analysis_text": "マーケット観測ノートは、次回会合で追加利上げが見送られるとの見方を紹介している。ただし材料は市場関係者の聞き取りと一部アナリスト予想が中心で、公表資料や決定文はまだ出ていないため、評価は分かれている。",
+      "expected": {
+        "verdict": "判断保留",
+        "domain": "金融"
+      },
+      "source_url": "https://claims.example/gray/rates-next-meeting",
+      "snapshot_overrides": {
+        "has_author": false,
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 67
+      }
+    },
+    {
+      "id": "gray-rates-next-meeting-03",
+      "title": "次回会合で追加利上げが見送られるという速報はあるが確定材料が足りない",
+      "site_name": "マーケット観測ノート",
+      "purpose": "5区分評価用の追加確認ケース",
+      "analysis_text": "マーケット観測ノートによれば、次回会合で追加利上げが見送られる可能性が示唆されているが、現段階の材料は市場関係者の聞き取りと一部アナリスト予想に偏っている。公表資料や決定文はまだ出ていないため、追加確認が必要だ。",
+      "expected": {
+        "verdict": "判断保留",
+        "domain": "金融"
+      },
+      "source_url": "https://claims.example/gray/rates-next-meeting",
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 67
+      }
+    },
+    {
+      "id": "gray-rates-next-meeting-04",
+      "title": "次回会合で追加利上げが見送られるを示す材料と否定材料が混在している",
+      "site_name": "マーケット観測ノート",
+      "purpose": "5区分評価用の追加確認ケース",
+      "analysis_text": "マーケット観測ノートは、次回会合で追加利上げが見送られると見る材料を挙げる一方で、反対の材料も残っている。主な根拠は市場関係者の聞き取りと一部アナリスト予想で、公表資料や決定文はまだ出ていない。",
+      "expected": {
+        "verdict": "判断保留",
+        "domain": "金融"
+      },
+      "source_url": "https://claims.example/gray/rates-next-meeting",
+      "snapshot_overrides": {
+        "has_author": false,
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 67
+      }
+    },
+    {
+      "id": "gray-rates-next-meeting-05",
+      "title": "次回会合で追加利上げが見送られると言い切るには因果関係が不明確",
+      "site_name": "マーケット観測ノート",
+      "purpose": "5区分評価用の追加確認ケース",
+      "analysis_text": "マーケット観測ノートは、次回会合で追加利上げが見送られると示唆するが、今のところ確認できるのは市場関係者の聞き取りと一部アナリスト予想までだ。公表資料や決定文はまだ出ていないため、断定は難しい。",
+      "expected": {
+        "verdict": "判断保留",
+        "domain": "金融"
+      },
+      "source_url": "https://claims.example/gray/rates-next-meeting",
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 67
+      }
+    },
+    {
+      "id": "gray-rent-redevelopment-01",
+      "title": "駅前再開発で周辺家賃が下がるとする小規模データが出ている",
+      "site_name": "都市生活レビュー",
+      "purpose": "5区分評価用の追加確認ケース",
+      "analysis_text": "都市生活レビューは、駅前再開発で周辺家賃が下がると伝えるが、根拠は一部不動産会社の見通しと限定的な募集事例にとどまり、地域全体の統計と他要因の切り分けは不十分だ。現時点では結論を急げない。",
+      "expected": {
+        "verdict": "判断保留",
+        "domain": "一般"
+      },
+      "source_url": "https://claims.example/gray/rent-redevelopment",
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 67
+      }
+    },
+    {
+      "id": "gray-rent-redevelopment-02",
+      "title": "駅前再開発で周辺家賃が下がるとの見方はあるが専門家評価は割れている",
+      "site_name": "都市生活レビュー",
+      "purpose": "5区分評価用の追加確認ケース",
+      "analysis_text": "都市生活レビューは、駅前再開発で周辺家賃が下がるとの見方を紹介している。ただし材料は一部不動産会社の見通しと限定的な募集事例が中心で、地域全体の統計と他要因の切り分けは不十分だため、評価は分かれている。",
+      "expected": {
+        "verdict": "判断保留",
+        "domain": "一般"
+      },
+      "source_url": "https://claims.example/gray/rent-redevelopment",
+      "snapshot_overrides": {
+        "has_author": false,
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 67
+      }
+    },
+    {
+      "id": "gray-rent-redevelopment-03",
+      "title": "駅前再開発で周辺家賃が下がるという速報はあるが確定材料が足りない",
+      "site_name": "都市生活レビュー",
+      "purpose": "5区分評価用の追加確認ケース",
+      "analysis_text": "都市生活レビューによれば、駅前再開発で周辺家賃が下がる可能性が示唆されているが、現段階の材料は一部不動産会社の見通しと限定的な募集事例に偏っている。地域全体の統計と他要因の切り分けは不十分だため、追加確認が必要だ。",
+      "expected": {
+        "verdict": "判断保留",
+        "domain": "一般"
+      },
+      "source_url": "https://claims.example/gray/rent-redevelopment",
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 67
+      }
+    },
+    {
+      "id": "gray-rent-redevelopment-04",
+      "title": "駅前再開発で周辺家賃が下がるを示す材料と否定材料が混在している",
+      "site_name": "都市生活レビュー",
+      "purpose": "5区分評価用の追加確認ケース",
+      "analysis_text": "都市生活レビューは、駅前再開発で周辺家賃が下がると見る材料を挙げる一方で、反対の材料も残っている。主な根拠は一部不動産会社の見通しと限定的な募集事例で、地域全体の統計と他要因の切り分けは不十分だ。",
+      "expected": {
+        "verdict": "判断保留",
+        "domain": "一般"
+      },
+      "source_url": "https://claims.example/gray/rent-redevelopment",
+      "snapshot_overrides": {
+        "has_author": false,
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 67
+      }
+    },
+    {
+      "id": "gray-rent-redevelopment-05",
+      "title": "駅前再開発で周辺家賃が下がると言い切るには因果関係が不明確",
+      "site_name": "都市生活レビュー",
+      "purpose": "5区分評価用の追加確認ケース",
+      "analysis_text": "都市生活レビューは、駅前再開発で周辺家賃が下がると示唆するが、今のところ確認できるのは一部不動産会社の見通しと限定的な募集事例までだ。地域全体の統計と他要因の切り分けは不十分だため、断定は難しい。",
+      "expected": {
+        "verdict": "判断保留",
+        "domain": "一般"
+      },
+      "source_url": "https://claims.example/gray/rent-redevelopment",
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 67
+      }
+    },
+    {
+      "id": "gray-school-tablet-score-01",
+      "title": "学校のタブレット導入で学力が上がったとする小規模データが出ている",
+      "site_name": "教育データ観測",
+      "purpose": "5区分評価用の追加確認ケース",
+      "analysis_text": "教育データ観測は、学校のタブレット導入で学力が上がったと伝えるが、根拠は一部自治体の速報値と担当者コメントにとどまり、学年差や補習施策など他の要因が整理されていない。現時点では結論を急げない。",
+      "expected": {
+        "verdict": "判断保留",
+        "domain": "一般"
+      },
+      "source_url": "https://claims.example/gray/school-tablet-score",
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 67
+      }
+    },
+    {
+      "id": "gray-school-tablet-score-02",
+      "title": "学校のタブレット導入で学力が上がったとの見方はあるが専門家評価は割れている",
+      "site_name": "教育データ観測",
+      "purpose": "5区分評価用の追加確認ケース",
+      "analysis_text": "教育データ観測は、学校のタブレット導入で学力が上がったとの見方を紹介している。ただし材料は一部自治体の速報値と担当者コメントが中心で、学年差や補習施策など他の要因が整理されていないため、評価は分かれている。",
+      "expected": {
+        "verdict": "判断保留",
+        "domain": "一般"
+      },
+      "source_url": "https://claims.example/gray/school-tablet-score",
+      "snapshot_overrides": {
+        "has_author": false,
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 67
+      }
+    },
+    {
+      "id": "gray-school-tablet-score-03",
+      "title": "学校のタブレット導入で学力が上がったという速報はあるが確定材料が足りない",
+      "site_name": "教育データ観測",
+      "purpose": "5区分評価用の追加確認ケース",
+      "analysis_text": "教育データ観測によれば、学校のタブレット導入で学力が上がった可能性が示唆されているが、現段階の材料は一部自治体の速報値と担当者コメントに偏っている。学年差や補習施策など他の要因が整理されていないため、追加確認が必要だ。",
+      "expected": {
+        "verdict": "判断保留",
+        "domain": "一般"
+      },
+      "source_url": "https://claims.example/gray/school-tablet-score",
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 67
+      }
+    },
+    {
+      "id": "gray-school-tablet-score-04",
+      "title": "学校のタブレット導入で学力が上がったを示す材料と否定材料が混在している",
+      "site_name": "教育データ観測",
+      "purpose": "5区分評価用の追加確認ケース",
+      "analysis_text": "教育データ観測は、学校のタブレット導入で学力が上がったと見る材料を挙げる一方で、反対の材料も残っている。主な根拠は一部自治体の速報値と担当者コメントで、学年差や補習施策など他の要因が整理されていない。",
+      "expected": {
+        "verdict": "判断保留",
+        "domain": "一般"
+      },
+      "source_url": "https://claims.example/gray/school-tablet-score",
+      "snapshot_overrides": {
+        "has_author": false,
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 67
+      }
+    },
+    {
+      "id": "gray-school-tablet-score-05",
+      "title": "学校のタブレット導入で学力が上がったと言い切るには因果関係が不明確",
+      "site_name": "教育データ観測",
+      "purpose": "5区分評価用の追加確認ケース",
+      "analysis_text": "教育データ観測は、学校のタブレット導入で学力が上がったと示唆するが、今のところ確認できるのは一部自治体の速報値と担当者コメントまでだ。学年差や補習施策など他の要因が整理されていないため、断定は難しい。",
+      "expected": {
+        "verdict": "判断保留",
+        "domain": "一般"
+      },
+      "source_url": "https://claims.example/gray/school-tablet-score",
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 67
+      }
+    },
+    {
+      "id": "caution-fever-event-01",
+      "title": "市内の発熱患者増加は週末イベントが原因だ",
+      "site_name": "速報まとめライン",
+      "purpose": "5区分評価用の文脈不足ケース",
+      "analysis_text": "速報まとめラインは、市内の発熱患者増加は週末イベントが原因だ。ただし根拠は一部病院の混雑とSNS上の参加報告に偏っており、検査結果や保健所の因果確認がない。",
+      "expected": {
+        "verdict": "不正確",
+        "domain": "医療"
+      },
+      "source_url": "https://claims.example/caution/fever-event",
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 0,
+        "extraction_score": 63
+      }
+    },
+    {
+      "id": "caution-fever-event-02",
+      "title": "文脈を落として市内の発熱患者増加は週末イベントが原因だ",
+      "site_name": "速報まとめライン",
+      "purpose": "5区分評価用の文脈不足ケース",
+      "analysis_text": "速報まとめラインは、一部病院の混雑とSNS上の参加報告をもとに市内の発熱患者増加は週末イベントが原因だと示すが、検査結果や保健所の因果確認がないため受け取りに注意がいる。",
+      "expected": {
+        "verdict": "不正確",
+        "domain": "医療"
+      },
+      "source_url": "https://claims.example/caution/fever-event",
+      "snapshot_overrides": {
+        "has_author": false,
+        "has_published_at": true,
+        "reference_link_count": 0,
+        "extraction_score": 63
+      }
+    },
+    {
+      "id": "caution-fever-event-03",
+      "title": "一部病院の混雑とSNS上の参加報告だけで市内の発熱患者増加は週末イベントが原因だと結論づけている",
+      "site_name": "速報まとめライン",
+      "purpose": "5区分評価用の文脈不足ケース",
+      "analysis_text": "速報まとめラインでは、一部病院の混雑とSNS上の参加報告を主な根拠として市内の発熱患者増加は週末イベントが原因だと結びつけている。しかし検査結果や保健所の因果確認がない。",
+      "expected": {
+        "verdict": "不正確",
+        "domain": "医療"
+      },
+      "source_url": "https://claims.example/caution/fever-event",
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 0,
+        "extraction_score": 63
+      }
+    },
+    {
+      "id": "caution-fever-event-04",
+      "title": "見出しでは市内の発熱患者増加は週末イベントが原因だと強く押し出している",
+      "site_name": "速報まとめライン",
+      "purpose": "5区分評価用の文脈不足ケース",
+      "analysis_text": "速報まとめラインのまとめは市内の発熱患者増加は週末イベントが原因だと強く打ち出すが、本文で示される材料は一部病院の混雑とSNS上の参加報告程度で、検査結果や保健所の因果確認がない。",
+      "expected": {
+        "verdict": "不正確",
+        "domain": "医療"
+      },
+      "source_url": "https://claims.example/caution/fever-event",
+      "snapshot_overrides": {
+        "has_author": false,
+        "has_published_at": true,
+        "reference_link_count": 0,
+        "extraction_score": 63
+      }
+    },
+    {
+      "id": "caution-fever-event-05",
+      "title": "限定的な事実だけを拾って市内の発熱患者増加は週末イベントが原因だ",
+      "site_name": "速報まとめライン",
+      "purpose": "5区分評価用の文脈不足ケース",
+      "analysis_text": "速報まとめラインは、一部病院の混雑とSNS上の参加報告のような限定的事実を拾い、市内の発熱患者増加は週末イベントが原因だと読める形で伝える。検査結果や保健所の因果確認がない。",
+      "expected": {
+        "verdict": "不正確",
+        "domain": "医療"
+      },
+      "source_url": "https://claims.example/caution/fever-event",
+      "snapshot_overrides": {
+        "has_author": false,
+        "has_published_at": true,
+        "reference_link_count": 0,
+        "extraction_score": 63
+      }
+    },
+    {
+      "id": "caution-old-flood-photo-01",
+      "title": "古い浸水写真を今回の洪水被害だとして使い、被害が全域に広がったと示す",
+      "site_name": "災害共有ネット",
+      "purpose": "5区分評価用の文脈不足ケース",
+      "analysis_text": "災害共有ネットは、古い浸水写真を今回の洪水被害だとして使い、被害が全域に広がったと示す。ただし根拠は写真自体は実在する災害記録に偏っており、撮影時期と今回の地域との対応づけが欠けている。",
+      "expected": {
+        "verdict": "不正確",
+        "domain": "災害"
+      },
+      "source_url": "https://claims.example/caution/old-flood-photo",
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 0,
+        "extraction_score": 63
+      }
+    },
+    {
+      "id": "caution-old-flood-photo-02",
+      "title": "文脈を落として古い浸水写真を今回の洪水被害だとして使い、被害が全域に広がったと示す",
+      "site_name": "災害共有ネット",
+      "purpose": "5区分評価用の文脈不足ケース",
+      "analysis_text": "災害共有ネットは、写真自体は実在する災害記録をもとに古い浸水写真を今回の洪水被害だとして使い、被害が全域に広がったと示すと示すが、撮影時期と今回の地域との対応づけが欠けているため受け取りに注意がいる。",
+      "expected": {
+        "verdict": "不正確",
+        "domain": "災害"
+      },
+      "source_url": "https://claims.example/caution/old-flood-photo",
+      "snapshot_overrides": {
+        "has_author": false,
+        "has_published_at": true,
+        "reference_link_count": 0,
+        "extraction_score": 63
+      }
+    },
+    {
+      "id": "caution-old-flood-photo-03",
+      "title": "写真自体は実在する災害記録だけで古い浸水写真を今回の洪水被害だとして使い、被害が全域に広がったと示すと結論づけている",
+      "site_name": "災害共有ネット",
+      "purpose": "5区分評価用の文脈不足ケース",
+      "analysis_text": "災害共有ネットでは、写真自体は実在する災害記録を主な根拠として古い浸水写真を今回の洪水被害だとして使い、被害が全域に広がったと示すと結びつけている。しかし撮影時期と今回の地域との対応づけが欠けている。",
+      "expected": {
+        "verdict": "不正確",
+        "domain": "災害"
+      },
+      "source_url": "https://claims.example/caution/old-flood-photo",
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 0,
+        "extraction_score": 63
+      }
+    },
+    {
+      "id": "caution-old-flood-photo-04",
+      "title": "見出しでは古い浸水写真を今回の洪水被害だとして使い、被害が全域に広がったと示すと強く押し出している",
+      "site_name": "災害共有ネット",
+      "purpose": "5区分評価用の文脈不足ケース",
+      "analysis_text": "災害共有ネットのまとめは古い浸水写真を今回の洪水被害だとして使い、被害が全域に広がったと示すと強く打ち出すが、本文で示される材料は写真自体は実在する災害記録程度で、撮影時期と今回の地域との対応づけが欠けている。",
+      "expected": {
+        "verdict": "不正確",
+        "domain": "災害"
+      },
+      "source_url": "https://claims.example/caution/old-flood-photo",
+      "snapshot_overrides": {
+        "has_author": false,
+        "has_published_at": true,
+        "reference_link_count": 0,
+        "extraction_score": 63
+      }
+    },
+    {
+      "id": "caution-old-flood-photo-05",
+      "title": "限定的な事実だけを拾って古い浸水写真を今回の洪水被害だとして使い、被害が全域に広がったと示す",
+      "site_name": "災害共有ネット",
+      "purpose": "5区分評価用の文脈不足ケース",
+      "analysis_text": "災害共有ネットは、写真自体は実在する災害記録のような限定的事実を拾い、古い浸水写真を今回の洪水被害だとして使い、被害が全域に広がったと示すと読める形で伝える。撮影時期と今回の地域との対応づけが欠けている。",
+      "expected": {
+        "verdict": "不正確",
+        "domain": "災害"
+      },
+      "source_url": "https://claims.example/caution/old-flood-photo",
+      "snapshot_overrides": {
+        "has_author": false,
+        "has_published_at": true,
+        "reference_link_count": 0,
+        "extraction_score": 63
+      }
+    },
+    {
+      "id": "caution-price-double-01",
+      "title": "一部商品の値上がりを根拠に来月は生活費が全国で倍になると断定する",
+      "site_name": "家計ウォッチ速報",
+      "purpose": "5区分評価用の文脈不足ケース",
+      "analysis_text": "家計ウォッチ速報は、一部商品の値上がりを根拠に来月は生活費が全国で倍になると断定する。ただし根拠は特定店舗の価格改定と家計アンケートの一部回答に偏っており、全国統計や品目別の差を無視している。",
+      "expected": {
+        "verdict": "不正確",
+        "domain": "一般"
+      },
+      "source_url": "https://claims.example/caution/price-double",
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 0,
+        "extraction_score": 63
+      }
+    },
+    {
+      "id": "caution-price-double-02",
+      "title": "文脈を落として一部商品の値上がりを根拠に来月は生活費が全国で倍になると断定する",
+      "site_name": "家計ウォッチ速報",
+      "purpose": "5区分評価用の文脈不足ケース",
+      "analysis_text": "家計ウォッチ速報は、特定店舗の価格改定と家計アンケートの一部回答をもとに一部商品の値上がりを根拠に来月は生活費が全国で倍になると断定すると示すが、全国統計や品目別の差を無視しているため受け取りに注意がいる。",
+      "expected": {
+        "verdict": "不正確",
+        "domain": "一般"
+      },
+      "source_url": "https://claims.example/caution/price-double",
+      "snapshot_overrides": {
+        "has_author": false,
+        "has_published_at": true,
+        "reference_link_count": 0,
+        "extraction_score": 63
+      }
+    },
+    {
+      "id": "caution-price-double-03",
+      "title": "特定店舗の価格改定と家計アンケートの一部回答だけで一部商品の値上がりを根拠に来月は生活費が全国で倍になると断定すると結論づけている",
+      "site_name": "家計ウォッチ速報",
+      "purpose": "5区分評価用の文脈不足ケース",
+      "analysis_text": "家計ウォッチ速報では、特定店舗の価格改定と家計アンケートの一部回答を主な根拠として一部商品の値上がりを根拠に来月は生活費が全国で倍になると断定すると結びつけている。しかし全国統計や品目別の差を無視している。",
+      "expected": {
+        "verdict": "不正確",
+        "domain": "一般"
+      },
+      "source_url": "https://claims.example/caution/price-double",
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 0,
+        "extraction_score": 63
+      }
+    },
+    {
+      "id": "caution-price-double-04",
+      "title": "見出しでは一部商品の値上がりを根拠に来月は生活費が全国で倍になると断定すると強く押し出している",
+      "site_name": "家計ウォッチ速報",
+      "purpose": "5区分評価用の文脈不足ケース",
+      "analysis_text": "家計ウォッチ速報のまとめは一部商品の値上がりを根拠に来月は生活費が全国で倍になると断定すると強く打ち出すが、本文で示される材料は特定店舗の価格改定と家計アンケートの一部回答程度で、全国統計や品目別の差を無視している。",
+      "expected": {
+        "verdict": "不正確",
+        "domain": "一般"
+      },
+      "source_url": "https://claims.example/caution/price-double",
+      "snapshot_overrides": {
+        "has_author": false,
+        "has_published_at": true,
+        "reference_link_count": 0,
+        "extraction_score": 63
+      }
+    },
+    {
+      "id": "caution-price-double-05",
+      "title": "限定的な事実だけを拾って一部商品の値上がりを根拠に来月は生活費が全国で倍になると断定する",
+      "site_name": "家計ウォッチ速報",
+      "purpose": "5区分評価用の文脈不足ケース",
+      "analysis_text": "家計ウォッチ速報は、特定店舗の価格改定と家計アンケートの一部回答のような限定的事実を拾い、一部商品の値上がりを根拠に来月は生活費が全国で倍になると断定すると読める形で伝える。全国統計や品目別の差を無視している。",
+      "expected": {
+        "verdict": "不正確",
+        "domain": "一般"
+      },
+      "source_url": "https://claims.example/caution/price-double",
+      "snapshot_overrides": {
+        "has_author": false,
+        "has_published_at": true,
+        "reference_link_count": 0,
+        "extraction_score": 63
+      }
+    },
+    {
+      "id": "caution-company-default-01",
+      "title": "単年度赤字だけで大手企業の破綻が確定したかのように伝える",
+      "site_name": "企業噂レポート",
+      "purpose": "5区分評価用の文脈不足ケース",
+      "analysis_text": "企業噂レポートは、単年度赤字だけで大手企業の破綻が確定したかのように伝える。ただし根拠は決算短信の一部数値に偏っており、資金繰りや支援策など継続企業情報の文脈が抜けている。",
+      "expected": {
+        "verdict": "不正確",
+        "domain": "金融"
+      },
+      "source_url": "https://claims.example/caution/company-default",
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 0,
+        "extraction_score": 63
+      }
+    },
+    {
+      "id": "caution-company-default-02",
+      "title": "文脈を落として単年度赤字だけで大手企業の破綻が確定したかのように伝える",
+      "site_name": "企業噂レポート",
+      "purpose": "5区分評価用の文脈不足ケース",
+      "analysis_text": "企業噂レポートは、決算短信の一部数値をもとに単年度赤字だけで大手企業の破綻が確定したかのように伝えると示すが、資金繰りや支援策など継続企業情報の文脈が抜けているため受け取りに注意がいる。",
+      "expected": {
+        "verdict": "不正確",
+        "domain": "金融"
+      },
+      "source_url": "https://claims.example/caution/company-default",
+      "snapshot_overrides": {
+        "has_author": false,
+        "has_published_at": true,
+        "reference_link_count": 0,
+        "extraction_score": 63
+      }
+    },
+    {
+      "id": "caution-company-default-03",
+      "title": "決算短信の一部数値だけで単年度赤字だけで大手企業の破綻が確定したかのように伝えると結論づけている",
+      "site_name": "企業噂レポート",
+      "purpose": "5区分評価用の文脈不足ケース",
+      "analysis_text": "企業噂レポートでは、決算短信の一部数値を主な根拠として単年度赤字だけで大手企業の破綻が確定したかのように伝えると結びつけている。しかし資金繰りや支援策など継続企業情報の文脈が抜けている。",
+      "expected": {
+        "verdict": "不正確",
+        "domain": "金融"
+      },
+      "source_url": "https://claims.example/caution/company-default",
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 0,
+        "extraction_score": 63
+      }
+    },
+    {
+      "id": "caution-company-default-04",
+      "title": "見出しでは単年度赤字だけで大手企業の破綻が確定したかのように伝えると強く押し出している",
+      "site_name": "企業噂レポート",
+      "purpose": "5区分評価用の文脈不足ケース",
+      "analysis_text": "企業噂レポートのまとめは単年度赤字だけで大手企業の破綻が確定したかのように伝えると強く打ち出すが、本文で示される材料は決算短信の一部数値程度で、資金繰りや支援策など継続企業情報の文脈が抜けている。",
+      "expected": {
+        "verdict": "不正確",
+        "domain": "金融"
+      },
+      "source_url": "https://claims.example/caution/company-default",
+      "snapshot_overrides": {
+        "has_author": false,
+        "has_published_at": true,
+        "reference_link_count": 0,
+        "extraction_score": 63
+      }
+    },
+    {
+      "id": "caution-company-default-05",
+      "title": "限定的な事実だけを拾って単年度赤字だけで大手企業の破綻が確定したかのように伝える",
+      "site_name": "企業噂レポート",
+      "purpose": "5区分評価用の文脈不足ケース",
+      "analysis_text": "企業噂レポートは、決算短信の一部数値のような限定的事実を拾い、単年度赤字だけで大手企業の破綻が確定したかのように伝えると読める形で伝える。資金繰りや支援策など継続企業情報の文脈が抜けている。",
+      "expected": {
+        "verdict": "不正確",
+        "domain": "金融"
+      },
+      "source_url": "https://claims.example/caution/company-default",
+      "snapshot_overrides": {
+        "has_author": false,
+        "has_published_at": true,
+        "reference_link_count": 0,
+        "extraction_score": 63
+      }
+    },
+    {
+      "id": "fake-vaccine-chip-01",
+      "title": "接種券の番号とぼやけた拡大画像を根拠に新型コロナワクチンには追跡用のマイクロチップが入っている",
+      "site_name": "匿名SNS投稿",
+      "purpose": "5区分評価用の高リスク誤情報ケース",
+      "analysis_text": "匿名SNS投稿は、接種券の番号とぼやけた拡大画像を証拠として、新型コロナワクチンには追跡用のマイクロチップが入っていると断定している。",
+      "expected": {
+        "verdict": "誤り",
+        "domain": "医療"
+      },
+      "source_url": "https://claims.example/fake/vaccine-chip",
+      "snapshot_overrides": {
+        "has_author": false,
+        "has_published_at": false,
+        "reference_link_count": 0,
+        "extraction_score": 55
+      }
+    },
+    {
+      "id": "fake-vaccine-chip-02",
+      "title": "内部情報があるとして新型コロナワクチンには追跡用のマイクロチップが入っている",
+      "site_name": "匿名SNS投稿",
+      "purpose": "5区分評価用の高リスク誤情報ケース",
+      "analysis_text": "匿名SNS投稿は、内部情報を知る人物がいるとして新型コロナワクチンには追跡用のマイクロチップが入っていると主張している。示される材料は接種券の番号とぼやけた拡大画像だけだ。",
+      "expected": {
+        "verdict": "誤り",
+        "domain": "医療"
+      },
+      "source_url": "https://claims.example/fake/vaccine-chip",
+      "snapshot_overrides": {
+        "has_author": false,
+        "has_published_at": false,
+        "reference_link_count": 0,
+        "extraction_score": 55
+      }
+    },
+    {
+      "id": "fake-vaccine-chip-03",
+      "title": "短い動画だけで新型コロナワクチンには追跡用のマイクロチップが入っている",
+      "site_name": "匿名SNS投稿",
+      "purpose": "5区分評価用の高リスク誤情報ケース",
+      "analysis_text": "匿名SNS投稿は、短い動画と接種券の番号とぼやけた拡大画像をもとに、新型コロナワクチンには追跡用のマイクロチップが入っていると広めている。",
+      "expected": {
+        "verdict": "誤り",
+        "domain": "医療"
+      },
+      "source_url": "https://claims.example/fake/vaccine-chip",
+      "snapshot_overrides": {
+        "has_author": false,
+        "has_published_at": false,
+        "reference_link_count": 0,
+        "extraction_score": 55
+      }
+    },
+    {
+      "id": "fake-vaccine-chip-04",
+      "title": "秘密計画が進んでいるとして新型コロナワクチンには追跡用のマイクロチップが入っている",
+      "site_name": "匿名SNS投稿",
+      "purpose": "5区分評価用の高リスク誤情報ケース",
+      "analysis_text": "匿名SNS投稿は、秘密計画が進んでいるという前提で新型コロナワクチンには追跡用のマイクロチップが入っていると書いている。根拠として並ぶのは接種券の番号とぼやけた拡大画像だ。",
+      "expected": {
+        "verdict": "誤り",
+        "domain": "医療"
+      },
+      "source_url": "https://claims.example/fake/vaccine-chip",
+      "snapshot_overrides": {
+        "has_author": false,
+        "has_published_at": false,
+        "reference_link_count": 0,
+        "extraction_score": 55
+      }
+    },
+    {
+      "id": "fake-vaccine-chip-05",
+      "title": "すぐ拡散すべきだとして新型コロナワクチンには追跡用のマイクロチップが入っている",
+      "site_name": "匿名SNS投稿",
+      "purpose": "5区分評価用の高リスク誤情報ケース",
+      "analysis_text": "匿名SNS投稿は、周囲に知らせるべき重要情報だとして新型コロナワクチンには追跡用のマイクロチップが入っていると訴える。裏付けとして示されるのは接種券の番号とぼやけた拡大画像に限られる。",
+      "expected": {
+        "verdict": "誤り",
+        "domain": "医療"
+      },
+      "source_url": "https://claims.example/fake/vaccine-chip",
+      "snapshot_overrides": {
+        "has_author": false,
+        "has_published_at": false,
+        "reference_link_count": 0,
+        "extraction_score": 55
+      }
+    },
+    {
+      "id": "fake-bleach-cure-01",
+      "title": "個人の体験談と正体不明の表を根拠に漂白剤を薄めて飲めば感染症を治療できる",
+      "site_name": "民間療法チャンネル",
+      "purpose": "5区分評価用の高リスク誤情報ケース",
+      "analysis_text": "民間療法チャンネルは、個人の体験談と正体不明の表を証拠として、漂白剤を薄めて飲めば感染症を治療できると断定している。",
+      "expected": {
+        "verdict": "誤り",
+        "domain": "医療"
+      },
+      "source_url": "https://claims.example/fake/bleach-cure",
+      "snapshot_overrides": {
+        "has_author": false,
+        "has_published_at": false,
+        "reference_link_count": 0,
+        "extraction_score": 55
+      }
+    },
+    {
+      "id": "fake-bleach-cure-02",
+      "title": "内部情報があるとして漂白剤を薄めて飲めば感染症を治療できる",
+      "site_name": "民間療法チャンネル",
+      "purpose": "5区分評価用の高リスク誤情報ケース",
+      "analysis_text": "民間療法チャンネルは、内部情報を知る人物がいるとして漂白剤を薄めて飲めば感染症を治療できると主張している。示される材料は個人の体験談と正体不明の表だけだ。",
+      "expected": {
+        "verdict": "誤り",
+        "domain": "医療"
+      },
+      "source_url": "https://claims.example/fake/bleach-cure",
+      "snapshot_overrides": {
+        "has_author": false,
+        "has_published_at": false,
+        "reference_link_count": 0,
+        "extraction_score": 55
+      }
+    },
+    {
+      "id": "fake-bleach-cure-03",
+      "title": "短い動画だけで漂白剤を薄めて飲めば感染症を治療できる",
+      "site_name": "民間療法チャンネル",
+      "purpose": "5区分評価用の高リスク誤情報ケース",
+      "analysis_text": "民間療法チャンネルは、短い動画と個人の体験談と正体不明の表をもとに、漂白剤を薄めて飲めば感染症を治療できると広めている。",
+      "expected": {
+        "verdict": "誤り",
+        "domain": "医療"
+      },
+      "source_url": "https://claims.example/fake/bleach-cure",
+      "snapshot_overrides": {
+        "has_author": false,
+        "has_published_at": false,
+        "reference_link_count": 0,
+        "extraction_score": 55
+      }
+    },
+    {
+      "id": "fake-bleach-cure-04",
+      "title": "秘密計画が進んでいるとして漂白剤を薄めて飲めば感染症を治療できる",
+      "site_name": "民間療法チャンネル",
+      "purpose": "5区分評価用の高リスク誤情報ケース",
+      "analysis_text": "民間療法チャンネルは、秘密計画が進んでいるという前提で漂白剤を薄めて飲めば感染症を治療できると書いている。根拠として並ぶのは個人の体験談と正体不明の表だ。",
+      "expected": {
+        "verdict": "誤り",
+        "domain": "医療"
+      },
+      "source_url": "https://claims.example/fake/bleach-cure",
+      "snapshot_overrides": {
+        "has_author": false,
+        "has_published_at": false,
+        "reference_link_count": 0,
+        "extraction_score": 55
+      }
+    },
+    {
+      "id": "fake-bleach-cure-05",
+      "title": "すぐ拡散すべきだとして漂白剤を薄めて飲めば感染症を治療できる",
+      "site_name": "民間療法チャンネル",
+      "purpose": "5区分評価用の高リスク誤情報ケース",
+      "analysis_text": "民間療法チャンネルは、周囲に知らせるべき重要情報だとして漂白剤を薄めて飲めば感染症を治療できると訴える。裏付けとして示されるのは個人の体験談と正体不明の表に限られる。",
+      "expected": {
+        "verdict": "誤り",
+        "domain": "医療"
+      },
+      "source_url": "https://claims.example/fake/bleach-cure",
+      "snapshot_overrides": {
+        "has_author": false,
+        "has_published_at": false,
+        "reference_link_count": 0,
+        "extraction_score": 55
+      }
+    },
+    {
+      "id": "fake-5g-virus-01",
+      "title": "地図の重ね合わせ画像と匿名証言を根拠に5G基地局がウイルスを発生させている",
+      "site_name": "陰謀解説ブログ",
+      "purpose": "5区分評価用の高リスク誤情報ケース",
+      "analysis_text": "陰謀解説ブログは、地図の重ね合わせ画像と匿名証言を証拠として、5G基地局がウイルスを発生させていると断定している。",
+      "expected": {
+        "verdict": "誤り",
+        "domain": "一般"
+      },
+      "source_url": "https://claims.example/fake/5g-virus",
+      "snapshot_overrides": {
+        "has_author": false,
+        "has_published_at": false,
+        "reference_link_count": 0,
+        "extraction_score": 55
+      }
+    },
+    {
+      "id": "fake-5g-virus-02",
+      "title": "内部情報があるとして5G基地局がウイルスを発生させている",
+      "site_name": "陰謀解説ブログ",
+      "purpose": "5区分評価用の高リスク誤情報ケース",
+      "analysis_text": "陰謀解説ブログは、内部情報を知る人物がいるとして5G基地局がウイルスを発生させていると主張している。示される材料は地図の重ね合わせ画像と匿名証言だけだ。",
+      "expected": {
+        "verdict": "誤り",
+        "domain": "一般"
+      },
+      "source_url": "https://claims.example/fake/5g-virus",
+      "snapshot_overrides": {
+        "has_author": false,
+        "has_published_at": false,
+        "reference_link_count": 0,
+        "extraction_score": 55
+      }
+    },
+    {
+      "id": "fake-5g-virus-03",
+      "title": "短い動画だけで5G基地局がウイルスを発生させている",
+      "site_name": "陰謀解説ブログ",
+      "purpose": "5区分評価用の高リスク誤情報ケース",
+      "analysis_text": "陰謀解説ブログは、短い動画と地図の重ね合わせ画像と匿名証言をもとに、5G基地局がウイルスを発生させていると広めている。",
+      "expected": {
+        "verdict": "誤り",
+        "domain": "一般"
+      },
+      "source_url": "https://claims.example/fake/5g-virus",
+      "snapshot_overrides": {
+        "has_author": false,
+        "has_published_at": false,
+        "reference_link_count": 0,
+        "extraction_score": 55
+      }
+    },
+    {
+      "id": "fake-5g-virus-04",
+      "title": "秘密計画が進んでいるとして5G基地局がウイルスを発生させている",
+      "site_name": "陰謀解説ブログ",
+      "purpose": "5区分評価用の高リスク誤情報ケース",
+      "analysis_text": "陰謀解説ブログは、秘密計画が進んでいるという前提で5G基地局がウイルスを発生させていると書いている。根拠として並ぶのは地図の重ね合わせ画像と匿名証言だ。",
+      "expected": {
+        "verdict": "誤り",
+        "domain": "一般"
+      },
+      "source_url": "https://claims.example/fake/5g-virus",
+      "snapshot_overrides": {
+        "has_author": false,
+        "has_published_at": false,
+        "reference_link_count": 0,
+        "extraction_score": 55
+      }
+    },
+    {
+      "id": "fake-5g-virus-05",
+      "title": "すぐ拡散すべきだとして5G基地局がウイルスを発生させている",
+      "site_name": "陰謀解説ブログ",
+      "purpose": "5区分評価用の高リスク誤情報ケース",
+      "analysis_text": "陰謀解説ブログは、周囲に知らせるべき重要情報だとして5G基地局がウイルスを発生させていると訴える。裏付けとして示されるのは地図の重ね合わせ画像と匿名証言に限られる。",
+      "expected": {
+        "verdict": "誤り",
+        "domain": "一般"
+      },
+      "source_url": "https://claims.example/fake/5g-virus",
+      "snapshot_overrides": {
+        "has_author": false,
+        "has_published_at": false,
+        "reference_link_count": 0,
+        "extraction_score": 55
+      }
+    },
+    {
+      "id": "fake-earthquake-cloud-01",
+      "title": "過去写真のこじつけ比較を根拠に雲の形を見れば明日の大地震を正確に予測できる",
+      "site_name": "予言観測クラブ",
+      "purpose": "5区分評価用の高リスク誤情報ケース",
+      "analysis_text": "予言観測クラブは、過去写真のこじつけ比較を証拠として、雲の形を見れば明日の大地震を正確に予測できると断定している。",
+      "expected": {
+        "verdict": "誤り",
+        "domain": "災害"
+      },
+      "source_url": "https://claims.example/fake/earthquake-cloud",
+      "snapshot_overrides": {
+        "has_author": false,
+        "has_published_at": false,
+        "reference_link_count": 0,
+        "extraction_score": 55
+      }
+    },
+    {
+      "id": "fake-earthquake-cloud-02",
+      "title": "内部情報があるとして雲の形を見れば明日の大地震を正確に予測できる",
+      "site_name": "予言観測クラブ",
+      "purpose": "5区分評価用の高リスク誤情報ケース",
+      "analysis_text": "予言観測クラブは、内部情報を知る人物がいるとして雲の形を見れば明日の大地震を正確に予測できると主張している。示される材料は過去写真のこじつけ比較だけだ。",
+      "expected": {
+        "verdict": "誤り",
+        "domain": "災害"
+      },
+      "source_url": "https://claims.example/fake/earthquake-cloud",
+      "snapshot_overrides": {
+        "has_author": false,
+        "has_published_at": false,
+        "reference_link_count": 0,
+        "extraction_score": 55
+      }
+    },
+    {
+      "id": "fake-earthquake-cloud-03",
+      "title": "短い動画だけで雲の形を見れば明日の大地震を正確に予測できる",
+      "site_name": "予言観測クラブ",
+      "purpose": "5区分評価用の高リスク誤情報ケース",
+      "analysis_text": "予言観測クラブは、短い動画と過去写真のこじつけ比較をもとに、雲の形を見れば明日の大地震を正確に予測できると広めている。",
+      "expected": {
+        "verdict": "誤り",
+        "domain": "災害"
+      },
+      "source_url": "https://claims.example/fake/earthquake-cloud",
+      "snapshot_overrides": {
+        "has_author": false,
+        "has_published_at": false,
+        "reference_link_count": 0,
+        "extraction_score": 55
+      }
+    },
+    {
+      "id": "fake-earthquake-cloud-04",
+      "title": "秘密計画が進んでいるとして雲の形を見れば明日の大地震を正確に予測できる",
+      "site_name": "予言観測クラブ",
+      "purpose": "5区分評価用の高リスク誤情報ケース",
+      "analysis_text": "予言観測クラブは、秘密計画が進んでいるという前提で雲の形を見れば明日の大地震を正確に予測できると書いている。根拠として並ぶのは過去写真のこじつけ比較だ。",
+      "expected": {
+        "verdict": "誤り",
+        "domain": "災害"
+      },
+      "source_url": "https://claims.example/fake/earthquake-cloud",
+      "snapshot_overrides": {
+        "has_author": false,
+        "has_published_at": false,
+        "reference_link_count": 0,
+        "extraction_score": 55
+      }
+    },
+    {
+      "id": "fake-earthquake-cloud-05",
+      "title": "すぐ拡散すべきだとして雲の形を見れば明日の大地震を正確に予測できる",
+      "site_name": "予言観測クラブ",
+      "purpose": "5区分評価用の高リスク誤情報ケース",
+      "analysis_text": "予言観測クラブは、周囲に知らせるべき重要情報だとして雲の形を見れば明日の大地震を正確に予測できると訴える。裏付けとして示されるのは過去写真のこじつけ比較に限られる。",
+      "expected": {
+        "verdict": "誤り",
+        "domain": "災害"
+      },
+      "source_url": "https://claims.example/fake/earthquake-cloud",
+      "snapshot_overrides": {
+        "has_author": false,
+        "has_published_at": false,
+        "reference_link_count": 0,
+        "extraction_score": 55
+      }
+    }
+  ]
+}

@@ -1,0 +1,485 @@
+:root {
+    --bg: #f4efe6;
+    --paper: rgba(255, 250, 243, 0.88);
+    --panel: rgba(255, 255, 255, 0.68);
+    --ink: #182126;
+    --muted: #5d6a70;
+    --line: rgba(24, 33, 38, 0.12);
+    --shadow: 0 20px 60px rgba(24, 33, 38, 0.12);
+    --water: #2c7fb0;
+    --green: #2f7d4e;
+    --yellow: #d29818;
+    --orange: #d66e1f;
+    --red: #c54d35;
+    --gray: #7d8894;
+    --deep: #172a3a;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    color: var(--ink);
+    font-family: "BIZ UDPGothic", "Yu Gothic UI", sans-serif;
+    background:
+        radial-gradient(circle at 0% 10%, rgba(47, 125, 78, 0.18), transparent 24%),
+        radial-gradient(circle at 100% 20%, rgba(197, 77, 53, 0.16), transparent 24%),
+        linear-gradient(180deg, #fffdf8 0%, var(--bg) 100%);
+}
+
+.page-shell {
+    width: min(1120px, calc(100% - 28px));
+    margin: 0 auto;
+    padding: 34px 0 56px;
+}
+
+.hero,
+.panel,
+.result,
+.alert {
+    border: 1px solid var(--line);
+    border-radius: 26px;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(10px);
+}
+
+.hero {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 28px;
+    background:
+        linear-gradient(140deg, rgba(255, 255, 255, 0.72), rgba(255, 248, 237, 0.82)),
+        linear-gradient(90deg, rgba(23, 42, 58, 0.05), rgba(47, 125, 78, 0.04));
+}
+
+.eyebrow,
+.metric-label,
+.meta,
+.link-kind {
+    margin: 0;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+h1,
+h2,
+h3 {
+    margin: 0;
+    font-family: "Yu Mincho", "Hiragino Mincho ProN", serif;
+}
+
+h4 {
+    margin: 0 0 10px;
+    font-size: 1rem;
+}
+
+h1 {
+    margin-top: 10px;
+    font-size: clamp(2.2rem, 3.5vw, 3.9rem);
+    line-height: 1.05;
+    max-width: none;
+    white-space: nowrap;
+}
+
+.lede,
+.summary,
+.note li,
+.card li,
+.source-note,
+.preview,
+.source-meta {
+    color: var(--muted);
+    line-height: 1.8;
+}
+
+.panel {
+    margin-top: 22px;
+    padding: 24px;
+    display: grid;
+    grid-template-columns: 1.45fr 1fr;
+    gap: 20px;
+    background: var(--paper);
+}
+
+.analysis-form {
+    display: grid;
+    gap: 16px;
+}
+
+label {
+    display: grid;
+    gap: 8px;
+    font-weight: 700;
+}
+
+input,
+textarea,
+button {
+    font: inherit;
+}
+
+input,
+textarea {
+    width: 100%;
+    border: 1px solid rgba(23, 42, 58, 0.14);
+    border-radius: 18px;
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--ink);
+}
+
+textarea {
+    resize: vertical;
+}
+
+input[type="checkbox"] {
+    width: auto;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    accent-color: var(--deep);
+}
+
+.checkbox-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    font-weight: 800;
+}
+
+.checkbox-note {
+    margin: -6px 0 2px;
+    color: var(--muted);
+    line-height: 1.7;
+    font-size: 0.94rem;
+}
+
+button {
+    border: none;
+    border-radius: 999px;
+    padding: 14px 18px;
+    cursor: pointer;
+    font-weight: 800;
+    color: #fffdf8;
+    background: linear-gradient(135deg, var(--deep), #305a4b);
+}
+
+.note {
+    border-radius: 20px;
+    padding: 18px;
+    background: linear-gradient(180deg, rgba(23, 42, 58, 0.06), rgba(255, 255, 255, 0.34));
+}
+
+.note ul,
+.card ul,
+.links {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.alert {
+    margin-top: 18px;
+    padding: 16px 20px;
+    background: rgba(255, 246, 243, 0.92);
+    border-color: rgba(197, 77, 53, 0.28);
+}
+
+.result {
+    margin-top: 24px;
+    padding: 24px;
+    background: var(--paper);
+}
+
+.result-top,
+.metrics,
+.grid {
+    display: grid;
+    gap: 18px;
+}
+
+.result-top {
+    grid-template-columns: 1fr;
+    align-items: center;
+}
+
+.metrics {
+    margin-top: 18px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.metrics-four {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.metric-card,
+.card {
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 18px;
+    background: var(--panel);
+}
+
+.metric-emphasis {
+    border-width: 1.5px;
+}
+
+.metric-water,
+.metric-green,
+.metric-yellow,
+.metric-orange,
+.metric-red,
+.metric-gray {
+    border-width: 1.5px;
+}
+
+.metric-water {
+    background: #dff4ff;
+    border-color: #91d1ef;
+}
+
+.metric-water .metric-label,
+.metric-water .metric-value {
+    color: #16698c;
+}
+
+.metric-green {
+    background: #e3f3e8;
+    border-color: #9cccab;
+}
+
+.metric-green .metric-label,
+.metric-green .metric-value {
+    color: #2f7d4e;
+}
+
+.metric-yellow {
+    background: #fff3c9;
+    border-color: #efcf75;
+}
+
+.metric-yellow .metric-label,
+.metric-yellow .metric-value {
+    color: #a56d00;
+}
+
+.metric-orange {
+    background: #ffe4c8;
+    border-color: #f0b27a;
+}
+
+.metric-orange .metric-label,
+.metric-orange .metric-value {
+    color: #c96512;
+}
+
+.metric-red {
+    background: #ffe0db;
+    border-color: #e79a8b;
+}
+
+.metric-red .metric-label,
+.metric-red .metric-value {
+    color: #b24531;
+}
+
+.metric-gray {
+    background: #eceff3;
+    border-color: #c7ced7;
+}
+
+.metric-gray .metric-label,
+.metric-gray .metric-value {
+    color: #66707c;
+}
+
+.metric-value {
+    line-height: 1.5;
+}
+
+.grid {
+    margin-top: 18px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.tag {
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(23, 42, 58, 0.08);
+    font-weight: 700;
+}
+
+.evidence-block {
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(23, 42, 58, 0.08);
+}
+
+.assessment-chip {
+    display: inline-flex;
+    margin: 10px 0 6px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-weight: 800;
+    color: var(--deep);
+    background: rgba(23, 42, 58, 0.08);
+}
+
+.claim-reviews,
+.query-list {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.claim-reviews li + li,
+.query-list li + li {
+    margin-top: 12px;
+}
+
+.source-card,
+.links {
+    margin-top: 18px;
+}
+
+.source-title {
+    margin: 0 0 8px;
+    font-weight: 800;
+    font-size: 1.12rem;
+}
+
+.source-meta,
+.source-note {
+    margin: 0 0 8px;
+}
+
+.preview {
+    margin-top: 12px;
+}
+
+.links li + li,
+.card li + li {
+    margin-top: 10px;
+}
+
+.signals {
+    list-style: none;
+    padding-left: 0;
+}
+
+.signal-row {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 12px;
+    align-items: start;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(23, 42, 58, 0.08);
+}
+
+.signal-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.signal-score {
+    min-width: 52px;
+    padding: 8px 10px;
+    border-radius: 999px;
+    text-align: center;
+    font-weight: 800;
+    background: rgba(23, 42, 58, 0.08);
+}
+
+.signal-リスク上昇 .signal-score {
+    background: rgba(197, 77, 53, 0.12);
+    color: var(--red);
+}
+
+.signal-リスク低下 .signal-score {
+    background: rgba(47, 125, 78, 0.12);
+    color: var(--green);
+}
+
+.signal-補足 .signal-score {
+    background: rgba(125, 136, 148, 0.16);
+    color: var(--gray);
+}
+
+.signal-detail {
+    margin: 4px 0 0;
+    color: var(--muted);
+    line-height: 1.7;
+}
+
+.links a,
+.source-meta a {
+    color: var(--ink);
+}
+
+.result-高リスク {
+    border-color: rgba(197, 77, 53, 0.34);
+}
+
+.result-要確認 {
+    border-color: rgba(210, 152, 24, 0.36);
+}
+
+.result-低リスク {
+    border-color: rgba(47, 125, 78, 0.34);
+}
+
+.result-water {
+    border-color: rgba(44, 127, 176, 0.34);
+}
+
+.result-green {
+    border-color: rgba(47, 125, 78, 0.34);
+}
+
+.result-yellow {
+    border-color: rgba(210, 152, 24, 0.36);
+}
+
+.result-orange {
+    border-color: rgba(214, 110, 31, 0.34);
+}
+
+.result-red {
+    border-color: rgba(197, 77, 53, 0.42);
+}
+
+.result-gray {
+    border-color: rgba(125, 136, 148, 0.34);
+}
+
+@media (max-width: 860px) {
+    .hero,
+    .panel,
+    .result-top,
+    .metrics,
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .page-shell {
+        width: min(100% - 18px, 1120px);
+        padding-top: 18px;
+    }
+
+    h1 {
+        white-space: normal;
+    }
+}

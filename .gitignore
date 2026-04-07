@@ -1,0 +1,23 @@
+# Environment files
+.env
+*.env
+
+# Python caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Virtual environments
+.venv/
+venv/
+
+# Logs
+*.log
+
+# Generated evaluation outputs
+Ver1/evaluation_outputs/
+Ver2/evaluation_outputs/
+Ver3/evaluation_outputs/
+
+# Local temp artifacts
+Ver3/tmp_kobe_pdf/

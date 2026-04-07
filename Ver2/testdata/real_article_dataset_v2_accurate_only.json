@@ -1,0 +1,143 @@
+{
+  "meta": {
+    "name": "real_article_dataset_v2_accurate_only",
+    "version": 1,
+    "curated_on": "2026-04-08",
+    "language": "ja",
+    "description": "real_article_dataset_v2.json から expected_verdict=正確 の20件のみ抽出した評価用データセットです。",
+    "source_excel": "エクセル/real_article_dataset_v2.xlsx",
+    "schema_fields": [
+      "id",
+      "expected_verdict",
+      "analysis_text",
+      "expected_domain"
+    ],
+    "case_count": 20,
+    "verdict_distribution": {
+      "正確": 20
+    },
+    "source_dataset": "c:\\Users\\oneuk\\OneDrive\\Desktop\\datamix\\講義\\05_インテグレーションステップ\\fake-news-checker\\Ver3\\testdata\\real_article_dataset_v2.json"
+  },
+  "cases": [
+    {
+      "id": "positive-accurate-01-nhk-broadcasts-200-human-sacrifices",
+      "expected_verdict": "正確",
+      "analysis_text": "NHKが「集団生贄200人」という歌詞の歌を放映した",
+      "expected_domain": "一般"
+    },
+    {
+      "id": "positive-accurate-02-why-not-in-the-news-shizuoka-flood-images-are-real",
+      "expected_verdict": "正確",
+      "analysis_text": "日本人最初のメジャーリーガーは野茂英雄ではない。",
+      "expected_domain": "一般"
+    },
+    {
+      "id": "positive-accurate-03-aaa-com-article-accurate-koizumi-warns-typhoon",
+      "expected_verdict": "正確",
+      "analysis_text": "世界最古の企業は日本にある。",
+      "expected_domain": "一般"
+    },
+    {
+      "id": "positive-accurate-04-wasegg210726-2",
+      "expected_verdict": "正確",
+      "analysis_text": "日本の研究者らが、歯を再生させる可能性のある薬剤を開発した。",
+      "expected_domain": "医療"
+    },
+    {
+      "id": "positive-accurate-05-jid211030-2",
+      "expected_verdict": "正確",
+      "analysis_text": "アベノマスクには全部で500億円ほどの税金が使われた。",
+      "expected_domain": "医療"
+    },
+    {
+      "id": "positive-accurate-06-wasegg220314-8",
+      "expected_verdict": "正確",
+      "analysis_text": "ドドドンパ・ジェットコースター、骨折事故発生を受け運行停止",
+      "expected_domain": "一般"
+    },
+    {
+      "id": "positive-accurate-07-infact220706",
+      "expected_verdict": "正確",
+      "analysis_text": "十三代目市川團十郎は初代市川團十郎の男系子孫ではない。",
+      "expected_domain": "一般"
+    },
+    {
+      "id": "positive-accurate-08-jid220707",
+      "expected_verdict": "正確",
+      "analysis_text": "G7が日本円で81兆円に相当する6千億ドルを、途上国のインフラ投資に回す",
+      "expected_domain": "金融"
+    },
+    {
+      "id": "positive-accurate-09-infact220821",
+      "expected_verdict": "正確",
+      "analysis_text": "クリーブランド・インディアンスは、クリーブランド・ガーディアンズに名称変更した。",
+      "expected_domain": "一般"
+    },
+    {
+      "id": "positive-accurate-10-wasegg220709-2",
+      "expected_verdict": "正確",
+      "analysis_text": "パラオはアメリカを追放される不法移民を最大75人受け入れることに合意した。",
+      "expected_domain": "政治"
+    },
+    {
+      "id": "positive-accurate-11-litmus221003",
+      "expected_verdict": "正確",
+      "analysis_text": "金星では「1日」が「1年」より長い。",
+      "expected_domain": "一般"
+    },
+    {
+      "id": "positive-accurate-12-mainichi230505",
+      "expected_verdict": "正確",
+      "analysis_text": "日本では子供は減っているが、大学は増えている。",
+      "expected_domain": "政治"
+    },
+    {
+      "id": "positive-accurate-13-litmus230706",
+      "expected_verdict": "正確",
+      "analysis_text": "住民税非課税世帯の４分の３は高齢者である。",
+      "expected_domain": "政治"
+    },
+    {
+      "id": "positive-accurate-14-post-23899",
+      "expected_verdict": "正確",
+      "analysis_text": "大谷翔平は、メジャーリーグ史上初めてシーズン50本塁打50盗塁を達成した。",
+      "expected_domain": "一般"
+    },
+    {
+      "id": "positive-accurate-15-japan-experimental-forestry",
+      "expected_verdict": "正確",
+      "analysis_text": "日本には円形の実験林が存在する",
+      "expected_domain": "一般"
+    },
+    {
+      "id": "positive-accurate-16-japanese-robotic-monster-wolves",
+      "expected_verdict": "正確",
+      "analysis_text": "日本のある町では、住民からクマとの遭遇や目撃情報が増加しているとの報告を受け、オオカミに偽装したロボット2体を使ってクマを地域から追い払った。",
+      "expected_domain": "一般"
+    },
+    {
+      "id": "positive-accurate-17-toyota-city-japan-name",
+      "expected_verdict": "正確",
+      "analysis_text": "日本の豊田市は、自動車メーカーであるトヨタ自動車にちなんで名付けられた。",
+      "expected_domain": "一般"
+    },
+    {
+      "id": "positive-accurate-18-square-watermelon",
+      "expected_verdict": "正確",
+      "analysis_text": "日本で作られている四角いスイカは実在し、観賞用や贈答用として栽培されている。",
+      "expected_domain": "一般"
+    },
+    {
+      "id": "positive-accurate-19-ronald-mcdonald-name-japan",
+      "expected_verdict": "正確",
+      "analysis_text": "ファストフードチェーン・マクドナルドのマスコットキャラクターは日本ではドナルド・マクドナルドの名前で呼ばれているが、英語の原名はロナルド・マクドナルドである。",
+      "expected_domain": "一般"
+    },
+    {
+      "id": "positive-accurate-20-photos-japan-orca",
+      "expected_verdict": "正確",
+      "analysis_text": "北海道沖で白いシャチの写真が撮影された",
+      "expected_domain": "一般"
+    }
+  ]
+}

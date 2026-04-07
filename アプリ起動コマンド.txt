@@ -1,0 +1,13 @@
+・仮想環境なしで実行
+cd C:\Users\oneuk\OneDrive\Desktop\datamix\講義\05_インテグレーションステップ\fake-news-checker\Ver1
+python -m uvicorn app.main:app --reload
+起動後にブラウザで http://127.0.0.1:8000 を開く
+
+
+・仮想環境ありで実行
+cd C:\Users\oneuk\OneDrive\Desktop\datamix\講義\05_インテグレーションステップ\fake-news-checker\Ver1
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+python -m uvicorn app.main:app --reload
+
