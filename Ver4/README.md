@@ -132,6 +132,29 @@ python -m app.dataset_runner --dataset real --no-gemini --output-json .\predicti
 python -m app.dataset_runner --dataset real --case-id positive-mostly-accurate-01-ainu-dance-filmed-1919 --output-json .\prediction_case01.json
 ```
 
+Ver2 / Ver3 と同じように、正規の評価成果物を `evaluation_outputs\YYYYMMDD-HHMM\` にまとめて保存したい場合は `--save-evaluation-bundle` を使います。
+
+```powershell
+python -m app.dataset_runner --dataset real --use-gemini --print-evaluation --save-evaluation-bundle
+```
+
+1ケースだけ確認しつつ、同じ形式で保存したい場合は `--case-id` と併用できます。
+
+```powershell
+python -m app.dataset_runner --dataset real --case-id positive-mostly-accurate-01-ainu-dance-filmed-1919 --use-gemini --print-evaluation --save-evaluation-bundle
+```
+
+このオプションを使うと、`evaluation_outputs\YYYYMMDD-HHMM\` の中に次が保存されます。
+
+- `predictions_*.json`
+- `eval_*.json`
+- `*_with_predicted_verdict_attention_score.csv`
+- `plots\evaluation_dashboard.png`
+- `plots\confusion_matrix.png`
+- `plots\summary_metrics.png`
+- `plots\per_class_metrics.png`
+- `plots\evaluation_overview.png`
+
 `dataset_runner` の挙動メモ:
 
 - 既定では Gemini を使います
@@ -139,6 +162,7 @@ python -m app.dataset_runner --dataset real --case-id positive-mostly-accurate-0
 - `--use-gemini` は明示指定用で、既定挙動と同じです
 - Gemini を使う場合は、実行前に接続 preflight を 1 回だけ行います
 - preflight が失敗した場合は dataset 全体を回す前に停止します
+- `--save-evaluation-bundle` を付けると、予測 JSON を標準出力せず、`evaluation_outputs` 配下に成果物をまとめて保存します
 
 ## 性能評価
 
