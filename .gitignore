@@ -23,3 +23,6 @@ Ver4/evaluation_outputs/
 # Local temp artifacts
 Ver3/tmp_kobe_pdf/
 Ver4/tmp_ver4_case_*
+
+# Local spreadsheet working files
+Ver4/testdata/エクセル/real_article_dataset_v2.xlsx
