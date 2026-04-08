@@ -48,7 +48,6 @@
 - Ver4 は `GPT primary + Gemini evidence` のハイブリッド構成を前提にします
 - ローカルのヒューリスティックを補助情報として使い、その上に GPT の一次判定を重ねる想定です
 - Gemini API が使える場合は `google_search` と `url_context` を使って外部根拠比較を行います
-- 初回コミットでは、設定と GPT 一次判定モジュールの土台を先に追加しています
 - 書き振り評価はスコアに直接混ぜず、別カードで見せます
 - ローカル補助の書き振り評価も、出典数や信頼度ではなく書き振り関連シグナルだけで作ります
 - 書き振り評価が `80%` 以上のときだけ、`status` を `人による確認推奨` に寄せます
@@ -66,10 +65,36 @@ pip install -r requirements.txt
 Copy-Item .env.example .env
 ```
 
-`.env` の `OPENAI_API_KEY` に GPT 一次判定用の API キーを設定し、`GEMINI_API_KEY` に外部根拠比較用の API キーを設定してください。
-Ver4 は `GPT primary + Gemini evidence` を前提にしています。
+`.env` には少なくとも `OPENAI_API_KEY` と `GEMINI_API_KEY` を設定してください。
+`OPENAI_PRIMARY_MODEL` は初期値の `gpt-4.1-mini` のままで始められます。
 Gemini の書き振り評価を有効にしたい場合だけ `GEMINI_STYLE_REVIEW_ENABLED=true` を追加してください。
 規約候補ページ探索を使いたい場合だけ `STRICT_POLICY_RESEARCH=true` を追加してください。
+
+最小の実運用例は次です。
+
+```dotenv
+OPENAI_API_KEY=sk-...
+OPENAI_PRIMARY_MODEL=gpt-4.1-mini
+
+GEMINI_API_KEY=AIza...
+GEMINI_MODEL=gemini-2.5-flash
+GEMINI_STYLE_REVIEW_ENABLED=false
+
+STRICT_POLICY_RESEARCH=false
+FETCH_TIMEOUT_SECONDS=12
+MAX_FETCH_CHARS=7000
+MIN_TEXT_CHARS=10
+MIN_AUTO_EXTRACT_CHARS=80
+APP_TIMEZONE=Asia/Tokyo
+APP_HOST=127.0.0.1
+APP_PORT=8000
+```
+
+運用メモ:
+
+- `OPENAI_API_KEY` が未設定のときは、GPT 一次判定をスキップしてローカル一次判定を使います
+- `GEMINI_API_KEY` が未設定のときは、Gemini 外部根拠比較をスキップしてローカル判定のみで動きます
+- Ver4 の標準運用は `GPT primary + Gemini evidence + style off` です
 
 ## 起動
 
@@ -78,6 +103,42 @@ python -m uvicorn app.main:app --reload
 ```
 
 ブラウザで `http://127.0.0.1:8000` を開きます。
+
+開発中に環境変数を一時設定して起動したいときは、PowerShell では次の形でも動かせます。
+
+```powershell
+$env:OPENAI_API_KEY="sk-..."
+$env:GEMINI_API_KEY="AIza..."
+python -m uvicorn app.main:app --reload
+```
+
+## dataset_runner
+
+単一 dataset を Ver4 で回して、予測 JSON と評価 JSON を同時に出したい場合は次です。
+
+```powershell
+python -m app.dataset_runner --dataset real --output-json .\predictions_real.json --print-evaluation --evaluation-output .\eval_real.json
+```
+
+Gemini を使わずローカル判定だけで比較したい場合は `--no-gemini` を付けます。
+
+```powershell
+python -m app.dataset_runner --dataset real --no-gemini --output-json .\predictions_real_local.json --print-evaluation --evaluation-output .\eval_real_local.json
+```
+
+1ケースだけ確認したいときは `--case-id` を使えます。
+
+```powershell
+python -m app.dataset_runner --dataset real --case-id positive-mostly-accurate-01-ainu-dance-filmed-1919 --output-json .\prediction_case01.json
+```
+
+`dataset_runner` の挙動メモ:
+
+- 既定では Gemini を使います
+- `--no-gemini` を付けると、Gemini 外部根拠比較を無効にしてローカル判定だけで実行します
+- `--use-gemini` は明示指定用で、既定挙動と同じです
+- Gemini を使う場合は、実行前に接続 preflight を 1 回だけ行います
+- preflight が失敗した場合は dataset 全体を回す前に停止します
 
 ## 性能評価
 
@@ -136,18 +197,6 @@ python -m app.dataset_runner .\eval_cases.json --output-json .\predictions.json
 - `誤り` 側:
   - `川口市の検挙人数178人のうち外国籍は135人で約76%を占め、検挙された人の約4人に3人が外国籍だ。`
 
-```powershell
-python -m app.dataset_runner --dataset real --output-json .\predictions_real.json --print-evaluation --evaluation-output .\eval_real.json
-```
-
-上の `dataset_runner` は既定で Gemini を使います。
-`--no-gemini` を付けない場合は、実行前に Gemini 接続 preflight を 1 回だけ行い、接続や認証に失敗したら dataset 全体を回す前に停止します。
-ローカル判定だけで回したいときだけ `--no-gemini` を付けてください。
-
-```powershell
-python -m app.dataset_runner --dataset real --no-gemini --output-json .\predictions_real_local.json --print-evaluation --evaluation-output .\eval_real_local.json
-```
-
 評価まで一度に出したい場合は次です。
 
 ```powershell
@@ -166,7 +215,9 @@ python .\scripts\plot_evaluation.py .\eval_real.json
 
 - `evaluation_dashboard.png`
 - `confusion_matrix.png`
+- `summary_metrics.png`
 - `per_class_metrics.png`
+- `evaluation_overview.png`
 
 保存先を変えたい場合は `--output-dir` を使います。
 
