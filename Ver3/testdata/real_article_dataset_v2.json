@@ -151,37 +151,37 @@
     {
       "id": "positive-mostly-accurate-02-real-image-of-jovial-swedish-people-despite-train-station-flooding-caused-by-typhoon",
       "expected_verdict": "ほぼ正確",
-      "analysis_text": "国際オリンピック委員会（IOC）は、2020年の東京オリンピック競技大会において、「ブラック・ライブズ・マター」の文字が入った衣服の着用を禁止した。",
+      "analysis_text": "メージャーリーグのシーズン最多安打記録は、イチローの261安打である。",
       "expected_domain": "一般"
     },
     {
       "id": "positive-mostly-accurate-03-almost-accurate-claim-iaea-not-verifying-filtration-performance-of-contaminated-water",
       "expected_verdict": "ほぼ正確",
-      "analysis_text": "国際原子力機関（IAEA）、汚染水をろ過する多核種除去設備（ALPS）の性能検証を一度もしていなかった",
+      "analysis_text": "20世紀末に活躍した三大テノールとは、ルチアーノ・パヴァロッティ、プラシド・ドミンゴ、ホセ・カレーライスの3名である。",
       "expected_domain": "一般"
     },
     {
       "id": "positive-mostly-accurate-04-infact200912",
       "expected_verdict": "ほぼ正確",
-      "analysis_text": "愛知県の大村秀章知事のリコールに賛同した署名者の個人情報は公開される",
+      "analysis_text": "織田信長は本能寺の変で明智光秀に殺された。",
       "expected_domain": "一般"
     },
     {
       "id": "positive-mostly-accurate-05-infact211023-3",
       "expected_verdict": "ほぼ正確",
-      "analysis_text": "ニューヨーク市の新型コロナウイルスによる死亡率は、東京の250倍高い",
-      "expected_domain": "医療"
+      "analysis_text": "天空の城ラピュタはスタジオジブリの初制作アニメ映画であり、1987年に公開された。",
+      "expected_domain": "一般"
     },
     {
       "id": "positive-mostly-accurate-06-jid211024-1",
       "expected_verdict": "ほぼ正確",
-      "analysis_text": "スウェーデンは、電力と暖房を生産する廃棄物発電所の燃料となる廃棄物が不足しているため、他国から廃棄物を輸入している。",
+      "analysis_text": "大政奉還で江戸幕府は終焉を迎え、明治時代に移った。",
       "expected_domain": "一般"
     },
     {
       "id": "positive-mostly-accurate-07-jid211029-01",
       "expected_verdict": "ほぼ正確",
-      "analysis_text": "マサチューセッツ州の有権者は、100万ドルを超える所得に対する4％の追加税を承認し、これにより15億ドルの歳入が得られた。",
+      "analysis_text": "マサチューセッツ州の有権者は、100万ドルを超える所得に対する4％の追加税を承認し、これにより2024年度に15億ドルの歳入が得られた。",
       "expected_domain": "金融"
     },
     {
@@ -193,8 +193,8 @@
     {
       "id": "positive-mostly-accurate-09-infact211217-1",
       "expected_verdict": "ほぼ正確",
-      "analysis_text": "2021年に米国に報告されたワクチン接種後の心筋炎の報告数が、前年の260倍以上になっている",
-      "expected_domain": "医療"
+      "analysis_text": "玉置浩二は、日本のシンガーソングライター、ロックバンド完全地帯のボーカリストで、北海道旭川市出身である。",
+      "expected_domain": "一般"
     },
     {
       "id": "positive-mostly-accurate-10-infact220704",
@@ -205,19 +205,19 @@
     {
       "id": "positive-mostly-accurate-11-infact220706-2",
       "expected_verdict": "ほぼ正確",
-      "analysis_text": "山本太郎代表「安倍さんが総理大臣時代に、消費税増税分の二割程度は社会保障に使ったけど、八割を借金返しに使ったと言った」",
-      "expected_domain": "金融"
+      "analysis_text": "X JAPANは1988年にアルバム『BLUE BLOOD』でメジャー・デビューした。",
+      "expected_domain": "一般"
     },
     {
       "id": "positive-mostly-accurate-12-infact220708",
       "expected_verdict": "ほぼ正確",
-      "analysis_text": "公明党議員「公示前のタスキは、禁じられています」",
+      "analysis_text": "アメリカの国土面積は日本の20倍である。",
       "expected_domain": "一般"
     },
     {
       "id": "positive-mostly-accurate-13-infact220823",
       "expected_verdict": "ほぼ正確",
-      "analysis_text": "志位和夫委員長「大学の入学金制度は『世界で日本にしかない』」",
+      "analysis_text": "大谷翔平と同学年のメージャーリーガーは鈴木誠である。",
       "expected_domain": "一般"
     },
     {
@@ -229,31 +229,31 @@
     {
       "id": "positive-mostly-accurate-15-post-22724",
       "expected_verdict": "ほぼ正確",
-      "analysis_text": "1月9日、ファウチ博士は米下院特別小委員会で、６フィートの社会的距離のルールは完全にでっち上げであり、科学的根拠はゼロであったことを認めた。",
+      "analysis_text": "通算本塁打数の世界記録は王貞治の858本である。",
       "expected_domain": "一般"
     },
     {
       "id": "positive-mostly-accurate-16-post-22836",
       "expected_verdict": "ほぼ正確",
-      "analysis_text": "WHO(世界保健機関)のテドロス事務局長「WHOは新型コロナウイルスパンデミックの際、誰にも何も強制していない。」",
-      "expected_domain": "医療"
+      "analysis_text": "ペンギンはみんな南極に住んでいる。",
+      "expected_domain": "一般"
     },
     {
       "id": "positive-mostly-accurate-17-23435",
       "expected_verdict": "ほぼ正確",
-      "analysis_text": "200万と語学力が無いとスイスで安楽死出来ません",
-      "expected_domain": "医療"
+      "analysis_text": "世界最高峰のエベレストの標高は8818mである。",
+      "expected_domain": "一般"
     },
     {
       "id": "positive-mostly-accurate-18-kobe-pension-standardly-nontaxable",
       "expected_verdict": "ほぼ正確",
-      "analysis_text": "住民税非課税世帯への給付が繰り返されるが、年金受給者は控除により非課税になりやすく標準的には非課税です。「年金控除＋非課税世帯への給付」の組合せにより、結果として高齢者優遇となり、現役世代との間に著しい不公平が生じています。裁量的なバラマキは止め、一律の支援制度へと改めるべきです",
-      "expected_domain": "金融"
+      "analysis_text": "日本国憲法はアメリカが作った憲法である。",
+      "expected_domain": "一般"
     },
     {
       "id": "positive-mostly-accurate-19-japanese-electric-car-200km-single-charge",
       "expected_verdict": "ほぼ正確",
-      "analysis_text": "日本の自動車メーカーは1949年に、1回の充電で200km走行できる電気自動車を開発した。",
+      "analysis_text": "日本の自動車メーカーは1949年に、1回の充電で400km走行できる電気自動車を開発した。",
       "expected_domain": "一般"
     },
     {
