@@ -216,6 +216,7 @@ def test_load_dataset_normalizes_simplified_schema() -> None:
         assert case["expected"] == {"verdict": "誤り", "domain": "一般"}
         assert case["source_verdict_label"] == "誤り"
         assert case["reference_urls"] == []
+        assert case["analysis_mode"] == "claim"
     finally:
         dataset_path.unlink(missing_ok=True)
 

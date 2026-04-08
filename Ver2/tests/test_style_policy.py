@@ -77,6 +77,25 @@ def test_build_prompt_omits_style_review_when_disabled() -> None:
     assert '"style_review"' not in prompt
 
 
+def test_build_prompt_mentions_short_claim_guidance_for_short_input() -> None:
+    page = make_page()
+    prompt = build_prompt(
+        page,
+        {
+            "domain": "一般",
+            "labels": [],
+            "reasons": [],
+            "source_snapshot": page,
+            "evidence_overview": {"claims": [], "links": []},
+            "source_profile": {},
+        },
+        Settings(gemini_style_review_enabled=False),
+    )
+
+    assert "短文claim評価" in prompt
+    assert "それだけで「出典不明」や「信頼できる一次ソース未確認」を付けないでください。" in prompt
+
+
 def test_merge_style_overview_stays_local_when_gemini_style_review_disabled() -> None:
     overview = merge_style_overview(
         {"signal_breakdown": [], "style_overview": build_fallback_style_overview([]).model_dump()},

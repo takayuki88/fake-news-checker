@@ -326,6 +326,8 @@ COUNTEREVIDENCE_SOURCE_GAP_INACCURATE_RISK_FLOOR = 70
 COUNTEREVIDENCE_SOURCE_GAP_INACCURATE_CONFIDENCE_FLOOR = 50
 COUNTEREVIDENCE_ERROR_RISK_FLOOR = 78
 COUNTEREVIDENCE_ERROR_CONFIDENCE_FLOOR = 50
+CLAIM_MODE_MAX_CHARS = 280
+CLAIM_MODE_MAX_PARAGRAPHS = 2
 PRIMARY_REVIEW_RISK_WEIGHT = 0.35
 PRIMARY_REVIEW_CONFIDENCE_WEIGHT = 0.3
 PRIMARY_REVIEW_RISK_DELTA_CAP = 12
@@ -348,6 +350,44 @@ def merge_timing_overview(base: TimingOverview | None, extra_stages: list[Timing
 
 def clamp(value: int, lower: int = 0, upper: int = 100) -> int:
     return max(lower, min(upper, value))
+
+
+def normalize_analysis_mode(value: Any) -> str:
+    mode = str(value or "").strip().lower()
+    return "claim" if mode == "claim" else "article"
+
+
+def is_claim_mode(page: Any) -> bool:
+    if isinstance(page, dict):
+        analysis_mode = normalize_analysis_mode(page.get("analysis_mode"))
+        input_source = str(page.get("input_source") or "").strip()
+        source_url = str(page.get("source_url") or "").strip()
+        extracted_chars = int(page.get("extracted_chars") or 0)
+        paragraph_count = int(page.get("paragraph_count") or 0)
+        has_author = bool(page.get("has_author"))
+        has_published_at = bool(page.get("has_published_at"))
+        reference_link_count = int(page.get("reference_link_count") or 0)
+    else:
+        analysis_mode = normalize_analysis_mode(getattr(page, "analysis_mode", None))
+        input_source = str(getattr(page, "input_source", "") or "").strip()
+        source_url = str(getattr(page, "source_url", "") or "").strip()
+        extracted_chars = int(getattr(page, "extracted_chars", 0) or 0)
+        paragraph_count = int(getattr(page, "paragraph_count", 0) or 0)
+        has_author = bool(getattr(page, "has_author", False))
+        has_published_at = bool(getattr(page, "has_published_at", False))
+        reference_link_count = int(getattr(page, "reference_link_count", 0) or 0)
+
+    if analysis_mode == "claim":
+        return True
+    return (
+        input_source in {"manual_text", "test_fixture"}
+        and not source_url
+        and not has_author
+        and not has_published_at
+        and reference_link_count == 0
+        and extracted_chars <= CLAIM_MODE_MAX_CHARS
+        and paragraph_count <= CLAIM_MODE_MAX_PARAGRAPHS
+    )
 
 
 def format_signed(value: int) -> str:
@@ -472,6 +512,7 @@ def derive_public_verdict(
     labels: list[str],
     source_profile: dict[str, Any],
     evidence_overview: dict[str, Any],
+    claim_mode: bool = False,
 ) -> str:
     overall_verdict = str(evidence_overview.get("assessment_status") or "").strip()
     grounding_sources = evidence_overview.get("grounding_sources") or []
@@ -497,6 +538,24 @@ def derive_public_verdict(
     claim_review_nuance = has_positive_claim_review_nuance(claim_reviews)
     claim_review_name_correction = has_positive_claim_review_name_correction(claim_reviews)
     partially_supported_counterevidence = has_partially_supported_counterevidence(claim_reviews)
+
+    if claim_mode:
+        if overall_verdict == "概ね整合":
+            if claim_review_partial_inaccuracy or claim_review_nuance or claim_review_name_correction:
+                return "ほぼ正確"
+            if positive_claim_reviews >= 1 or official_grounding_sources >= 1 or trusted_grounding_sources >= 1:
+                return "正確" if confidence_score >= 45 else "ほぼ正確"
+            return "ほぼ正確"
+        if overall_verdict == "反証あり":
+            if partially_supported_counterevidence:
+                return "不正確"
+            return "誤り" if risk_score >= 60 and confidence_score >= 40 else "不正確"
+        if overall_verdict in {"一次ソース未確認", "判定不能", "要追加確認"}:
+            return "判断保留"
+        if evidence_missing:
+            if "反証情報あり" in labels and risk_score >= 75 and confidence_score >= 45:
+                return "不正確"
+            return "判断保留"
 
     if overall_verdict == "反証あり":
         if official_source:
@@ -620,6 +679,18 @@ def build_public_summary(
     evidence_summary = str(payload.get("evidence_overview", {}).get("assessment_summary") or "").strip()
     if evidence_summary:
         return evidence_summary
+    if source_profile.get("claim_mode"):
+        if public_verdict == "正確":
+            return "この主張は、公開情報と大きな齟齬が見えにくく、現時点では正確と見ました。"
+        if public_verdict == "ほぼ正確":
+            return "この主張は大筋では整合しそうですが、細部や前提条件は追加確認の余地があります。"
+        if public_verdict == "判断保留":
+            return "この主張は、真偽を断定するにはまだ公開根拠が十分ではありません。"
+        if public_verdict == "不正確":
+            return "この主張は、一部に事実を含んでいても表現や前提にズレがありそうです。"
+        if public_verdict == "誤り":
+            return "この主張は、外部根拠による反証が強く、誤りと見ました。"
+        return "この主張は、現時点で信頼できる裏付けを十分に確認できず、判断保留として扱いました。"
     if public_verdict == "正確":
         if source_profile.get("official_source"):
             return f"{page.site_name} の内容は、公的な一次ソースとして確認しやすく、現時点では正確と見ました。"
@@ -769,9 +840,24 @@ def publicize_result(page: ResolvedPage, payload: dict[str, Any], source_profile
     signal_breakdown = payload.get("signal_breakdown", [])
     fallback_style_overview = build_fallback_style_overview(signal_breakdown).model_dump()
     style_overview = dict(payload.get("style_overview") or fallback_style_overview)
-    public_verdict = derive_public_verdict(risk_score, confidence_score, labels, source_profile, evidence_overview)
+    claim_mode = bool(source_profile.get("claim_mode")) or is_claim_mode(page)
+    effective_source_profile = {**source_profile, "claim_mode": claim_mode}
+    public_verdict = derive_public_verdict(
+        risk_score,
+        confidence_score,
+        labels,
+        effective_source_profile,
+        evidence_overview,
+        claim_mode=claim_mode,
+    )
     attention_score = public_attention_score(public_verdict, risk_score)
     merged_labels = list(dict.fromkeys(labels + PUBLIC_VERDICT_HINTS.get(public_verdict, [])))[:4]
+    if claim_mode and public_verdict != "判断保留":
+        merged_labels = [
+            label
+            for label in merged_labels
+            if label not in {"判定不能", "出典不明", "信頼できる一次ソース未確認"}
+        ][:4]
     attention_band_display = public_attention_band_display(public_verdict)
     score_calculation = build_score_calculation(
         {**payload, "attention_band_display": attention_band_display},
@@ -797,7 +883,7 @@ def publicize_result(page: ResolvedPage, payload: dict[str, Any], source_profile
             str(payload.get("status") or ""),
             style_overview,
         ),
-        summary=build_public_summary(payload, public_verdict, page, source_profile),
+        summary=build_public_summary(payload, public_verdict, page, effective_source_profile),
         reasons=[str(reason).strip() for reason in payload.get("reasons", []) if str(reason).strip()][:3],
         supplement=build_public_supplement(public_verdict),
         labels=merged_labels,
@@ -841,6 +927,7 @@ def hostname_matches(hostname: str, domains: set[str]) -> bool:
 
 
 def build_source_profile(page: ResolvedPage, text: str, source_hint_count: int) -> dict[str, Any]:
+    claim_mode = is_claim_mode(page)
     hostname = normalize_hostname(page.source_url)
     site_text = f"{page.site_name}\n{page.title}"
     combined_text = f"{site_text}\n{text[:1800]}"
@@ -868,6 +955,7 @@ def build_source_profile(page: ResolvedPage, text: str, source_hint_count: int) 
 
     return {
         "hostname": hostname,
+        "claim_mode": claim_mode,
         "official_source": official_source,
         "fact_check_source": fact_check_source,
         "trusted_source": trusted_source,
@@ -883,6 +971,7 @@ def build_source_snapshot(page: ResolvedPage) -> SourceSnapshot:
         site_name=page.site_name,
         source_url=page.source_url,
         input_source=page.input_source,
+        analysis_mode="claim" if is_claim_mode(page) else "article",
         extraction_note=page.extraction_note,
         analysis_date=page.analysis_date,
         analysis_datetime=page.analysis_datetime,
@@ -1005,6 +1094,7 @@ def heuristic_analysis(page: ResolvedPage) -> dict[str, Any]:
     numeric_claims = bool(re.search(r"\d", body))
     title_is_loud = bool(title_absolute_hits or page.title.count("!") >= 1 or page.title.count("！") >= 1)
     short_body = len(body) < 500
+    claim_mode = is_claim_mode(page)
     strong_transparency = page.has_author and page.has_published_at and page.reference_link_count >= 1
     medium_transparency = (page.has_author or page.has_published_at) and page.reference_link_count >= 1
     official_source = bool(source_profile["official_source"])
@@ -1056,7 +1146,7 @@ def heuristic_analysis(page: ResolvedPage) -> dict[str, Any]:
         elif fact_check_source:
             score += 2
             add_signal(signals, "出典抽出が限定的", 2, "ファクトチェック記事ですが、抽出本文内では出典導線を十分に確認できませんでした。")
-        else:
+        elif not claim_mode:
             score += 14
             labels.append("出典不明")
             add_signal(signals, "出典の手がかり不足", 14, "本文内に出典語や引用リンクが見当たらず、確認の足がかりが弱いです。")
@@ -1069,11 +1159,12 @@ def heuristic_analysis(page: ResolvedPage) -> dict[str, Any]:
         if official_source:
             add_signal(signals, "組織発信ページ", 0, "著者名や公開日時の明示は限定的ですが、組織名とURLから発信主体は追跡できます。")
         elif fact_check_source:
-            score += 2
-            if "信頼できる一次ソース未確認" not in labels and page.reference_link_count == 0 and source_hint_count == 0:
-                labels.append("信頼できる一次ソース未確認")
-            add_signal(signals, "出所情報が一部不足", 2, "検証記事ですが、著者名や公開日時の明示は限定的でした。")
-        else:
+            if not claim_mode:
+                score += 2
+                if "信頼できる一次ソース未確認" not in labels and page.reference_link_count == 0 and source_hint_count == 0:
+                    labels.append("信頼できる一次ソース未確認")
+                add_signal(signals, "出所情報が一部不足", 2, "検証記事ですが、著者名や公開日時の明示は限定的でした。")
+        elif not claim_mode:
             score += 8
             if "信頼できる一次ソース未確認" not in labels:
                 labels.append("信頼できる一次ソース未確認")
@@ -1091,7 +1182,7 @@ def heuristic_analysis(page: ResolvedPage) -> dict[str, Any]:
         if official_source:
             score -= 6
             add_signal(signals, "数字の一次ソース", -6, "数字や統計を含みますが、元ページ自体が公的機関の一次ソースです。")
-        else:
+        elif not claim_mode:
             score += 8
             labels.append("信頼できる一次ソース未確認")
             add_signal(signals, "数字の裏付け不足", 8, "数字や統計らしき記述がありますが、対応する出典が見当たりません。")
@@ -1122,7 +1213,7 @@ def heuristic_analysis(page: ResolvedPage) -> dict[str, Any]:
         score += 4
         add_signal(signals, "意見文の可能性", 4, "コラムや私見のような表現があり、事実と意見が混ざる可能性があります。")
 
-    if short_body:
+    if short_body and not claim_mode:
         short_body_delta = 2 if trusted_source or correction_article else 4
         score += short_body_delta
         add_signal(signals, "本文が短い", short_body_delta, "抽出本文が短く、前後文脈を十分に確認できません。")
@@ -1141,7 +1232,7 @@ def heuristic_analysis(page: ResolvedPage) -> dict[str, Any]:
         confidence_score += 5
     if source_hint_count >= 2:
         confidence_score += 5
-    if short_body:
+    if short_body and not claim_mode:
         confidence_score -= 12
     if page.input_source == "manual_text":
         confidence_score -= 5
@@ -1153,7 +1244,7 @@ def heuristic_analysis(page: ResolvedPage) -> dict[str, Any]:
         confidence_score += 10
     elif correction_article and page.reference_link_count >= 1:
         confidence_score += 4
-    if not trusted_source and source_hint_count == 0 and page.reference_link_count == 0:
+    if not trusted_source and source_hint_count == 0 and page.reference_link_count == 0 and not claim_mode:
         confidence_score -= 6
     if official_source and source_hint_count == 0 and page.reference_link_count == 0:
         confidence_score += 6
@@ -1246,15 +1337,32 @@ def build_prompt(page: ResolvedPage, seed: dict[str, Any], settings: Settings) -
   }
 """.rstrip()
 
+    claim_mode = is_claim_mode(page)
+    mode_instruction = ""
+    mode_label = "短文claim評価" if claim_mode else "記事評価"
+    metadata_guidance = "一次ソースが見当たらない場合は無理に断定せず、「一次ソース未確認」または「判定不能」にしてください。"
+    if claim_mode:
+        mode_instruction = (
+            "今回の入力は記事本文ではなく短文の主張です。入力に URL・著者名・公開日時・引用リンクが無いこと自体は通常なので、"
+            "それだけで「出典不明」や「信頼できる一次ソース未確認」を付けないでください。"
+            "主張そのものが公開情報と整合するかを優先し、外部検索しても真偽判断に足る根拠が見つからない場合に限って"
+            "「一次ソース未確認」または「判定不能」を使ってください。"
+        )
+        metadata_guidance = (
+            "短文claim評価では、入力メタデータ不足だけで「一次ソース未確認」や「判定不能」にしないでください。"
+            "外部検索しても主張の真偽判断に足る根拠が見つからない場合に限って使ってください。"
+        )
+
     return f"""
 あなたは日本語のニュース検証支援AIです。
 役割は次の2つ{("と補助評価1つ" if settings.gemini_style_review_enabled else "")}を厳密に分けて実行することです。
 1. ページ本文・見出し・メタ情報だけを使って一次判定を作る
 2. 本文から抽出した主張候補を外部根拠と照合して整理する
 {style_task_text}
+{mode_instruction}
 一次判定では google_search や url_context の結果を使わず、ページ本文とメタ情報だけで判断してください。
 必要に応じて google_search と url_context を使い、公開ウェブ上の一次ソース、公的機関、主要報道機関、ファクトチェック記事を優先して確認してください。
-一次ソースが見当たらない場合は無理に断定せず、「一次ソース未確認」または「判定不能」にしてください。
+{metadata_guidance}
 相対表現の「今日」「昨日」「明日」は、下記の判定日時を基準に解釈してください。
 出力は次のJSONだけにしてください。Markdownや説明文は不要です。
 {{
@@ -1287,6 +1395,7 @@ def build_prompt(page: ResolvedPage, seed: dict[str, Any], settings: Settings) -
 判定日: {page.analysis_date or "未設定"}
 判定日時: {page.analysis_datetime or "未設定"}
 判定タイムゾーン: {page.analysis_timezone or "未設定"}
+解析モード: {mode_label}
 
 著者名: {page.author_name or "未取得"}
 公開日時: {page.published_at or "未取得"}
@@ -2139,11 +2248,30 @@ def score_adjustments_from_evidence(
     return max(-15, min(risk_delta, 22)), max(-15, min(confidence_delta, 15))
 
 
-def merge_result_labels(seed_labels: list[str], evidence_labels: list[str]) -> list[str]:
-    cleaned_seed_labels = seed_labels
-    if evidence_labels:
-        cleaned_seed_labels = [label for label in seed_labels if label != "判定不能"]
-    merged = list(dict.fromkeys(evidence_labels + cleaned_seed_labels))
+def merge_result_labels(
+    seed_labels: list[str],
+    evidence_labels: list[str],
+    overall_verdict: str = "",
+    claim_mode: bool = False,
+) -> list[str]:
+    cleaned_evidence_labels = list(evidence_labels)
+    cleaned_seed_labels = list(seed_labels)
+    if overall_verdict in {"概ね整合", "反証あり"}:
+        cleaned_evidence_labels = [label for label in cleaned_evidence_labels if label != "判定不能"]
+    if evidence_labels or overall_verdict in {"概ね整合", "反証あり"}:
+        cleaned_seed_labels = [label for label in cleaned_seed_labels if label != "判定不能"]
+    if claim_mode:
+        cleaned_evidence_labels = [
+            label
+            for label in cleaned_evidence_labels
+            if label not in {"出典不明", "信頼できる一次ソース未確認"}
+        ]
+        cleaned_seed_labels = [
+            label
+            for label in cleaned_seed_labels
+            if label not in {"出典不明", "信頼できる一次ソース未確認"}
+        ]
+    merged = list(dict.fromkeys(cleaned_evidence_labels + cleaned_seed_labels))
     return merged[:4] if merged else ["判定不能"]
 
 
@@ -2232,7 +2360,12 @@ def combine_result(page: ResolvedPage, seed: dict[str, Any], llm_bundle: dict[st
         style_overview,
     )
     summary = build_result_summary(effective_seed["summary"], evidence_overview)
-    labels = merge_result_labels(effective_seed["labels"], evidence_labels)
+    labels = merge_result_labels(
+        effective_seed["labels"],
+        evidence_labels,
+        overall_verdict=overall_verdict,
+        claim_mode=bool(effective_seed.get("source_profile", {}).get("claim_mode")) or is_claim_mode(page),
+    )
     reasons = merge_result_reasons(page, effective_seed["reasons"], evidence_reasons)
 
     internal_payload = dict(

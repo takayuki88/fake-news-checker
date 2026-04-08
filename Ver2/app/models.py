@@ -119,6 +119,7 @@ class SourceSnapshot(BaseModel):
     site_name: str
     source_url: str | None = None
     input_source: str
+    analysis_mode: str = "article"
     extraction_note: str
     analysis_date: str | None = None
     analysis_datetime: str | None = None

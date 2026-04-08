@@ -1,3 +1,4 @@
+import asyncio
 from pathlib import Path
 from decimal import Decimal, ROUND_HALF_UP
 
@@ -25,6 +26,7 @@ app.add_middleware(
 )
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
+REQUEST_SEMAPHORE = asyncio.Semaphore(max(get_settings().app_max_concurrent_requests, 1))
 
 
 def format_duration_seconds(duration_ms: int | None) -> str:
@@ -65,55 +67,57 @@ async def analyze(
     page_text: str = Form(default=""),
     skip_policy_check: bool = Form(default=False),
 ) -> HTMLResponse:
-    form_data = {
-        "page_url": page_url,
-        "page_text": page_text,
-        "skip_policy_check": skip_policy_check,
-    }
-    context = base_context()
-    settings = get_settings()
-    page, error = await resolve_page_input(
-        page_text,
-        page_url,
-        settings,
-        skip_policy_check=skip_policy_check,
-    )
-    if error or not page:
+    async with REQUEST_SEMAPHORE:
+        form_data = {
+            "page_url": page_url,
+            "page_text": page_text,
+            "skip_policy_check": skip_policy_check,
+        }
+        context = base_context()
+        settings = get_settings()
+        page, error = await resolve_page_input(
+            page_text,
+            page_url,
+            settings,
+            skip_policy_check=skip_policy_check,
+        )
+        if error or not page:
+            context.update(
+                {
+                    "request": request,
+                    "result": None,
+                    "error": error or "解析対象を確定できませんでした。",
+                    "form_data": form_data,
+                }
+            )
+            return templates.TemplateResponse(request, "index.html", context, status_code=400)
+
+        result = await analyze_page(page, settings)
         context.update(
             {
                 "request": request,
-                "result": None,
-                "error": error or "解析対象を確定できませんでした。",
+                "result": result.model_dump(),
+                "error": None,
                 "form_data": form_data,
             }
         )
-        return templates.TemplateResponse(request, "index.html", context, status_code=400)
-
-    result = await analyze_page(page, settings)
-    context.update(
-        {
-            "request": request,
-            "result": result.model_dump(),
-            "error": None,
-            "form_data": form_data,
-        }
-    )
-    return templates.TemplateResponse(request, "index.html", context)
+        return templates.TemplateResponse(request, "index.html", context)
 
 
 @app.post("/api/analyze", response_model=AnalysisResult)
 async def analyze_api(payload: AnalyzeForm) -> AnalysisResult:
-    settings = get_settings()
-    page_url = str(payload.page_url) if payload.page_url else None
-    page, error = await resolve_page_input(
-        payload.page_text,
-        page_url,
-        settings,
-        skip_policy_check=payload.skip_policy_check,
-    )
-    if error or not page:
-        raise HTTPException(status_code=400, detail=error or "解析対象を確定できませんでした。")
-    return await analyze_page(page, settings)
+    async with REQUEST_SEMAPHORE:
+        settings = get_settings()
+        page_url = str(payload.page_url) if payload.page_url else None
+        page, error = await resolve_page_input(
+            payload.page_text,
+            page_url,
+            settings,
+            skip_policy_check=payload.skip_policy_check,
+        )
+        if error or not page:
+            raise HTTPException(status_code=400, detail=error or "解析対象を確定できませんでした。")
+        return await analyze_page(page, settings)
 
 
 @app.get("/api/health")

@@ -12,7 +12,7 @@
   - 誤り
 - 要注意度は `0〜100%` で表示します
 - GPT は本文とメタ情報だけで一次判定を行います
-- Gemini は `google_search` と `url_context` を使って外部根拠比較を行います
+- Gemini は `google_search` を使って外部根拠比較を行います
 - Gemini の書き振り評価は既定でオフです
 - 真偽は外部根拠を主にして決めます
 - 書き振り評価は危なさを見る補助情報として別表示します
@@ -29,6 +29,7 @@
 - 両方ある場合は本文を優先
 - 本文は既定で最低 `10` 文字
 - API入力は最大 `12000` 文字
+- URL なしの短い主張文は自動で `短文claim評価モード` として扱い、記事メタデータ不足だけでは減点しません
 - 開発用に `skip_policy_check` を有効にすると、URL入力時の規約確認をスキップできます
 - 必要時だけ `.env` で `STRICT_POLICY_RESEARCH=true` を設定すると、規約候補ページ探索を有効化できます
 
@@ -47,7 +48,7 @@
 
 - Ver4 は `GPT primary + Gemini evidence` のハイブリッド構成を前提にします
 - ローカルのヒューリスティックを補助情報として使い、その上に GPT の一次判定を重ねる想定です
-- Gemini API が使える場合は `google_search` と `url_context` を使って外部根拠比較を行います
+- Gemini API が使える場合は `google_search` を使って外部根拠比較を行います
 - 書き振り評価はスコアに直接混ぜず、別カードで見せます
 - ローカル補助の書き振り評価も、出典数や信頼度ではなく書き振り関連シグナルだけで作ります
 - 書き振り評価が `80%` 以上のときだけ、`status` を `人による確認推奨` に寄せます
@@ -88,6 +89,7 @@ MIN_AUTO_EXTRACT_CHARS=80
 APP_TIMEZONE=Asia/Tokyo
 APP_HOST=127.0.0.1
 APP_PORT=8000
+APP_MAX_CONCURRENT_REQUESTS=8
 ```
 
 運用メモ:
@@ -95,6 +97,8 @@ APP_PORT=8000
 - `OPENAI_API_KEY` が未設定のときは、GPT 一次判定をスキップしてローカル一次判定を使います
 - `GEMINI_API_KEY` が未設定のときは、Gemini 外部根拠比較をスキップしてローカル判定のみで動きます
 - Ver4 の標準運用は `GPT primary + Gemini evidence + style off` です
+- `gpt-5-mini` など GPT-5 系の一次判定では、Responses API 非対応の `temperature` を送らないようにしています
+- Web アプリ本体は `APP_MAX_CONCURRENT_REQUESTS` 件まで同時に解析を進め、それ以上はサーバー内で順番待ちします
 
 ## 起動
 
@@ -164,6 +168,26 @@ python -m app.dataset_runner --dataset real --case-id positive-mostly-accurate-0
 - preflight が失敗した場合は dataset 全体を回す前に停止します
 - `--save-evaluation-bundle` を付けると、予測 JSON を標準出力せず、`evaluation_outputs` 配下に成果物をまとめて保存します
 
+## OpenAI primary model 比較
+
+`OPENAI_PRIMARY_MODEL` を毎回手で書き換えずに、3候補をまとめて比較したい場合は次を使えます。
+
+```powershell
+python -m app.model_compare .\testdata\real_article_dataset_v2.json --models gpt-4.1-mini gpt-5-mini gpt-5.4-mini --use-gemini
+```
+
+`evaluation_outputs\model_compare\YYYYMMDD-HHMMSS\` の下に、モデルごとのサブフォルダと `summary.json` / `summary.md` が保存されます。
+
+- 各モデルのサブフォルダには `predictions.json` / `evaluation.json` / `*_with_predicted_verdict_attention_score.csv` が入ります
+- `summary.md` には `accuracy` / `macro_f1` / `誤り recall` / `誤り precision` の比較表が入ります
+- `.env` は書き換えず、実行中だけ `OPENAI_PRIMARY_MODEL` を一時上書きします
+
+`誤り` のみなどの subset を比べたい場合は、custom dataset か `--case-id` も使えます。
+
+```powershell
+python -m app.model_compare .\testdata\real_article_dataset_v2.json --case-id jfc-false-03-chemtrail-government-airborne-dispersion-harmful-substances-false --models gpt-4.1-mini gpt-5-mini gpt-5.4-mini --use-gemini
+```
+
 ## 性能評価
 
 5区分の `Accuracy / Precision / Recall / F1 / Macro F1 / Weighted F1 / Confusion Matrix` を確認したいときは、評価用 JSON を用意して次を実行します。
@@ -202,6 +226,8 @@ python -m app.dataset_runner .\eval_cases.json --output-json .\predictions.json
 判定対象は `analysis_text` の中心命題で、`正確 / ほぼ正確 / 判断保留 / 不正確 / 誤り` を各20件ずつ含みます。
 `正確 / ほぼ正確` は JFC、FactCheck Navi が集約した日本系ファクトチェック記事、InFact、神戸新聞、Snopes の日本関連記事を基にした実在ネット記事ケースです。
 `analysis_text` は全ケースで日本語要約にそろえています。
+短文 dataset には `analysis_mode / claim_text / review_focus / human_note / contested_span` の補助列も持たせています。
+同じフォルダにある `*_reading_guide.csv` は、人が見返すための補助一覧です。
 
 ### `analysis_text` 抽出ガイドライン
 

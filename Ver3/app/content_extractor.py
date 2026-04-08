@@ -1089,6 +1089,14 @@ def estimate_manual_paragraph_count(text: str) -> int:
     return max(1, sentence_count(text) // 2)
 
 
+def detect_analysis_mode_for_manual_text(text: str, source_url: str | None) -> str:
+    if source_url:
+        return "article"
+    if len(text.strip()) <= 280 and manual_reference_link_count(text) == 0 and estimate_manual_paragraph_count(text) <= 2:
+        return "claim"
+    return "article"
+
+
 async def resolve_page_input(
     page_text: str | None,
     page_url: str | None,
@@ -1120,6 +1128,7 @@ async def resolve_page_input(
                 site_name=urlparse(cleaned_url).netloc.replace("www.", "") if cleaned_url else "manual",
                 source_url=cleaned_url,
                 input_source="manual_text",
+                analysis_mode=detect_analysis_mode_for_manual_text(cleaned_text, cleaned_url),
                 extraction_note=note,
                 analysis_date=timestamp_fields["analysis_date"],
                 analysis_datetime=timestamp_fields["analysis_datetime"],

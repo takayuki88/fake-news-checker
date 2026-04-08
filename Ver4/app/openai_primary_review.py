@@ -59,6 +59,56 @@ PRIMARY_REVIEW_JSON_SCHEMA = {
 OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses"
 
 
+def normalize_analysis_mode(value: Any) -> str:
+    mode = str(value or "").strip().lower()
+    return "claim" if mode == "claim" else "article"
+
+
+def is_claim_mode(page: Any) -> bool:
+    analysis_mode = normalize_analysis_mode(getattr(page, "analysis_mode", None))
+    if analysis_mode == "claim":
+        return True
+    input_source = str(getattr(page, "input_source", "") or "").strip()
+    source_url = str(getattr(page, "source_url", "") or "").strip()
+    extracted_chars = int(getattr(page, "extracted_chars", 0) or 0)
+    paragraph_count = int(getattr(page, "paragraph_count", 0) or 0)
+    reference_link_count = int(getattr(page, "reference_link_count", 0) or 0)
+    has_author = bool(getattr(page, "has_author", False))
+    has_published_at = bool(getattr(page, "has_published_at", False))
+    return (
+        input_source in {"manual_text", "test_fixture"}
+        and not source_url
+        and not has_author
+        and not has_published_at
+        and reference_link_count == 0
+        and extracted_chars <= 280
+        and paragraph_count <= 2
+    )
+
+
+def supports_temperature(model_name: str) -> bool:
+    cleaned = str(model_name or "").strip().lower()
+    return not cleaned.startswith("gpt-5")
+
+
+def build_openai_primary_payload(prompt: str, model_name: str) -> dict[str, Any]:
+    payload = {
+        "model": model_name,
+        "input": prompt,
+        "text": {
+            "format": {
+                "type": "json_schema",
+                "name": "primary_review_response",
+                "strict": True,
+                "schema": PRIMARY_REVIEW_JSON_SCHEMA,
+            }
+        },
+    }
+    if supports_temperature(model_name):
+        payload["temperature"] = 0.1
+    return payload
+
+
 def build_gpt_primary_prompt(page: Any, seed: dict[str, Any]) -> str:
     prompt_seed = {
         "local_domain": seed.get("domain"),
@@ -66,10 +116,20 @@ def build_gpt_primary_prompt(page: Any, seed: dict[str, Any]) -> str:
         "local_reasons": seed.get("reasons", []),
         "source_snapshot": getattr(seed.get("source_snapshot"), "model_dump", lambda: seed.get("source_snapshot", {}))(),
     }
+    claim_mode = is_claim_mode(page)
+    mode_label = "短文claim評価" if claim_mode else "記事評価"
+    mode_instruction = ""
+    if claim_mode:
+        mode_instruction = (
+            "今回の入力は記事本文ではなく短文の主張です。入力に URL・著者名・公開日時・引用リンクが無いこと自体は通常なので、"
+            "それだけで「出典不明」や「信頼できる一次ソース未確認」を強く付けないでください。"
+            "メタデータ不足ではなく、主張の具体性・内部整合性・検証可能性に注目して一次判定してください。"
+        )
     return f"""
 あなたは日本語のニュース検証支援AIです。
 役割は、ページ本文とメタ情報だけを使って一次判定を返すことです。
 外部検索結果や外部根拠は使わないでください。
+{mode_instruction}
 出力は JSON のみとしてください。
 
 期待する JSON:
@@ -80,6 +140,7 @@ def build_gpt_primary_prompt(page: Any, seed: dict[str, Any]) -> str:
 サイト名: {getattr(page, "site_name", "") or "未取得"}
 判定日: {getattr(page, "analysis_date", "") or "未設定"}
 判定日時: {getattr(page, "analysis_datetime", "") or "未設定"}
+解析モード: {mode_label}
 
 著者名: {getattr(page, "author_name", "") or "未取得"}
 公開日時: {getattr(page, "published_at", "") or "未取得"}
@@ -166,19 +227,7 @@ async def run_openai_primary_review(page: Any, seed: dict[str, Any], settings: A
         return None
 
     prompt = build_gpt_primary_prompt(page, seed)
-    payload = {
-        "model": settings.openai_primary_model,
-        "input": prompt,
-        "temperature": 0.1,
-        "text": {
-            "format": {
-                "type": "json_schema",
-                "name": "primary_review_response",
-                "strict": True,
-                "schema": PRIMARY_REVIEW_JSON_SCHEMA,
-            }
-        },
-    }
+    payload = build_openai_primary_payload(prompt, settings.openai_primary_model)
     headers = {
         "Authorization": f"Bearer {settings.openai_api_key}",
         "Content-Type": "application/json",

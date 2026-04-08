@@ -15,6 +15,7 @@ from app.analyzer import (
 )
 from app.config import Settings
 from app.models import AnalysisSignal, ResolvedPage
+from app.openai_primary_review import build_openai_primary_payload
 
 
 def make_page() -> ResolvedPage:
@@ -79,6 +80,56 @@ def test_build_gemini_evidence_prompt_omits_style_review_when_disabled() -> None
         Settings(gemini_style_review_enabled=False),
     )
     assert '"style_review"' not in prompt
+
+
+def test_build_gemini_evidence_prompt_mentions_google_search_only() -> None:
+    page = make_page()
+    prompt = build_gemini_evidence_prompt(
+        page,
+        {
+            "domain": "一般",
+            "labels": [],
+            "reasons": [],
+            "source_snapshot": page,
+            "evidence_overview": {"claims": [], "links": []},
+            "source_profile": {},
+        },
+        Settings(gemini_style_review_enabled=False),
+    )
+
+    assert "google_search" in prompt
+    assert "url_context" not in prompt
+
+
+def test_build_gemini_evidence_prompt_mentions_short_claim_guidance_for_short_input() -> None:
+    page = make_page()
+    prompt = build_gemini_evidence_prompt(
+        page,
+        {
+            "domain": "一般",
+            "labels": [],
+            "reasons": [],
+            "source_snapshot": page,
+            "evidence_overview": {"claims": [], "links": []},
+            "source_profile": {},
+        },
+        Settings(gemini_style_review_enabled=False),
+    )
+
+    assert "短文claim評価" in prompt
+    assert "それだけで「出典不明」や「信頼できる一次ソース未確認」を付けないでください。" in prompt
+
+
+def test_openai_primary_payload_omits_temperature_for_gpt5_models() -> None:
+    payload = build_openai_primary_payload("prompt", "gpt-5-mini")
+
+    assert "temperature" not in payload
+
+
+def test_openai_primary_payload_keeps_temperature_for_legacy_models() -> None:
+    payload = build_openai_primary_payload("prompt", "gpt-4.1-mini")
+
+    assert payload["temperature"] == 0.1
 
 
 def test_build_model_used_reflects_gpt_primary_and_gemini_evidence() -> None:

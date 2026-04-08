@@ -30,6 +30,7 @@
 - 両方ある場合は本文を優先
 - 本文は既定で最低 `10` 文字
 - API入力は最大 `12000` 文字
+- URL なしの短い主張文は自動で `短文claim評価モード` として扱い、記事メタデータ不足だけでは減点しません
 - 開発用に `skip_policy_check` を有効にすると、URL入力時の規約確認をスキップできます
 - 必要時だけ `.env` で `STRICT_POLICY_RESEARCH=true` を設定すると、規約候補ページ探索を有効化できます
 
@@ -119,6 +120,8 @@ python -m app.dataset_runner .\eval_cases.json --output-json .\predictions.json
 判定対象は `analysis_text` の中心命題で、`正確 / ほぼ正確 / 判断保留 / 不正確 / 誤り` を各20件ずつ含みます。
 `正確 / ほぼ正確` は JFC、FactCheck Navi が集約した日本系ファクトチェック記事、InFact、神戸新聞、Snopes の日本関連記事を基にした実在ネット記事ケースです。
 `analysis_text` は全ケースで日本語要約にそろえています。
+短文 dataset には `analysis_mode / claim_text / review_focus / human_note / contested_span` の補助列も持たせています。
+同じフォルダにある `*_reading_guide.csv` は、人が見返すための補助一覧です。
 
 ### `analysis_text` 抽出ガイドライン
 

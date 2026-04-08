@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     app_timezone: str = "Asia/Tokyo"
     app_host: str = "127.0.0.1"
     app_port: int = 8000
+    app_max_concurrent_requests: int = 8
     robots_user_agent: str = "WebPageTrustChecker"
     request_user_agent: str = (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "

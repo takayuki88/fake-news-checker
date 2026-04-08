@@ -98,6 +98,11 @@ def normalize_case_schema(case: dict[str, Any], dataset_meta: dict[str, Any] | N
     ).strip()
     normalized["reference_urls"] = list(case.get("reference_urls") or [])
     normalized["snapshot_overrides"] = dict(case.get("snapshot_overrides") or {})
+    normalized["analysis_mode"] = normalize_analysis_mode(
+        case.get("analysis_mode"),
+        analysis_text=str(case.get("analysis_text") or ""),
+        source_url=case.get("source_url") or case.get("page_url"),
+    )
     normalized["source_verdict_label"] = str(
         case.get("source_verdict_label") or expected_verdict or ""
     ).strip()
@@ -170,6 +175,21 @@ def estimate_paragraph_count(text: str) -> int:
     return max(len(lines), 1)
 
 
+def normalize_analysis_mode(
+    raw_mode: Any,
+    *,
+    analysis_text: str = "",
+    source_url: Any = None,
+) -> str:
+    mode = str(raw_mode or "").strip().lower()
+    if mode in {"claim", "article"}:
+        return mode
+    cleaned_text = str(analysis_text or "").strip()
+    if cleaned_text and not str(source_url or "").strip() and len(cleaned_text) <= 280:
+        return "claim"
+    return "article"
+
+
 def build_fixture_page(case: dict[str, Any], settings: Settings) -> ResolvedPage:
     overrides = case.get("snapshot_overrides", {})
     text = str(case["analysis_text"]).strip()
@@ -185,6 +205,11 @@ def build_fixture_page(case: dict[str, Any], settings: Settings) -> ResolvedPage
         site_name=str(case.get("site_name") or "fixture.local").strip(),
         source_url=case.get("source_url"),
         input_source="test_fixture",
+        analysis_mode=normalize_analysis_mode(
+            case.get("analysis_mode"),
+            analysis_text=text,
+            source_url=case.get("source_url"),
+        ),
         extraction_note=str(case.get("purpose") or "テスト用記事セット").strip(),
         analysis_date=timestamp_fields["analysis_date"],
         analysis_datetime=timestamp_fields["analysis_datetime"],
