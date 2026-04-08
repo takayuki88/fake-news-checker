@@ -18,6 +18,8 @@ venv/
 Ver1/evaluation_outputs/
 Ver2/evaluation_outputs/
 Ver3/evaluation_outputs/
+Ver4/evaluation_outputs/
 
 # Local temp artifacts
 Ver3/tmp_kobe_pdf/
+Ver4/tmp_ver4_case_*
