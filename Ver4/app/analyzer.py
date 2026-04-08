@@ -124,6 +124,15 @@ FACT_CHECK_HOSTNAMES = {
     "www.snopes.com",
     "snopes.com",
 }
+TRUSTED_MEDIA_HOSTNAMES = {
+    "www3.nhk.or.jp",
+    "jp.reuters.com",
+}
+TRUSTED_MEDIA_TITLE_HINTS = [
+    "nhkニュース",
+    "reuters japan",
+    "ロイター",
+]
 FACT_CHECK_HINTS = [
     "ファクトチェック",
     "fact check",
@@ -161,6 +170,34 @@ REPORT_BACKED_CAUTION_HINTS = [
     "評価",
     "解釈",
     "無駄遣い",
+]
+RESEARCH_BACKED_INSTITUTION_HINTS = [
+    "研究機関",
+    "研究グループ",
+    "研究チーム",
+    "大学",
+    "研究者ら",
+    "研究者",
+]
+RESEARCH_BACKED_TRIAL_HINTS = [
+    "医師主導治験",
+    "臨床試験",
+    "治験",
+    "フェーズ1",
+    "第1相",
+    "第i相",
+    "ヒトでの臨床試験",
+]
+RESEARCH_BACKED_PROGRESS_HINTS = [
+    "承認",
+    "進行中",
+    "開始",
+    "開始され",
+    "実施中",
+    "準備段階",
+    "成功",
+    "確認",
+    "実用化",
 ]
 PARTIAL_INACCURACY_HINTS = [
     "主張は不正確",
@@ -493,6 +530,7 @@ def derive_public_verdict(
         if normalize_evidence_verdict(review.get("verdict")) == "概ね整合"
     )
     report_backed_claim_reviews = count_report_backed_positive_claim_reviews(claim_reviews)
+    research_backed_claim_reviews = count_research_backed_positive_claim_reviews(claim_reviews)
     claim_review_caution = has_report_backed_claim_review_caution(claim_reviews)
     claim_review_partial_inaccuracy = has_positive_claim_review_partial_inaccuracy(claim_reviews)
     claim_review_nuance = has_positive_claim_review_nuance(claim_reviews)
@@ -544,6 +582,14 @@ def derive_public_verdict(
         if (
             report_backed_claim_reviews >= 1
             and confidence_score >= 44
+            and not indeterminate
+            and not claim_review_caution
+        ):
+            return "正確"
+        if (
+            research_backed_claim_reviews >= 1
+            and confidence_score >= 46
+            and risk_score <= 65
             and not indeterminate
             and not claim_review_caution
         ):
@@ -722,10 +768,10 @@ def build_score_calculation(payload: dict[str, Any], public_verdict: str, attent
     if isinstance(primary_review_risk_score, int) and isinstance(heuristic_risk_score, int):
         steps.append(
             ScoreCalculationStep(
-                label="Gemini一次判定で補正",
+                label="一次判定で補正",
                 expression=f"{heuristic_risk_score}% -> {primary_review_risk_score}%",
                 result=f"{primary_review_risk_score}%",
-                note="Ver3 では Gemini の一次判定案を弱く混ぜて内部リスク点を補正します。",
+                note="Ver4 では一次判定モデルの出力を弱く混ぜて内部リスク点を補正します。",
             )
         )
         seed_for_evidence = primary_review_risk_score
@@ -837,8 +883,69 @@ def normalize_hostname(url: str | None) -> str:
     return (parsed.hostname or "").lower()
 
 
+def normalize_hostname_like_text(value: str | None) -> str:
+    text = str(value or "").strip().lower()
+    if not text:
+        return ""
+    if "://" in text:
+        return normalize_hostname(text)
+    if " " in text or "/" in text or "." not in text:
+        return ""
+    return normalize_hostname(f"https://{text}")
+
+
 def hostname_matches(hostname: str, domains: set[str]) -> bool:
     return any(hostname == domain or hostname.endswith(f".{domain}") for domain in domains)
+
+
+def is_official_like_hostname(hostname: str) -> bool:
+    return bool(
+        hostname
+        and (
+            hostname_matches(hostname, OFFICIAL_HOSTNAMES)
+            or any(hostname == suffix or hostname.endswith(f".{suffix}") for suffix in OFFICIAL_HOST_SUFFIXES)
+        )
+    )
+
+
+def is_fact_check_like_source(hostname: str, lowered_title: str) -> bool:
+    return bool(
+        hostname_matches(hostname, FACT_CHECK_HOSTNAMES)
+        or any(hint in lowered_title for hint in FACT_CHECK_HINTS)
+    )
+
+
+def is_trusted_media_like_source(hostname: str, lowered_title: str) -> bool:
+    return bool(
+        hostname_matches(hostname, TRUSTED_MEDIA_HOSTNAMES)
+        or any(hint in lowered_title for hint in TRUSTED_MEDIA_TITLE_HINTS)
+    )
+
+
+def is_trusted_grounding_source(source: dict[str, Any]) -> bool:
+    title = str(source.get("title") or "").strip()
+    lowered_title = title.lower()
+    url_hostname = normalize_hostname(str(source.get("url") or "").strip())
+    title_hostname = normalize_hostname_like_text(title)
+    hostnames = [host for host in (url_hostname, title_hostname) if host and host != "vertexaisearch.cloud.google.com"]
+
+    for hostname in hostnames:
+        if is_official_like_hostname(hostname):
+            return True
+        if is_fact_check_like_source(hostname, lowered_title):
+            return True
+        if is_trusted_media_like_source(hostname, lowered_title):
+            return True
+
+    return bool(
+        any(hint in title for hint in OFFICIAL_SITE_HINTS)
+        or any(hint in lowered_title for hint in FACT_CHECK_HINTS)
+        or any(hint in lowered_title for hint in TRUSTED_MEDIA_TITLE_HINTS)
+    )
+
+
+def filter_grounding_sources(grounding_sources: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [source for source in grounding_sources if isinstance(source, dict) and is_trusted_grounding_source(source)]
 
 
 def build_source_profile(page: ResolvedPage, text: str, source_hint_count: int) -> dict[str, Any]:
@@ -1858,7 +1965,7 @@ def merge_evidence_overview(seed: dict[str, Any], llm_bundle: dict[str, Any] | N
     claim_reviews = normalize_claim_reviews(llm_output.get("claim_reviews"), fallback_claims)
     overall_verdict = derive_overall_verdict(llm_output.get("overall_verdict"), claim_reviews)
     grounding_queries = llm_bundle.get("grounding_queries") or []
-    grounding_sources = llm_bundle.get("grounding_sources") or []
+    grounding_sources = filter_grounding_sources(llm_bundle.get("grounding_sources") or [])
     retrieved_urls = llm_bundle.get("retrieved_urls") or []
 
     overview["status"] = determine_evidence_status(bool(llm_output), grounding_sources, retrieved_urls, claim_reviews, error_note)
@@ -1991,6 +2098,24 @@ def count_report_backed_positive_claim_reviews(claim_reviews: list[dict[str, Any
         if any(hint in hint_text for hint in REPORT_BACKED_CAUTION_HINTS):
             continue
         if any(hint in hint_text for hint in REPORT_BACKED_ACCURATE_HINTS):
+            supported_count += 1
+    return supported_count
+
+
+def count_research_backed_positive_claim_reviews(claim_reviews: list[dict[str, Any]]) -> int:
+    supported_count = 0
+    for review in claim_reviews:
+        if not isinstance(review, dict):
+            continue
+        if normalize_evidence_verdict(review.get("verdict")) != "概ね整合":
+            continue
+        hint_text = f"{review.get('claim') or ''} {review.get('reason') or ''}".strip().lower()
+        if any(hint in hint_text for hint in REPORT_BACKED_CAUTION_HINTS):
+            continue
+        has_trial = any(hint in hint_text for hint in RESEARCH_BACKED_TRIAL_HINTS)
+        has_institution = any(hint in hint_text for hint in RESEARCH_BACKED_INSTITUTION_HINTS)
+        has_progress = any(hint in hint_text for hint in RESEARCH_BACKED_PROGRESS_HINTS)
+        if has_trial and (has_institution or has_progress):
             supported_count += 1
     return supported_count
 

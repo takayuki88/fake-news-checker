@@ -15,7 +15,7 @@ from .time_utils import build_analysis_timestamp_fields
 
 BASE_DIR = Path(__file__).resolve().parent
 
-app = FastAPI(title="Fake News Checker Ver3", version="3.0.0")
+app = FastAPI(title="Fake News Checker Ver4", version="4.0.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],

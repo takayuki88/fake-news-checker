@@ -1,10 +1,12 @@
 from app.analyzer import (
     apply_primary_review,
+    build_score_calculation,
     build_gemini_evidence_prompt,
     build_model_used,
     build_fallback_style_overview,
     build_result_status,
     derive_public_verdict,
+    filter_grounding_sources,
     merge_style_overview,
     publicize_result,
     style_key_for_score,
@@ -82,6 +84,40 @@ def test_build_gemini_evidence_prompt_omits_style_review_when_disabled() -> None
 def test_build_model_used_reflects_gpt_primary_and_gemini_evidence() -> None:
     model_used = build_model_used({"status": "ローカル補助判定"}, True, "gpt-primary")
     assert model_used == "gpt-primary+gemini-evidence"
+
+
+def test_filter_grounding_sources_keeps_trusted_hosts_and_drops_untrusted_titles() -> None:
+    filtered = filter_grounding_sources(
+        [
+            {"title": "hokudai.ac.jp", "url": "https://vertexaisearch.cloud.google.com/example-1"},
+            {"title": "apexhardwareny.com", "url": "https://vertexaisearch.cloud.google.com/example-2"},
+            {"title": "Reuters Japan", "url": "https://vertexaisearch.cloud.google.com/example-3"},
+        ]
+    )
+
+    assert [source["title"] for source in filtered] == ["hokudai.ac.jp", "Reuters Japan"]
+
+
+def test_build_score_calculation_uses_ver4_primary_review_wording() -> None:
+    calculation = build_score_calculation(
+        {
+            "heuristic_base_score": 42,
+            "heuristic_signal_total": 10,
+            "heuristic_raw_score": 52,
+            "heuristic_risk_score": 52,
+            "primary_review_risk_score": 48,
+            "risk_score": 40,
+            "evidence_risk_delta": -8,
+            "attention_band_display": "21〜40%",
+        },
+        public_verdict="ほぼ正確",
+        attention_score=40,
+    )
+
+    labels = [step.label for step in calculation.attention_steps]
+    notes = [step.note for step in calculation.attention_steps if step.note]
+    assert "一次判定で補正" in labels
+    assert any("Ver4" in note for note in notes)
 
 
 def test_merge_style_overview_stays_local_when_gemini_style_review_disabled() -> None:
@@ -221,6 +257,58 @@ def test_report_backed_claim_review_can_promote_supported_case_to_accurate() -> 
         },
     )
     assert verdict == "正確"
+
+
+def test_research_backed_claim_review_can_promote_supported_case_to_accurate_without_grounding_sources() -> None:
+    verdict = derive_public_verdict(
+        risk_score=60,
+        confidence_score=47,
+        labels=["出典不明", "信頼できる一次ソース未確認", "大筋で整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+        },
+        evidence_overview={
+            "assessment_status": "概ね整合",
+            "grounding_sources": [],
+            "claim_reviews": [
+                {
+                    "claim": "日本の研究者らが、歯を再生させる可能性のある薬剤を開発した",
+                    "verdict": "概ね整合",
+                    "reason": "大阪大学の研究グループが歯の再生を促す薬剤を開発し、医師主導治験の承認を受け、ヒトでの臨床試験が進行中である。",
+                },
+            ],
+        },
+    )
+    assert verdict == "正確"
+
+
+def test_research_backed_claim_review_without_trial_signal_stays_mostly_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=60,
+        confidence_score=47,
+        labels=["出典不明", "信頼できる一次ソース未確認", "大筋で整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+        },
+        evidence_overview={
+            "assessment_status": "概ね整合",
+            "grounding_sources": [],
+            "claim_reviews": [
+                {
+                    "claim": "研究者が新薬候補を開発した",
+                    "verdict": "概ね整合",
+                    "reason": "大学の研究グループが新薬候補を開発し、今後の実用化を目指している。",
+                },
+            ],
+        },
+    )
+    assert verdict == "ほぼ正確"
 
 
 def test_contextual_caveat_in_claim_review_keeps_case_mostly_accurate() -> None:
