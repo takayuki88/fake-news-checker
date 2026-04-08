@@ -51,7 +51,9 @@ def format_gemini_preflight_error(detail: str) -> str:
 
 
 def is_gemini_quota_skip(result: AnalysisResult, use_gemini: bool) -> bool:
-    if not use_gemini or result.model_used != "heuristic-fallback":
+    if not use_gemini or not (
+        result.model_used == "heuristic-fallback" or result.model_used.endswith("+evidence-fallback")
+    ):
         return False
     note = (result.evidence_overview.assessment_note or "").lower()
     quota_markers = [
@@ -274,6 +276,8 @@ def evaluate_result(case: dict[str, Any], result: AnalysisResult, use_gemini: bo
     valid_gemini_models = {
         "heuristic+gemini-evidence+gemini-style",
         "heuristic+gemini-evidence",
+        "gpt-primary+gemini-evidence+gemini-style",
+        "gpt-primary+gemini-evidence",
         "gemini-primary+gemini-evidence+gemini-style",
         "gemini-primary+gemini-evidence",
     }

@@ -1,6 +1,7 @@
 from app.analyzer import (
-    apply_gemini_primary_review,
-    build_prompt,
+    apply_primary_review,
+    build_gemini_evidence_prompt,
+    build_model_used,
     build_fallback_style_overview,
     build_result_status,
     derive_public_verdict,
@@ -61,9 +62,9 @@ def test_gemini_style_review_is_disabled_by_default_in_settings() -> None:
     assert Settings().gemini_style_review_enabled is False
 
 
-def test_build_prompt_omits_style_review_when_disabled() -> None:
+def test_build_gemini_evidence_prompt_omits_style_review_when_disabled() -> None:
     page = make_page()
-    prompt = build_prompt(
+    prompt = build_gemini_evidence_prompt(
         page,
         {
             "domain": "一般",
@@ -76,6 +77,11 @@ def test_build_prompt_omits_style_review_when_disabled() -> None:
         Settings(gemini_style_review_enabled=False),
     )
     assert '"style_review"' not in prompt
+
+
+def test_build_model_used_reflects_gpt_primary_and_gemini_evidence() -> None:
+    model_used = build_model_used({"status": "ローカル補助判定"}, True, "gpt-primary")
+    assert model_used == "gpt-primary+gemini-evidence"
 
 
 def test_merge_style_overview_stays_local_when_gemini_style_review_disabled() -> None:
@@ -641,7 +647,7 @@ def test_counterevidence_without_source_gap_can_be_false_with_slightly_lower_thr
     assert verdict == "誤り"
 
 
-def test_apply_gemini_primary_review_blends_seed_scores_and_summary() -> None:
+def test_apply_primary_review_blends_seed_scores_and_summary() -> None:
     seed = {
         "risk_score": 72,
         "confidence": "判定不能",
@@ -666,19 +672,20 @@ def test_apply_gemini_primary_review_blends_seed_scores_and_summary() -> None:
         }
     }
 
-    merged = apply_gemini_primary_review(seed, llm_output)
+    merged = apply_primary_review(seed, llm_output, provider_key="gpt-primary", provider_status="GPT一次判定")
 
     assert merged["primary_review_raw_risk_score"] == 18
     assert merged["risk_score"] == 60
     assert merged["confidence_score"] == 50
-    assert merged["status"] == "Gemini一次判定"
+    assert merged["status"] == "GPT一次判定"
+    assert merged["primary_review_provider"] == "gpt-primary"
     assert merged["summary"] == "Gemini の一次判定です。"
     assert merged["domain"] == "医療"
     assert merged["labels"] == ["反証情報あり", "判定不能"]
     assert merged["reasons"] == ["Gemini reason", "heuristic reason"]
 
 
-def test_apply_gemini_primary_review_keeps_seed_when_primary_review_missing() -> None:
+def test_apply_primary_review_keeps_seed_when_primary_review_missing() -> None:
     seed = {
         "risk_score": 35,
         "confidence": "モデルの確信度",
@@ -693,6 +700,6 @@ def test_apply_gemini_primary_review_keeps_seed_when_primary_review_missing() ->
         "source_profile": {},
     }
 
-    merged = apply_gemini_primary_review(seed, {})
+    merged = apply_primary_review(seed, {}, provider_key="gpt-primary", provider_status="GPT一次判定")
 
     assert merged is seed

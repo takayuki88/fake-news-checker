@@ -41,7 +41,7 @@ def make_result():
         "domain": "一般",
         "verification_links": [],
         "caution_level": "ほぼ正確",
-        "model_used": "heuristic+gemini-evidence+gemini-style",
+        "model_used": "gpt-primary+gemini-evidence",
         "signal_breakdown": [],
         "evidence_overview": {
             "status": "Gemini根拠比較済み",

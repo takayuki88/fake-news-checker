@@ -25,6 +25,7 @@ from .models import (
     TimingStage,
     VerificationLink,
 )
+from .openai_primary_review import run_openai_primary_review
 
 ABSOLUTE_PATTERNS = [
     "絶対",
@@ -1209,15 +1210,15 @@ def heuristic_analysis(page: ResolvedPage) -> dict[str, Any]:
     }
 
 
-def build_prompt(page: ResolvedPage, seed: dict[str, Any], settings: Settings) -> str:
+def build_gemini_evidence_prompt(page: ResolvedPage, seed: dict[str, Any], settings: Settings) -> str:
     source_snapshot = seed["source_snapshot"].model_dump()
     evidence_overview = seed["evidence_overview"]
     evidence_links = evidence_overview.get("links", [])
     source_profile = {key: value for key, value in seed.get("source_profile", {}).items() if key != "hostname"}
     prompt_seed = {
-        "local_domain": seed["domain"],
-        "local_labels": seed["labels"],
-        "local_reasons": seed["reasons"],
+        "primary_domain": seed["domain"],
+        "primary_labels": seed["labels"],
+        "primary_reasons": seed["reasons"],
         "source_profile": source_profile,
         "source_snapshot": source_snapshot,
         "evidence_claims": evidence_overview.get("claims", []),
@@ -1248,24 +1249,14 @@ def build_prompt(page: ResolvedPage, seed: dict[str, Any], settings: Settings) -
 
     return f"""
 あなたは日本語のニュース検証支援AIです。
-役割は次の2つ{("と補助評価1つ" if settings.gemini_style_review_enabled else "")}を厳密に分けて実行することです。
-1. ページ本文・見出し・メタ情報だけを使って一次判定を作る
-2. 本文から抽出した主張候補を外部根拠と照合して整理する
+役割は、本文から抽出した主張候補を外部根拠と照合して整理することです{("。加えて本文の書き振りを補助評価してください" if settings.gemini_style_review_enabled else "")}。
+GPT などによる一次判定の補助情報は参考にして構いませんが、最終的な外部根拠比較は google_search と url_context で確認した公開情報を優先してください。
 {style_task_text}
-一次判定では google_search や url_context の結果を使わず、ページ本文とメタ情報だけで判断してください。
 必要に応じて google_search と url_context を使い、公開ウェブ上の一次ソース、公的機関、主要報道機関、ファクトチェック記事を優先して確認してください。
 一次ソースが見当たらない場合は無理に断定せず、「一次ソース未確認」または「判定不能」にしてください。
 相対表現の「今日」「昨日」「明日」は、下記の判定日時を基準に解釈してください。
 出力は次のJSONだけにしてください。Markdownや説明文は不要です。
 {{
-  "primary_review": {{
-    "domain": "医療" または "災害" または "政治" または "金融" または "一般",
-    "risk_score": 0から100の整数,
-    "confidence_score": 0から100の整数,
-    "summary": "本文とメタ情報だけで見た一次判定の要約を120字以内で",
-    "labels": ["出典不明", "誇張表現が強い", "既知のデマ類型に類似", "信頼できる一次ソース未確認", "反証情報あり", "判定不能"] から適切なものを最大4件,
-    "reasons": ["本文ベースの一次判定理由1", "本文ベースの一次判定理由2", "本文ベースの一次判定理由3"] のように最大4件
-  }},
   "overall_verdict": "反証あり" または "一次ソース未確認" または "判定不能" または "概ね整合" または "要追加確認",
   "overall_summary": "120字以内の要約",
   "claim_reviews": [
@@ -1309,6 +1300,10 @@ def build_prompt(page: ResolvedPage, seed: dict[str, Any], settings: Settings) -
 ローカル一次判定の補助情報:
 {json.dumps(prompt_seed, ensure_ascii=False)}
 """.strip()
+
+
+def build_prompt(page: ResolvedPage, seed: dict[str, Any], settings: Settings) -> str:
+    return build_gemini_evidence_prompt(page, seed, settings)
 
 
 def extract_json_block(raw_text: str) -> dict[str, Any]:
@@ -1474,7 +1469,12 @@ def blend_primary_score(seed_score: int, primary_score: int, weight: float, delt
     return clamp(seed_score + bounded_delta)
 
 
-def apply_gemini_primary_review(seed: dict[str, Any], llm_output: dict[str, Any]) -> dict[str, Any]:
+def apply_primary_review(
+    seed: dict[str, Any],
+    llm_output: dict[str, Any],
+    provider_key: str,
+    provider_status: str,
+) -> dict[str, Any]:
     raw_primary_review = llm_output.get("primary_review") if isinstance(llm_output, dict) else None
     if not isinstance(raw_primary_review, dict):
         return seed
@@ -1516,15 +1516,20 @@ def apply_gemini_primary_review(seed: dict[str, Any], llm_output: dict[str, Any]
             "risk_score": risk_score,
             "confidence": "モデルの確信度" if confidence_score >= 45 else "判定不能",
             "confidence_score": confidence_score,
-            "status": "Gemini一次判定",
+            "status": provider_status,
             "summary": summary,
             "labels": list(dict.fromkeys(primary_labels + seed["labels"]))[:4] if primary_labels else seed["labels"],
             "reasons": list(dict.fromkeys(primary_reasons + seed["reasons"]))[:4] if primary_reasons else seed["reasons"],
             "domain": domain,
             "caution_level": label_for_score(risk_score),
+            "primary_review_provider": provider_key,
         }
     )
     return merged
+
+
+def apply_gemini_primary_review(seed: dict[str, Any], llm_output: dict[str, Any]) -> dict[str, Any]:
+    return apply_primary_review(seed, llm_output, provider_key="gemini-primary", provider_status="Gemini一次判定")
 
 
 def extract_text_parts(parts: Any) -> list[str]:
@@ -1677,7 +1682,7 @@ async def run_gemini_preflight(settings: Settings) -> None:
         raise RuntimeError(format_gemini_error(exc)) from exc
 
 
-async def gemini_analysis(page: ResolvedPage, settings: Settings, seed: dict[str, Any]) -> dict[str, Any] | None:
+async def gemini_evidence_analysis(page: ResolvedPage, settings: Settings, seed: dict[str, Any]) -> dict[str, Any] | None:
     if not settings.gemini_api_key:
         return None
 
@@ -1686,7 +1691,7 @@ async def gemini_analysis(page: ResolvedPage, settings: Settings, seed: dict[str
         f"{settings.gemini_model}:generateContent?key={settings.gemini_api_key}"
     )
     payload = {
-        "contents": [{"parts": [{"text": build_prompt(page, seed, settings)}]}],
+        "contents": [{"parts": [{"text": build_gemini_evidence_prompt(page, seed, settings)}]}],
         "tools": [
             {"google_search": {}},
             {"url_context": {}},
@@ -1713,6 +1718,10 @@ async def gemini_analysis(page: ResolvedPage, settings: Settings, seed: dict[str
             "retrieved_urls": [],
             "error": format_gemini_error(exc),
         }
+
+
+async def gemini_analysis(page: ResolvedPage, settings: Settings, seed: dict[str, Any]) -> dict[str, Any] | None:
+    return await gemini_evidence_analysis(page, settings, seed)
 
 
 def build_search_link(query: str) -> VerificationLink:
@@ -2181,19 +2190,27 @@ def build_result_status(
     return seed_status
 
 
-def build_model_used(style_overview: dict[str, Any], has_llm_output: bool, has_primary_review: bool) -> str:
+def build_model_used(style_overview: dict[str, Any], has_llm_output: bool, primary_review_provider: str | None = None) -> str:
     if not has_llm_output:
-        return "heuristic-fallback"
-    base = "gemini-primary" if has_primary_review else "heuristic"
+        return f"{primary_review_provider}+evidence-fallback" if primary_review_provider else "heuristic-fallback"
+    base = primary_review_provider or "heuristic"
     if str(style_overview.get("status") or "") == "Gemini書き振り評価済み":
         return f"{base}+gemini-evidence+gemini-style"
     return f"{base}+gemini-evidence"
 
 
-def combine_result(page: ResolvedPage, seed: dict[str, Any], llm_bundle: dict[str, Any] | None, settings: Settings) -> AnalysisResult:
-    result_seed = {key: value for key, value in seed.items() if key != "source_profile"}
+def combine_result(
+    page: ResolvedPage,
+    seed: dict[str, Any],
+    effective_seed: dict[str, Any],
+    llm_bundle: dict[str, Any] | None,
+    settings: Settings,
+) -> AnalysisResult:
+    result_seed = {key: value for key, value in effective_seed.items() if key != "source_profile"}
+    primary_review_provider = effective_seed.get("primary_review_provider")
 
     if not llm_bundle:
+        result_seed["model_used"] = build_model_used(seed.get("style_overview", {}), False, primary_review_provider)
         return publicize_result(page, result_seed, seed.get("source_profile", {}))
 
     llm_output = llm_bundle.get("output") if isinstance(llm_bundle.get("output"), dict) else {}
@@ -2201,13 +2218,10 @@ def combine_result(page: ResolvedPage, seed: dict[str, Any], llm_bundle: dict[st
     style_overview = merge_style_overview(seed, llm_bundle, settings)
     if not llm_output:
         fallback_seed = dict(result_seed)
-        fallback_seed["model_used"] = "heuristic-fallback"
+        fallback_seed["model_used"] = build_model_used(style_overview, False, primary_review_provider)
         fallback_seed["evidence_overview"] = evidence_overview
         fallback_seed["style_overview"] = style_overview
         return publicize_result(page, fallback_seed, seed.get("source_profile", {}))
-
-    effective_seed = apply_gemini_primary_review(seed, llm_output)
-    primary_review_used = effective_seed is not seed
 
     claim_reviews = normalize_claim_reviews(llm_output.get("claim_reviews"), evidence_overview.get("claims", []))
     overall_verdict = evidence_overview.get("assessment_status") or derive_overall_verdict(llm_output.get("overall_verdict"), claim_reviews)
@@ -2252,7 +2266,7 @@ def combine_result(page: ResolvedPage, seed: dict[str, Any], llm_bundle: dict[st
         domain=effective_seed["domain"],
         verification_links=merge_links(effective_seed["domain"], suggested_queries, page.source_url),
         caution_level=label_for_score(risk_score),
-        model_used=build_model_used(style_overview, True, primary_review_used),
+        model_used=build_model_used(style_overview, True, primary_review_provider),
         source_snapshot=build_source_snapshot(page),
         signal_breakdown=effective_seed["signal_breakdown"],
         evidence_overview=evidence_overview,
@@ -2275,8 +2289,30 @@ async def analyze_page(page: ResolvedPage, settings: Settings) -> AnalysisResult
         )
     )
 
+    primary_started_at = time.perf_counter()
+    primary_bundle = await run_openai_primary_review(page, seed, settings)
+    primary_note = "OpenAI primary review を実行しました。"
+    if not settings.openai_api_key:
+        primary_note = "OpenAI API 未設定のため一次判定はローカルのままです。"
+    elif not settings.openai_primary_model:
+        primary_note = "OPENAI_PRIMARY_MODEL 未設定のため一次判定はローカルのままです。"
+    elif primary_bundle and primary_bundle.get("error"):
+        primary_note = str(primary_bundle.get("error"))
+    elif not primary_bundle or not primary_bundle.get("output"):
+        primary_note = "OpenAI primary review の出力を取得できなかったため、ローカル一次判定を使います。"
+    primary_output = primary_bundle.get("output") if isinstance(primary_bundle, dict) else None
+    effective_seed = apply_primary_review(seed, primary_output or {}, provider_key="gpt-primary", provider_status="GPT一次判定")
+    analysis_stages.append(
+        TimingStage(
+            key="openai_primary_review",
+            label="GPT一次判定",
+            duration_ms=elapsed_ms(primary_started_at),
+            note=primary_note,
+        )
+    )
+
     gemini_started_at = time.perf_counter()
-    llm_bundle = await gemini_analysis(page, settings, seed)
+    llm_bundle = await gemini_evidence_analysis(page, settings, effective_seed)
     gemini_note = (
         "外部根拠比較と書き振り評価を実行しました。"
         if settings.gemini_style_review_enabled
@@ -2288,15 +2324,15 @@ async def analyze_page(page: ResolvedPage, settings: Settings) -> AnalysisResult
         gemini_note = str(llm_bundle.get("error"))
     analysis_stages.append(
         TimingStage(
-            key="gemini_analysis",
-            label="Gemini比較",
+            key="gemini_evidence_review",
+            label="Gemini外部根拠比較",
             duration_ms=elapsed_ms(gemini_started_at),
             note=gemini_note,
         )
     )
 
     combine_started_at = time.perf_counter()
-    result = combine_result(page, seed, llm_bundle, settings)
+    result = combine_result(page, seed, effective_seed, llm_bundle, settings)
     analysis_stages.append(
         TimingStage(
             key="result_combine",
