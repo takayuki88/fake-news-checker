@@ -14,6 +14,7 @@
 - Gemini の役割を 2 つに分けます
   - 外部根拠比較
   - 本文の書き振り評価
+- Gemini の書き振り評価は既定でオフです
 - 真偽は外部根拠を主にして決めます
 - 書き振り評価は危なさを見る補助情報として別表示します
 - 書き振り評価が低くても、それだけで信頼性は上げません
@@ -69,6 +70,7 @@ Copy-Item .env.example .env
 `.env` の `GEMINI_API_KEY` に Gemini の API キーを設定してください。
 Ver3 は基本的に Gemini を使う前提です。
 API キー未設定時だけローカル判定にフォールバックします。
+Gemini の書き振り評価を有効にしたい場合だけ `GEMINI_STYLE_REVIEW_ENABLED=true` を追加してください。
 規約候補ページ探索を使いたい場合だけ `STRICT_POLICY_RESEARCH=true` を追加してください。
 
 ## 起動

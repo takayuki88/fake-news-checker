@@ -9,6 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 class Settings(BaseSettings):
     gemini_api_key: str = ""
     gemini_model: str = "gemini-2.5-flash"
+    gemini_style_review_enabled: bool = False
     strict_policy_research: bool = False
     fetch_timeout_seconds: float = 12.0
     max_fetch_chars: int = 7000

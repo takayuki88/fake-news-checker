@@ -1,12 +1,15 @@
 from app.analyzer import (
+    build_prompt,
     build_fallback_style_overview,
     build_result_status,
     derive_public_verdict,
+    merge_style_overview,
     publicize_result,
     style_key_for_score,
     style_label_for_score,
     style_score_display,
 )
+from app.config import Settings
 from app.models import AnalysisSignal, ResolvedPage
 
 
@@ -51,6 +54,36 @@ def test_fallback_style_overview_ignores_non_style_signals() -> None:
 def test_build_result_status_escalates_only_at_style_score_80_or_above() -> None:
     assert build_result_status("自動判定", "概ね整合", 70, {}, {"score": 79}) == "自動判定"
     assert build_result_status("自動判定", "概ね整合", 70, {}, {"score": 80}) == "要人手確認"
+
+
+def test_gemini_style_review_is_disabled_by_default_in_settings() -> None:
+    assert Settings().gemini_style_review_enabled is False
+
+
+def test_build_prompt_omits_style_review_when_disabled() -> None:
+    page = make_page()
+    prompt = build_prompt(
+        page,
+        {
+            "domain": "一般",
+            "labels": [],
+            "reasons": [],
+            "source_snapshot": page,
+            "evidence_overview": {"claims": [], "links": []},
+            "source_profile": {},
+        },
+        Settings(gemini_style_review_enabled=False),
+    )
+    assert '"style_review"' not in prompt
+
+
+def test_merge_style_overview_stays_local_when_gemini_style_review_disabled() -> None:
+    overview = merge_style_overview(
+        {"signal_breakdown": [], "style_overview": build_fallback_style_overview([]).model_dump()},
+        {"output": {"style_review": {"style_score": 90}}},
+        Settings(gemini_style_review_enabled=False),
+    )
+    assert overview["status"] == "ローカル補助判定"
 
 
 def test_public_verdict_is_not_changed_by_style_score_but_status_is() -> None:
@@ -318,6 +351,145 @@ def test_value_judgment_claim_review_does_not_promote_to_accurate() -> None:
                     "verdict": "概ね整合",
                     "reason": "会計検査院の報告で余剰在庫は確認できるが、無駄遣いという評価表現は残る。",
                 },
+            ],
+        },
+    )
+    assert verdict == "ほぼ正確"
+
+
+def test_partial_detail_error_claim_review_keeps_case_mostly_accurate_and_mid_band_attention() -> None:
+    result = publicize_result(
+        make_page(),
+        {
+            "risk_score": 64,
+            "confidence": "中程度",
+            "confidence_score": 54,
+            "status": "自動判定",
+            "summary": "1919年に撮影されたアイヌの踊りの映像は存在するが、オリジナルは白黒である。",
+            "labels": ["反証情報あり", "出典不明", "信頼できる一次ソース未確認"],
+            "reasons": [
+                "1919年にアイヌの踊りが撮影された映像は存在する。",
+                "カラー映像はAIによる着色であり、オリジナルは白黒である。",
+            ],
+            "domain": "一般",
+            "verification_links": [],
+            "caution_level": "正確",
+            "model_used": "heuristic+gemini-evidence+gemini-style",
+            "signal_breakdown": [],
+            "evidence_overview": {
+                "status": "Gemini根拠比較済み",
+                "summary": "外部根拠は大筋で整合しています。",
+                "assessment_status": "概ね整合",
+                "assessment_summary": "外部根拠は大筋で整合しています。",
+                "links": [],
+                "grounding_sources": [
+                    {"title": "factcheckcenter.jp", "url": "https://example.com/1", "kind": "Gemini参照ソース"},
+                    {"title": "nibutani-ainu-museum.com", "url": "https://example.com/2", "kind": "Gemini参照ソース"},
+                    {"title": "nii.ac.jp", "url": "https://example.com/3", "kind": "Gemini参照ソース"},
+                ],
+                "claim_reviews": [
+                    {
+                        "claim": "アイヌの踊りが1919年に撮影され、カラー映像で保存されていた",
+                        "verdict": "概ね整合",
+                        "reason": "1919年にアイヌの踊りが撮影された映像は存在するが、オリジナルは白黒であり、カラー映像はAIによって着色されたものであるため、「カラー映像で保存されていた」という主張は不正確である。",
+                    }
+                ],
+                "grounding_queries": [],
+                "retrieved_urls": [],
+            },
+        },
+        {
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+        },
+    )
+
+    assert result.verdict == "ほぼ正確"
+    assert result.attention_score is not None
+    assert 21 <= result.attention_score <= 40
+
+
+def test_generic_supported_claim_with_slight_numeric_gap_stays_mostly_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=68,
+        confidence_score=51,
+        labels=["出典不明", "信頼できる一次ソース未確認", "大筋で整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+        },
+        evidence_overview={
+            "assessment_status": "概ね整合",
+            "grounding_sources": [
+                {"title": "site-a.example", "url": "https://example.com/a"},
+                {"title": "site-b.example", "url": "https://example.com/b"},
+                {"title": "site-c.example", "url": "https://example.com/c"},
+            ],
+            "claim_reviews": [
+                {
+                    "claim": "claim",
+                    "verdict": "概ね整合",
+                    "reason": "数値自体は概ね整合しているが、わずかな差異がある。",
+                },
+            ],
+        },
+    )
+    assert verdict == "ほぼ正確"
+
+
+def test_name_correction_in_supported_claim_stays_mostly_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=68,
+        confidence_score=53,
+        labels=["出典不明", "信頼できる一次ソース未確認", "大筋で整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+        },
+        evidence_overview={
+            "assessment_status": "概ね整合",
+            "grounding_sources": [
+                {"title": "wikipedia.org", "url": "https://example.com/a"},
+                {"title": "gaga.ne.jp", "url": "https://example.com/b"},
+                {"title": "naxos.jp", "url": "https://example.com/c"},
+            ],
+            "claim_reviews": [
+                {
+                    "claim": "三大テノールとは、ルチアーノ・パヴァロッティ、プラシド・ドミンゴ、ホセ・カレーライスの3名である",
+                    "verdict": "概ね整合",
+                    "reason": "三大テノールは、ルチアーノ・パヴァロッティ、プラシド・ドミンゴ、ホセ・カレーラスの3名のテノール歌手を指す名称である。",
+                },
+            ],
+        },
+    )
+    assert verdict == "ほぼ正確"
+
+
+def test_counterevidence_with_supported_core_and_corrective_detail_can_be_mostly_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=79,
+        confidence_score=48,
+        labels=["信頼できる一次ソース未確認", "判定不能", "出典不明", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+        },
+        evidence_overview={
+            "assessment_status": "要追加確認",
+            "claim_reviews": [
+                {
+                    "claim": "claim",
+                    "verdict": "要追加確認",
+                    "reason": "有権者による承認、税率、対象は確認できた。しかし本文の歳入額の一次ソースは確認できない。",
+                }
             ],
         },
     )

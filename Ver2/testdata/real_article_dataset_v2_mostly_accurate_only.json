@@ -1,0 +1,146 @@
+{
+  "meta": {
+    "name": "real_article_dataset_v2_mostly_accurate_only",
+    "version": 1,
+    "curated_on": "2026-04-08",
+    "language": "ja",
+    "description": "ほぼ正確20件のみのsubset",
+    "source_excel": "エクセル/real_article_dataset_v2.xlsx",
+    "schema_fields": [
+      "id",
+      "expected_verdict",
+      "analysis_text",
+      "expected_domain"
+    ],
+    "case_count": 100,
+    "verdict_distribution": {
+      "正確": 20,
+      "ほぼ正確": 20,
+      "判断保留": 20,
+      "不正確": 20,
+      "誤り": 20
+    }
+  },
+  "cases": [
+    {
+      "id": "positive-mostly-accurate-01-ainu-dance-filmed-1919",
+      "expected_verdict": "ほぼ正確",
+      "analysis_text": "アイヌの踊りが1919年に撮影され、カラー映像で保存されていた。",
+      "expected_domain": "一般"
+    },
+    {
+      "id": "positive-mostly-accurate-02-real-image-of-jovial-swedish-people-despite-train-station-flooding-caused-by-typhoon",
+      "expected_verdict": "ほぼ正確",
+      "analysis_text": "メージャーリーグのシーズン最多安打記録は、イチローの261安打である。",
+      "expected_domain": "一般"
+    },
+    {
+      "id": "positive-mostly-accurate-03-almost-accurate-claim-iaea-not-verifying-filtration-performance-of-contaminated-water",
+      "expected_verdict": "ほぼ正確",
+      "analysis_text": "20世紀末に活躍した三大テノールとは、ルチアーノ・パヴァロッティ、プラシド・ドミンゴ、ホセ・カレーライスの3名である。",
+      "expected_domain": "一般"
+    },
+    {
+      "id": "positive-mostly-accurate-04-infact200912",
+      "expected_verdict": "ほぼ正確",
+      "analysis_text": "織田信長は本能寺の変で明智光秀に殺された。",
+      "expected_domain": "一般"
+    },
+    {
+      "id": "positive-mostly-accurate-05-infact211023-3",
+      "expected_verdict": "ほぼ正確",
+      "analysis_text": "天空の城ラピュタはスタジオジブリの初制作アニメ映画であり、1987年に公開された。",
+      "expected_domain": "一般"
+    },
+    {
+      "id": "positive-mostly-accurate-06-jid211024-1",
+      "expected_verdict": "ほぼ正確",
+      "analysis_text": "大政奉還で江戸幕府は終焉を迎え、明治時代に移った。",
+      "expected_domain": "一般"
+    },
+    {
+      "id": "positive-mostly-accurate-07-jid211029-01",
+      "expected_verdict": "ほぼ正確",
+      "analysis_text": "マサチューセッツ州の有権者は、100万ドルを超える所得に対する4％の追加税を承認し、これにより2024年度に15億ドルの歳入が得られた。",
+      "expected_domain": "金融"
+    },
+    {
+      "id": "positive-mostly-accurate-08-asahi211116-2",
+      "expected_verdict": "ほぼ正確",
+      "analysis_text": "ギザのピラミッドを建設した古代エジプトの労働者たちは、毎日4～5リットルのビールを配給されていた。",
+      "expected_domain": "一般"
+    },
+    {
+      "id": "positive-mostly-accurate-09-infact211217-1",
+      "expected_verdict": "ほぼ正確",
+      "analysis_text": "玉置浩二は、日本のシンガーソングライター、ロックバンド完全地帯のボーカリストで、北海道旭川市出身である。",
+      "expected_domain": "一般"
+    },
+    {
+      "id": "positive-mostly-accurate-10-infact220704",
+      "expected_verdict": "ほぼ正確",
+      "analysis_text": "岸田首相の発言「今年の春闘の賃上げ率2.08%は、過去20年で2番目に高い」",
+      "expected_domain": "金融"
+    },
+    {
+      "id": "positive-mostly-accurate-11-infact220706-2",
+      "expected_verdict": "ほぼ正確",
+      "analysis_text": "X JAPANは1988年にアルバム『BLUE BLOOD』でメジャー・デビューした。",
+      "expected_domain": "一般"
+    },
+    {
+      "id": "positive-mostly-accurate-12-infact220708",
+      "expected_verdict": "ほぼ正確",
+      "analysis_text": "アメリカの国土面積は日本の20倍である。",
+      "expected_domain": "一般"
+    },
+    {
+      "id": "positive-mostly-accurate-13-infact220823",
+      "expected_verdict": "ほぼ正確",
+      "analysis_text": "大谷翔平と同学年のメージャーリーガーは鈴木誠である。",
+      "expected_domain": "一般"
+    },
+    {
+      "id": "positive-mostly-accurate-14-bfj230313",
+      "expected_verdict": "ほぼ正確",
+      "analysis_text": "WBC中継で「オーストラリアにはカンガルーが5000万頭いる」",
+      "expected_domain": "金融"
+    },
+    {
+      "id": "positive-mostly-accurate-15-post-22724",
+      "expected_verdict": "ほぼ正確",
+      "analysis_text": "通算本塁打数の世界記録は王貞治の858本である。",
+      "expected_domain": "一般"
+    },
+    {
+      "id": "positive-mostly-accurate-16-post-22836",
+      "expected_verdict": "ほぼ正確",
+      "analysis_text": "ペンギンはみんな南極に住んでいる。",
+      "expected_domain": "一般"
+    },
+    {
+      "id": "positive-mostly-accurate-17-23435",
+      "expected_verdict": "ほぼ正確",
+      "analysis_text": "世界最高峰のエベレストの標高は8818mである。",
+      "expected_domain": "一般"
+    },
+    {
+      "id": "positive-mostly-accurate-18-kobe-pension-standardly-nontaxable",
+      "expected_verdict": "ほぼ正確",
+      "analysis_text": "日本国憲法はアメリカが作った憲法である。",
+      "expected_domain": "一般"
+    },
+    {
+      "id": "positive-mostly-accurate-19-japanese-electric-car-200km-single-charge",
+      "expected_verdict": "ほぼ正確",
+      "analysis_text": "日本の自動車メーカーは1949年に、1回の充電で400km走行できる電気自動車を開発した。",
+      "expected_domain": "一般"
+    },
+    {
+      "id": "positive-mostly-accurate-20-blobfish-natural-environment",
+      "expected_verdict": "ほぼ正確",
+      "analysis_text": "バイデン政権はマドゥロに2500万ドルの懸賞金をかけた",
+      "expected_domain": "政治"
+    }
+  ]
+}

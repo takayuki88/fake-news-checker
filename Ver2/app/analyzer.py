@@ -1,4 +1,5 @@
 import asyncio
+import difflib
 import json
 import re
 import time
@@ -159,6 +160,42 @@ REPORT_BACKED_CAUTION_HINTS = [
     "評価",
     "解釈",
     "無駄遣い",
+]
+PARTIAL_INACCURACY_HINTS = [
+    "主張は不正確",
+    "という主張は不正確",
+    "一部誤り",
+    "一部誤って",
+    "ではなく",
+    "オリジナルは",
+    "着色",
+]
+MOSTLY_ACCURATE_NUANCE_HINTS = [
+    "概ね整合しているが",
+    "概ね整合しますが",
+    "わずかな差異",
+    "やや控えめ",
+    "その後",
+]
+PARTIAL_SUPPORT_HINTS = [
+    "概ね整合",
+    "一致する",
+    "一致しています",
+    "確認できた",
+    "存在する",
+    "数字自体は",
+]
+PARTIAL_CORRECTION_HINTS = [
+    "ただし",
+    "しかし",
+    "が、",
+    "ではない",
+    "誤り",
+    "異なる",
+    "不正確",
+    "公開年は",
+    "名称は",
+    "一次ソースは確認できない",
 ]
 CORRECTION_PATTERNS = [
     "は誤り",
@@ -456,10 +493,16 @@ def derive_public_verdict(
     )
     report_backed_claim_reviews = count_report_backed_positive_claim_reviews(claim_reviews)
     claim_review_caution = has_report_backed_claim_review_caution(claim_reviews)
+    claim_review_partial_inaccuracy = has_positive_claim_review_partial_inaccuracy(claim_reviews)
+    claim_review_nuance = has_positive_claim_review_nuance(claim_reviews)
+    claim_review_name_correction = has_positive_claim_review_name_correction(claim_reviews)
+    partially_supported_counterevidence = has_partially_supported_counterevidence(claim_reviews)
 
     if overall_verdict == "反証あり":
         if official_source:
             return "正確" if risk_score <= 25 and confidence_score >= 60 else "ほぼ正確"
+        if partially_supported_counterevidence and confidence_score >= 48:
+            return "ほぼ正確"
         if correction_article or fact_check_source or trusted_source:
             return "ほぼ正確"
         if confidence_score < COUNTEREVIDENCE_HOLD_CONFIDENCE_FLOOR:
@@ -486,6 +529,8 @@ def derive_public_verdict(
             return "誤り"
         return "不正確"
     if overall_verdict == "概ね整合":
+        if claim_review_partial_inaccuracy or claim_review_nuance or claim_review_name_correction:
+            return "ほぼ正確"
         if official_source and confidence_score >= 60 and risk_score <= 25:
             return "正確"
         if (
@@ -529,6 +574,8 @@ def derive_public_verdict(
     if overall_verdict == "判定不能":
         return "判断保留"
     if overall_verdict == "要追加確認":
+        if partially_supported_counterevidence and confidence_score >= 39:
+            return "ほぼ正確"
         return "不正確" if risk_score >= 61 else "判断保留"
 
     if evidence_missing and fact_check_source and risk_score <= 46 and confidence_score >= 58:
@@ -1161,7 +1208,7 @@ def heuristic_analysis(page: ResolvedPage) -> dict[str, Any]:
     }
 
 
-def build_prompt(page: ResolvedPage, seed: dict[str, Any]) -> str:
+def build_prompt(page: ResolvedPage, seed: dict[str, Any], settings: Settings) -> str:
     source_snapshot = seed["source_snapshot"].model_dump()
     evidence_overview = seed["evidence_overview"]
     evidence_links = evidence_overview.get("links", [])
@@ -1175,13 +1222,34 @@ def build_prompt(page: ResolvedPage, seed: dict[str, Any]) -> str:
         "evidence_claims": evidence_overview.get("claims", []),
         "evidence_links": evidence_links,
     }
+    style_task_text = ""
+    style_review_schema = ""
+    if settings.gemini_style_review_enabled:
+        style_task_text = (
+            "2. 本文の書き振りだけを見て、煽り・断定・感情誘導・文脈不足の強さを採点する\n"
+            "真偽と書き振りは混同しないでください。書き振りが落ち着いていても真実とは限らず、"
+            "書き振りが強くても即座に虚偽とは限りません。"
+        )
+        style_review_schema = """
+  "style_review": {
+    "style_score": 0から100の整数,
+    "summary": "120字以内の要約",
+    "highlights": ["書き振り上の注目点1", "書き振り上の注目点2"] を最大4件,
+    "signals": [
+      {
+        "title": "煽り表現" のような短い項目名,
+        "severity": "高" または "中" または "低",
+        "detail": "書き振り上の短い理由"
+      }
+    ]
+  }
+""".rstrip()
 
     return f"""
 あなたは日本語のニュース検証支援AIです。
-役割は次の2つを厳密に分けて実行することです。
+役割は次の1つ{("と補助評価1つ" if settings.gemini_style_review_enabled else "")}を厳密に分けて実行することです。
 1. 本文から抽出した主張候補を外部根拠と照合して整理する
-2. 本文の書き振りだけを見て、煽り・断定・感情誘導・文脈不足の強さを採点する
-真偽と書き振りは混同しないでください。書き振りが落ち着いていても真実とは限らず、書き振りが強くても即座に虚偽とは限りません。
+{style_task_text}
 必要に応じて google_search と url_context を使い、公開ウェブ上の一次ソース、公的機関、主要報道機関、ファクトチェック記事を優先して確認してください。
 一次ソースが見当たらない場合は無理に断定せず、「一次ソース未確認」または「判定不能」にしてください。
 相対表現の「今日」「昨日」「明日」は、下記の判定日時を基準に解釈してください。
@@ -1198,19 +1266,8 @@ def build_prompt(page: ResolvedPage, seed: dict[str, Any]) -> str:
   ],
   "labels": ["反証情報あり", "信頼できる一次ソース未確認", "判定不能"] から適切なものを最大4件,
   "reasons": ["外部根拠の要点1", "外部根拠の要点2", "外部根拠の要点3"] のように最大4件,
-  "suggested_queries": ["確認用検索語1", "確認用検索語2", "確認用検索語3"],
-  "style_review": {{
-    "style_score": 0から100の整数,
-    "summary": "120字以内の要約",
-    "highlights": ["書き振り上の注目点1", "書き振り上の注目点2"] を最大4件,
-    "signals": [
-      {{
-        "title": "煽り表現" のような短い項目名,
-        "severity": "高" または "中" または "低",
-        "detail": "書き振り上の短い理由"
-      }}
-    ]
-  }}
+  "suggested_queries": ["確認用検索語1", "確認用検索語2", "確認用検索語3"]{"," if style_review_schema else ""}
+{style_review_schema}
 }}
 
 対象URL: {page.source_url or "未入力"}
@@ -1510,7 +1567,7 @@ async def gemini_analysis(page: ResolvedPage, settings: Settings, seed: dict[str
         f"{settings.gemini_model}:generateContent?key={settings.gemini_api_key}"
     )
     payload = {
-        "contents": [{"parts": [{"text": build_prompt(page, seed)}]}],
+        "contents": [{"parts": [{"text": build_prompt(page, seed, settings)}]}],
         "tools": [
             {"google_search": {}},
             {"url_context": {}},
@@ -1693,6 +1750,12 @@ def merge_evidence_overview(seed: dict[str, Any], llm_bundle: dict[str, Any] | N
 def merge_style_overview(seed: dict[str, Any], llm_bundle: dict[str, Any] | None, settings: Settings) -> dict[str, Any]:
     overview = dict(seed.get("style_overview") or build_fallback_style_overview(seed["signal_breakdown"]).model_dump())
 
+    if not settings.gemini_style_review_enabled:
+        overview["status"] = "ローカル補助判定"
+        overview["note"] = "Gemini の書き振り評価は無効です。ローカル補助表示のみを使っています。"
+        overview["model"] = "local-style-fallback"
+        return overview
+
     if not llm_bundle:
         return overview
 
@@ -1812,6 +1875,68 @@ def has_report_backed_claim_review_caution(claim_reviews: list[dict[str, Any]]) 
             continue
         hint_text = f"{review.get('claim') or ''} {review.get('reason') or ''}".strip().lower()
         if any(hint in hint_text for hint in REPORT_BACKED_CAUTION_HINTS):
+            return True
+    return False
+
+
+def has_positive_claim_review_partial_inaccuracy(claim_reviews: list[dict[str, Any]]) -> bool:
+    for review in claim_reviews:
+        if not isinstance(review, dict):
+            continue
+        if normalize_evidence_verdict(review.get("verdict")) != "概ね整合":
+            continue
+        hint_text = f"{review.get('claim') or ''} {review.get('reason') or ''}".strip().lower()
+        if any(hint in hint_text for hint in PARTIAL_INACCURACY_HINTS):
+            return True
+    return False
+
+
+def has_positive_claim_review_nuance(claim_reviews: list[dict[str, Any]]) -> bool:
+    for review in claim_reviews:
+        if not isinstance(review, dict):
+            continue
+        if normalize_evidence_verdict(review.get("verdict")) != "概ね整合":
+            continue
+        hint_text = f"{review.get('claim') or ''} {review.get('reason') or ''}".strip().lower()
+        if any(hint in hint_text for hint in MOSTLY_ACCURATE_NUANCE_HINTS):
+            return True
+    return False
+
+
+def has_positive_claim_review_name_correction(claim_reviews: list[dict[str, Any]]) -> bool:
+    katakana_pattern = re.compile(r"[ァ-ヶー]{3,}")
+    for review in claim_reviews:
+        if not isinstance(review, dict):
+            continue
+        if normalize_evidence_verdict(review.get("verdict")) != "概ね整合":
+            continue
+        claim_text = str(review.get("claim") or "").strip()
+        reason_text = str(review.get("reason") or "").strip()
+        if not claim_text or not reason_text:
+            continue
+        claim_tokens = {token for token in katakana_pattern.findall(claim_text)}
+        reason_tokens = {token for token in katakana_pattern.findall(reason_text)}
+        for token in claim_tokens:
+            if token in reason_tokens:
+                continue
+            for candidate in reason_tokens:
+                if candidate == token:
+                    continue
+                if difflib.SequenceMatcher(None, token, candidate).ratio() >= 0.55:
+                    return True
+    return False
+
+
+def has_partially_supported_counterevidence(claim_reviews: list[dict[str, Any]]) -> bool:
+    for review in claim_reviews:
+        if not isinstance(review, dict):
+            continue
+        if normalize_evidence_verdict(review.get("verdict")) not in {"反証あり", "要追加確認"}:
+            continue
+        hint_text = f"{review.get('claim') or ''} {review.get('reason') or ''}".strip().lower()
+        has_support = any(hint in hint_text for hint in PARTIAL_SUPPORT_HINTS)
+        has_correction = any(hint in hint_text for hint in PARTIAL_CORRECTION_HINTS)
+        if has_support and has_correction:
             return True
     return False
 
@@ -2022,7 +2147,11 @@ async def analyze_page(page: ResolvedPage, settings: Settings) -> AnalysisResult
 
     gemini_started_at = time.perf_counter()
     llm_bundle = await gemini_analysis(page, settings, seed)
-    gemini_note = "外部根拠比較と書き振り評価を実行しました。"
+    gemini_note = (
+        "外部根拠比較と書き振り評価を実行しました。"
+        if settings.gemini_style_review_enabled
+        else "外部根拠比較を実行しました。書き振り評価はローカル補助表示です。"
+    )
     if not settings.gemini_api_key:
         gemini_note = "Gemini API 未設定のため未実行です。"
     elif llm_bundle and llm_bundle.get("error"):
