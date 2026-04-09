@@ -1,10 +1,10 @@
 {
   "meta": {
-    "name": "real_article_dataset_v2_mostly_accurate_only",
+    "name": "real_article_dataset_v2",
     "version": 1,
     "curated_on": "2026-04-08",
     "language": "ja",
-    "description": "ほぼ正確20件のみのsubset 短文claim評価用の補助列を追加しています。",
+    "description": "real_article_dataset_v2.xlsx の4列をそのまま採用した簡略スキーマの評価用データセットです。 短文claim評価用の補助列を追加しています。",
     "source_excel": "エクセル/real_article_dataset_v2.xlsx",
     "schema_fields": [
       "id",
@@ -17,13 +17,9 @@
       "human_note",
       "contested_span"
     ],
-    "case_count": 100,
+    "case_count": 20,
     "verdict_distribution": {
-      "正確": 20,
-      "ほぼ正確": 20,
-      "判断保留": 20,
-      "不正確": 20,
-      "誤り": 20
+      "ほぼ正確": 20
     },
     "analysis_mode": "claim",
     "helper_fields": [
@@ -49,13 +45,13 @@
     {
       "id": "positive-mostly-accurate-02-real-image-of-jovial-swedish-people-despite-train-station-flooding-caused-by-typhoon",
       "expected_verdict": "ほぼ正確",
-      "analysis_text": "メージャーリーグのシーズン最多安打記録は、イチローの261安打である。",
+      "analysis_text": "イチローは29年間のプロ野球選手生活で日米通算4367安打を記録した。",
       "expected_domain": "一般",
       "analysis_mode": "claim",
-      "claim_text": "メージャーリーグのシーズン最多安打記録は、イチローの261安打である。",
+      "claim_text": "イチローは29年間のプロ野球選手生活で日米通算4367安打を記録した。",
       "review_focus": "大筋は合うが、条件・時点・表現の丸め過ぎがないかを見る。",
       "human_note": "短文claim評価用に、大筋は正しいが細部に注意が必要な主張を抜き出したケースです。",
-      "contested_span": "メージャーリーグのシーズン最多安打記録は、イチローの261安打である。"
+      "contested_span": "イチローは29年間のプロ野球選手生活で日米通算4367安打を記録した。"
     },
     {
       "id": "positive-mostly-accurate-03-almost-accurate-claim-iaea-not-verifying-filtration-performance-of-contaminated-water",
@@ -82,13 +78,13 @@
     {
       "id": "positive-mostly-accurate-05-infact211023-3",
       "expected_verdict": "ほぼ正確",
-      "analysis_text": "天空の城ラピュタはスタジオジブリの初制作アニメ映画であり、1987年に公開された。",
+      "analysis_text": "天空の城ラピュタはスタジオジブリの初制作アニメ映画であり、1986年9月に公開された。",
       "expected_domain": "一般",
       "analysis_mode": "claim",
-      "claim_text": "天空の城ラピュタはスタジオジブリの初制作アニメ映画であり、1987年に公開された。",
+      "claim_text": "天空の城ラピュタはスタジオジブリの初制作アニメ映画であり、1986年9月に公開された。",
       "review_focus": "大筋は合うが、条件・時点・表現の丸め過ぎがないかを見る。",
       "human_note": "短文claim評価用に、大筋は正しいが細部に注意が必要な主張を抜き出したケースです。",
-      "contested_span": "天空の城ラピュタはスタジオジブリの初制作アニメ映画であり、1987年に公開された。"
+      "contested_span": "天空の城ラピュタはスタジオジブリの初制作アニメ映画であり、1986年9月に公開された。"
     },
     {
       "id": "positive-mostly-accurate-06-jid211024-1",
@@ -148,13 +144,13 @@
     {
       "id": "positive-mostly-accurate-11-infact220706-2",
       "expected_verdict": "ほぼ正確",
-      "analysis_text": "X JAPANは1988年にアルバム『BLUE BLOOD』でメジャー・デビューした。",
+      "analysis_text": "X JAPANは1989年5月にアルバム『BLUE BLOOD』でメジャー・デビューした。",
       "expected_domain": "一般",
       "analysis_mode": "claim",
-      "claim_text": "X JAPANは1988年にアルバム『BLUE BLOOD』でメジャー・デビューした。",
+      "claim_text": "X JAPANは1989年5月にアルバム『BLUE BLOOD』でメジャー・デビューした。",
       "review_focus": "大筋は合うが、条件・時点・表現の丸め過ぎがないかを見る。",
       "human_note": "短文claim評価用に、大筋は正しいが細部に注意が必要な主張を抜き出したケースです。",
-      "contested_span": "X JAPANは1988年にアルバム『BLUE BLOOD』でメジャー・デビューした。"
+      "contested_span": "X JAPANは1989年5月にアルバム『BLUE BLOOD』でメジャー・デビューした。"
     },
     {
       "id": "positive-mostly-accurate-12-infact220708",
@@ -170,35 +166,35 @@
     {
       "id": "positive-mostly-accurate-13-infact220823",
       "expected_verdict": "ほぼ正確",
-      "analysis_text": "大谷翔平と同学年のメージャーリーガーは鈴木誠である。",
+      "analysis_text": "大谷翔平と同学年の日本人メージャーリーガーは鈴木誠である。",
       "expected_domain": "一般",
       "analysis_mode": "claim",
-      "claim_text": "大谷翔平と同学年のメージャーリーガーは鈴木誠である。",
+      "claim_text": "大谷翔平と同学年の日本人メージャーリーガーは鈴木誠である。",
       "review_focus": "大筋は合うが、条件・時点・表現の丸め過ぎがないかを見る。",
       "human_note": "短文claim評価用に、大筋は正しいが細部に注意が必要な主張を抜き出したケースです。",
-      "contested_span": "大谷翔平と同学年のメージャーリーガーは鈴木誠である。"
+      "contested_span": "大谷翔平と同学年の日本人メージャーリーガーは鈴木誠である。"
     },
     {
       "id": "positive-mostly-accurate-14-bfj230313",
       "expected_verdict": "ほぼ正確",
-      "analysis_text": "WBC中継で「オーストラリアにはカンガルーが5000万頭いる」",
-      "expected_domain": "金融",
+      "analysis_text": "オーストラリアにはカンガルーが5000万頭いる。",
+      "expected_domain": "一般",
       "analysis_mode": "claim",
-      "claim_text": "WBC中継で「オーストラリアにはカンガルーが5000万頭いる」",
+      "claim_text": "オーストラリアにはカンガルーが5000万頭いる。",
       "review_focus": "大筋は合うが、条件・時点・表現の丸め過ぎがないかを見る。",
       "human_note": "短文claim評価用に、大筋は正しいが細部に注意が必要な主張を抜き出したケースです。",
-      "contested_span": "WBC中継で「オーストラリアにはカンガルーが5000万頭いる」"
+      "contested_span": "オーストラリアにはカンガルーが5000万頭いる。"
     },
     {
       "id": "positive-mostly-accurate-15-post-22724",
       "expected_verdict": "ほぼ正確",
-      "analysis_text": "通算本塁打数の世界記録は王貞治の858本である。",
+      "analysis_text": "通算本塁打数の世界記録は王貞治の869本である。",
       "expected_domain": "一般",
       "analysis_mode": "claim",
-      "claim_text": "通算本塁打数の世界記録は王貞治の858本である。",
+      "claim_text": "通算本塁打数の世界記録は王貞治の869本である。",
       "review_focus": "大筋は合うが、条件・時点・表現の丸め過ぎがないかを見る。",
       "human_note": "短文claim評価用に、大筋は正しいが細部に注意が必要な主張を抜き出したケースです。",
-      "contested_span": "通算本塁打数の世界記録は王貞治の858本である。"
+      "contested_span": "通算本塁打数の世界記録は王貞治の869本である。"
     },
     {
       "id": "positive-mostly-accurate-16-post-22836",
@@ -214,13 +210,13 @@
     {
       "id": "positive-mostly-accurate-17-23435",
       "expected_verdict": "ほぼ正確",
-      "analysis_text": "世界最高峰のエベレストの標高は8818mである。",
+      "analysis_text": "世界最高峰のエベレストの標高は8858mである。",
       "expected_domain": "一般",
       "analysis_mode": "claim",
-      "claim_text": "世界最高峰のエベレストの標高は8818mである。",
+      "claim_text": "世界最高峰のエベレストの標高は8858mである。",
       "review_focus": "大筋は合うが、条件・時点・表現の丸め過ぎがないかを見る。",
       "human_note": "短文claim評価用に、大筋は正しいが細部に注意が必要な主張を抜き出したケースです。",
-      "contested_span": "世界最高峰のエベレストの標高は8818mである。"
+      "contested_span": "世界最高峰のエベレストの標高は8858mである。"
     },
     {
       "id": "positive-mostly-accurate-18-kobe-pension-standardly-nontaxable",
@@ -236,13 +232,13 @@
     {
       "id": "positive-mostly-accurate-19-japanese-electric-car-200km-single-charge",
       "expected_verdict": "ほぼ正確",
-      "analysis_text": "日本の自動車メーカーは1949年に、1回の充電で400km走行できる電気自動車を開発した。",
+      "analysis_text": "日本の自動車メーカーは1949年に、1回の充電で300km走行できる電気自動車を開発した。",
       "expected_domain": "一般",
       "analysis_mode": "claim",
-      "claim_text": "日本の自動車メーカーは1949年に、1回の充電で400km走行できる電気自動車を開発した。",
+      "claim_text": "日本の自動車メーカーは1949年に、1回の充電で300km走行できる電気自動車を開発した。",
       "review_focus": "大筋は合うが、条件・時点・表現の丸め過ぎがないかを見る。",
       "human_note": "短文claim評価用に、大筋は正しいが細部に注意が必要な主張を抜き出したケースです。",
-      "contested_span": "日本の自動車メーカーは1949年に、1回の充電で400km走行できる電気自動車を開発した。"
+      "contested_span": "日本の自動車メーカーは1949年に、1回の充電で300km走行できる電気自動車を開発した。"
     },
     {
       "id": "positive-mostly-accurate-20-blobfish-natural-environment",
