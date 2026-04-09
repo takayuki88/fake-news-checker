@@ -24,6 +24,7 @@ from scripts.plot_evaluation import (
 )
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
+VERSION_LABEL = "Ver4"
 DEFAULT_DATASET_PATH = ROOT_DIR / "testdata" / "article_dataset.json"
 REAL_DATASET_PATH = ROOT_DIR / "testdata" / "real_article_dataset.json"
 URL_PATTERN = re.compile(r"https?://[^\s)>\"]+")
@@ -90,7 +91,7 @@ def normalize_case_schema(case: dict[str, Any], dataset_meta: dict[str, Any] | N
         dataset_name = str(dataset_meta.get("name") or "").strip()
 
     normalized = dict(case)
-    normalized["title"] = str(case.get("title") or case.get("id") or "dataset case").strip()
+    normalized["title"] = derive_case_title(case)
     normalized["site_name"] = str(case.get("site_name") or dataset_name or "dataset_fixture").strip()
     normalized["source_url"] = case.get("source_url") or case.get("page_url")
     normalized["purpose"] = str(
@@ -111,6 +112,20 @@ def normalize_case_schema(case: dict[str, Any], dataset_meta: dict[str, Any] | N
         "domain": expected_domain,
     }
     return normalized
+
+
+def derive_case_title(case: dict[str, Any]) -> str:
+    explicit_title = str(case.get("title") or "").strip()
+    if explicit_title:
+        return explicit_title
+
+    for raw_candidate in (case.get("claim_text"), case.get("analysis_text")):
+        cleaned = " ".join(str(raw_candidate or "").split()).strip()
+        if cleaned:
+            return cleaned[:80].rstrip()
+
+    fallback_id = str(case.get("id") or "").strip()
+    return fallback_id or "dataset case"
 
 
 def normalize_dataset_schema(payload: dict[str, Any]) -> dict[str, Any]:
@@ -382,8 +397,8 @@ def build_csv_base_name(dataset_path: Path, case_filter: str | None = None) -> s
     stem = dataset_path.stem
     if case_filter:
         normalized_case_id = re.sub(r"[^0-9A-Za-z._-]+", "-", case_filter).strip("-") or "case"
-        return f"{stem}_{normalized_case_id}_with_predicted_verdict_attention_score"
-    return f"{stem}_with_predicted_verdict_attention_score"
+        return f"{VERSION_LABEL}_{stem}_{normalized_case_id}_with_predicted_verdict_attention_score"
+    return f"{VERSION_LABEL}_{stem}_with_predicted_verdict_attention_score"
 
 
 def create_evaluation_output_paths(

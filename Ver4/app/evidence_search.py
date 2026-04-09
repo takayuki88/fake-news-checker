@@ -86,7 +86,22 @@ def looks_like_noise(text: str) -> bool:
     lowered = text.lower()
     if lowered.startswith("http://") or lowered.startswith("https://"):
         return True
+    if looks_like_case_slug(text):
+        return True
     return any(phrase in text for phrase in NOISE_PHRASES)
+
+
+def looks_like_case_slug(text: str) -> bool:
+    cleaned = normalize_whitespace(text)
+    if len(cleaned) < 20 or " " in cleaned:
+        return False
+    if any(char in cleaned for char in "。、「」『』（）()"):
+        return False
+    hyphen_like_count = cleaned.count("-") + cleaned.count("_")
+    if hyphen_like_count < 2:
+        return False
+    ascii_ratio = sum(1 for char in cleaned if ord(char) < 128) / max(len(cleaned), 1)
+    return ascii_ratio >= 0.9
 
 
 def score_claim(text: str, domain: str) -> int:

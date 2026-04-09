@@ -182,6 +182,8 @@ PARTIAL_SUPPORT_HINTS = [
     "一致する",
     "一致しています",
     "確認できた",
+    "確認できる",
+    "であることは",
     "存在する",
     "数字自体は",
 ]
@@ -537,18 +539,29 @@ def derive_public_verdict(
     claim_review_partial_inaccuracy = has_positive_claim_review_partial_inaccuracy(claim_reviews)
     claim_review_nuance = has_positive_claim_review_nuance(claim_reviews)
     claim_review_name_correction = has_positive_claim_review_name_correction(claim_reviews)
+    claim_review_death_manner_correction = has_positive_claim_review_death_manner_correction(claim_reviews)
+    counterevidence_name_correction = has_counterevidence_name_correction(claim_reviews)
     partially_supported_counterevidence = has_partially_supported_counterevidence(claim_reviews)
 
     if claim_mode:
         if overall_verdict == "概ね整合":
-            if claim_review_partial_inaccuracy or claim_review_nuance or claim_review_name_correction:
+            if (
+                claim_review_partial_inaccuracy
+                or claim_review_nuance
+                or claim_review_name_correction
+                or claim_review_death_manner_correction
+            ):
                 return "ほぼ正確"
             if positive_claim_reviews >= 1 or official_grounding_sources >= 1 or trusted_grounding_sources >= 1:
                 return "正確" if confidence_score >= 45 else "ほぼ正確"
             return "ほぼ正確"
         if overall_verdict == "反証あり":
-            if partially_supported_counterevidence:
-                return "不正確"
+            if counterevidence_name_correction and (
+                positive_claim_reviews >= 1 or partially_supported_counterevidence
+            ):
+                return "ほぼ正確"
+            if partially_supported_counterevidence and confidence_score >= 48 and risk_score < 60:
+                return "ほぼ正確"
             return "誤り" if risk_score >= 60 and confidence_score >= 40 else "不正確"
         if overall_verdict in {"一次ソース未確認", "判定不能", "要追加確認"}:
             return "判断保留"
@@ -560,6 +573,10 @@ def derive_public_verdict(
     if overall_verdict == "反証あり":
         if official_source:
             return "正確" if risk_score <= 25 and confidence_score >= 60 else "ほぼ正確"
+        if counterevidence_name_correction and (
+            positive_claim_reviews >= 1 or partially_supported_counterevidence
+        ):
+            return "ほぼ正確"
         if partially_supported_counterevidence and confidence_score >= 48:
             return "ほぼ正確"
         if correction_article or fact_check_source or trusted_source:
@@ -588,7 +605,12 @@ def derive_public_verdict(
             return "誤り"
         return "不正確"
     if overall_verdict == "概ね整合":
-        if claim_review_partial_inaccuracy or claim_review_nuance or claim_review_name_correction:
+        if (
+            claim_review_partial_inaccuracy
+            or claim_review_nuance
+            or claim_review_name_correction
+            or claim_review_death_manner_correction
+        ):
             return "ほぼ正確"
         if official_source and confidence_score >= 60 and risk_score <= 25:
             return "正確"
@@ -2014,6 +2036,35 @@ def has_positive_claim_review_nuance(claim_reviews: list[dict[str, Any]]) -> boo
 
 def has_positive_claim_review_name_correction(claim_reviews: list[dict[str, Any]]) -> bool:
     katakana_pattern = re.compile(r"[ァ-ヶー]{3,}")
+    name_like_pattern = re.compile(r"[一-龥々ァ-ヶーA-Za-z0-9]{2,}")
+    stop_tokens = {
+        "日本",
+        "出身",
+        "存在",
+        "映像",
+        "カラー",
+        "オリジナル",
+        "白黒",
+        "現在",
+        "主張",
+        "確認",
+        "情報源",
+        "ボーカリスト",
+        "シンガーソングライター",
+    }
+
+    def normalized_name_tokens(text: str) -> set[str]:
+        tokens = {token for token in katakana_pattern.findall(text)}
+        for token in name_like_pattern.findall(text):
+            if len(token) < 3:
+                continue
+            if token in stop_tokens:
+                continue
+            if re.fullmatch(r"[A-Za-z0-9]+", token):
+                continue
+            tokens.add(token)
+        return tokens
+
     for review in claim_reviews:
         if not isinstance(review, dict):
             continue
@@ -2023,17 +2074,51 @@ def has_positive_claim_review_name_correction(claim_reviews: list[dict[str, Any]
         reason_text = str(review.get("reason") or "").strip()
         if not claim_text or not reason_text:
             continue
-        claim_tokens = {token for token in katakana_pattern.findall(claim_text)}
-        reason_tokens = {token for token in katakana_pattern.findall(reason_text)}
+        claim_tokens = normalized_name_tokens(claim_text)
+        reason_tokens = normalized_name_tokens(reason_text)
         for token in claim_tokens:
             if token in reason_tokens:
                 continue
             for candidate in reason_tokens:
                 if candidate == token:
                     continue
-                if difflib.SequenceMatcher(None, token, candidate).ratio() >= 0.55:
+                similarity = difflib.SequenceMatcher(None, token, candidate).ratio()
+                shares_edge = (
+                    token[:2] == candidate[:2]
+                    or token[-2:] == candidate[-2:]
+                    or token in candidate
+                    or candidate in token
+                )
+                if similarity >= 0.55 and shares_edge:
                     return True
     return False
+
+
+def has_positive_claim_review_death_manner_correction(claim_reviews: list[dict[str, Any]]) -> bool:
+    claim_hints = ("殺された", "殺害された", "暗殺された", "討たれた")
+    reason_hints = ("自害", "自刃", "切腹")
+
+    for review in claim_reviews:
+        if not isinstance(review, dict):
+            continue
+        if normalize_evidence_verdict(review.get("verdict")) != "概ね整合":
+            continue
+        claim_text = str(review.get("claim") or "").strip()
+        reason_text = str(review.get("reason") or "").strip()
+        if not claim_text or not reason_text:
+            continue
+        if any(hint in claim_text for hint in claim_hints) and any(hint in reason_text for hint in reason_hints):
+            return True
+    return False
+
+
+def has_counterevidence_name_correction(claim_reviews: list[dict[str, Any]]) -> bool:
+    normalized_reviews = [
+        {**review, "verdict": "概ね整合"}
+        for review in claim_reviews
+        if isinstance(review, dict) and normalize_evidence_verdict(review.get("verdict")) == "反証あり"
+    ]
+    return has_positive_claim_review_name_correction(normalized_reviews)
 
 
 def has_partially_supported_counterevidence(claim_reviews: list[dict[str, Any]]) -> bool:

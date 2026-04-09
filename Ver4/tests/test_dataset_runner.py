@@ -211,7 +211,7 @@ def test_load_dataset_normalizes_simplified_schema() -> None:
         dataset = load_dataset(dataset_path)
         case = dataset["cases"][0]
 
-        assert case["title"] == "case-1"
+        assert case["title"] == "これは誤った主張です。"
         assert case["site_name"] == "real_article_dataset_v2"
         assert case["expected"] == {"verdict": "誤り", "domain": "一般"}
         assert case["source_verdict_label"] == "誤り"
@@ -229,14 +229,14 @@ def test_create_evaluation_output_paths_uses_timestamp_and_expected_names() -> N
         use_gemini=True,
         case_filter=None,
         output_stem="real_v4_use_gemini",
-        csv_base_name="real_article_dataset_v2_with_predicted_verdict_attention_score",
+        csv_base_name="Ver4_real_article_dataset_v2_with_predicted_verdict_attention_score",
     )
 
     assert output_paths["output_dir"].parent.name == "evaluation_outputs"
     assert output_paths["output_dir"].name
     assert output_paths["predictions_json"].name == "predictions_real_v4_use_gemini.json"
     assert output_paths["evaluation_json"].name == "eval_real_v4_use_gemini.json"
-    assert output_paths["csv"].name == "real_article_dataset_v2_with_predicted_verdict_attention_score.csv"
+    assert output_paths["csv"].name == "Ver4_real_article_dataset_v2_with_predicted_verdict_attention_score.csv"
     assert output_paths["plots_dir"].name == "plots"
 
 

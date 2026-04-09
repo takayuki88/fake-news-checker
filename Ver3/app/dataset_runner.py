@@ -1,5 +1,6 @@
 import argparse
 import asyncio
+import csv
 import json
 import re
 import sys
@@ -11,9 +12,19 @@ from .config import Settings
 from .content_extractor import resolve_page_input
 from .evaluation import build_evaluation_report, format_report_text
 from .models import AnalysisResult, ResolvedPage
-from .time_utils import build_analysis_timestamp_fields
+from .time_utils import build_analysis_timestamp_fields, get_current_app_datetime
+from scripts.plot_evaluation import (
+    configure_plot_style,
+    ensure_plotting_modules,
+    save_confusion_matrix,
+    save_evaluation_overview,
+    save_per_class_metrics,
+    save_summary_dashboard,
+    save_summary_metrics,
+)
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
+VERSION_LABEL = "Ver3"
 DEFAULT_DATASET_PATH = ROOT_DIR / "testdata" / "article_dataset.json"
 REAL_DATASET_PATH = ROOT_DIR / "testdata" / "real_article_dataset.json"
 URL_PATTERN = re.compile(r"https?://[^\s)>\"]+")
@@ -355,6 +366,134 @@ def resolve_dataset_path(dataset_path: Path | None, dataset_name: str | None) ->
     raise ValueError("データセット JSON を指定してください。例: python -m app.dataset_runner .\\eval_cases.json")
 
 
+def build_output_stem(dataset_path: Path, use_gemini: bool, case_filter: str | None = None) -> str:
+    stem = dataset_path.stem
+    mode = "use_gemini" if use_gemini else "no_gemini"
+    if case_filter:
+        normalized_case_id = re.sub(r"[^0-9A-Za-z._-]+", "-", case_filter).strip("-") or "case"
+        return f"{stem}_{normalized_case_id}_{mode}"
+    return f"{stem}_{mode}"
+
+
+def build_csv_base_name(dataset_path: Path, case_filter: str | None = None) -> str:
+    stem = dataset_path.stem
+    if case_filter:
+        normalized_case_id = re.sub(r"[^0-9A-Za-z._-]+", "-", case_filter).strip("-") or "case"
+        return f"{VERSION_LABEL}_{stem}_{normalized_case_id}_with_predicted_verdict_attention_score"
+    return f"{VERSION_LABEL}_{stem}_with_predicted_verdict_attention_score"
+
+
+def create_evaluation_output_paths(
+    dataset_path: Path,
+    settings: Settings,
+    use_gemini: bool,
+    case_filter: str | None = None,
+    output_stem: str | None = None,
+    csv_base_name: str | None = None,
+) -> dict[str, Path]:
+    timestamp = get_current_app_datetime(settings).strftime("%Y%m%d-%H%M")
+    output_dir = ROOT_DIR / "evaluation_outputs" / timestamp
+    normalized_output_stem = output_stem or build_output_stem(dataset_path, use_gemini, case_filter)
+    normalized_csv_base_name = csv_base_name or build_csv_base_name(dataset_path, case_filter)
+    return {
+        "output_dir": output_dir,
+        "predictions_json": output_dir / f"predictions_{normalized_output_stem}.json",
+        "evaluation_json": output_dir / f"eval_{normalized_output_stem}.json",
+        "csv": output_dir / f"{normalized_csv_base_name}.csv",
+        "plots_dir": output_dir / "plots",
+    }
+
+
+def export_prediction_csv(
+    prediction_bundle: dict[str, Any],
+    dataset_path: Path,
+    csv_path: Path,
+) -> None:
+    prediction_records = prediction_bundle.get("records", [])
+    predicted_by_id: dict[str, dict[str, str]] = {}
+    for record in prediction_records:
+        predicted = record.get("predicted", {})
+        attention_score = predicted.get("attention_score")
+        predicted_by_id[str(record.get("id") or "")] = {
+            "predicted_verdict": str(predicted.get("verdict") or "").strip(),
+            "attention_score": "" if attention_score is None else str(int(round(float(attention_score)))),
+        }
+
+    dataset = load_dataset(dataset_path)
+    fieldnames = [
+        "id",
+        "expected_verdict",
+        "analysis_text",
+        "expected_domain",
+        "predicted_verdict",
+        "attention_score",
+    ]
+    rows: list[dict[str, str]] = []
+    for case in dataset.get("cases", []):
+        expected = case.get("expected", {})
+        case_id = str(case.get("id") or "")
+        row = {
+            "id": case_id,
+            "expected_verdict": str(case.get("expected_verdict") or expected.get("verdict") or "").strip(),
+            "analysis_text": str(case.get("analysis_text") or "").strip(),
+            "expected_domain": str(case.get("expected_domain") or expected.get("domain") or "").strip(),
+            "predicted_verdict": "",
+            "attention_score": "",
+        }
+        row.update(predicted_by_id.get(case_id, {}))
+        rows.append(row)
+
+    csv_path.parent.mkdir(parents=True, exist_ok=True)
+    with csv_path.open("w", encoding="utf-8-sig", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def export_evaluation_plots(report: dict[str, Any], plots_dir: Path) -> None:
+    plots_dir.mkdir(parents=True, exist_ok=True)
+    plt, sns, font_manager = ensure_plotting_modules()
+    configure_plot_style(plt, sns, font_manager)
+    save_summary_dashboard(report, plots_dir / "evaluation_dashboard.png", plt, sns)
+    save_confusion_matrix(report, plots_dir / "confusion_matrix.png", plt, sns)
+    save_summary_metrics(report, plots_dir / "summary_metrics.png", plt)
+    save_per_class_metrics(report, plots_dir / "per_class_metrics.png", plt)
+    save_evaluation_overview(report, plots_dir / "evaluation_overview.png", plt)
+
+
+def save_evaluation_bundle(
+    prediction_bundle: dict[str, Any],
+    report: dict[str, Any],
+    dataset_path: Path,
+    settings: Settings,
+    use_gemini: bool,
+    case_filter: str | None = None,
+    output_stem: str | None = None,
+    csv_base_name: str | None = None,
+) -> dict[str, Path]:
+    output_paths = create_evaluation_output_paths(
+        dataset_path=dataset_path,
+        settings=settings,
+        use_gemini=use_gemini,
+        case_filter=case_filter,
+        output_stem=output_stem,
+        csv_base_name=csv_base_name,
+    )
+    output_dir = output_paths["output_dir"]
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output_paths["predictions_json"].write_text(
+        json.dumps(prediction_bundle, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    output_paths["evaluation_json"].write_text(
+        json.dumps(report, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    export_prediction_csv(prediction_bundle, dataset_path, output_paths["csv"])
+    export_evaluation_plots(report, output_paths["plots_dir"])
+    return output_paths
+
+
 def serialize_prediction(result: AnalysisResult | None) -> dict[str, Any]:
     if not result:
         return {}
@@ -453,12 +592,24 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output-json", type=Path, default=None, help="予測 JSON の保存先")
     parser.add_argument("--print-evaluation", action="store_true", help="評価結果を標準出力にも表示")
     parser.add_argument("--evaluation-output", type=Path, default=None, help="評価結果 JSON の保存先")
+    parser.add_argument(
+        "--save-evaluation-bundle",
+        action="store_true",
+        help="evaluation_outputs/YYYYMMDD-HHMM に json/csv/plots をまとめて保存",
+    )
+    parser.add_argument("--output-stem", default=None, help="predictions_/eval_ の共通 stem")
+    parser.add_argument(
+        "--csv-base-name",
+        default=None,
+        help="CSV ファイル名の base name。拡張子は自動で .csv になります",
+    )
     return parser.parse_args()
 
 
 def main() -> int:
     args = parse_args()
     dataset_path = resolve_dataset_path(args.dataset_json, args.dataset)
+    settings = build_settings(args.use_gemini)
     try:
         prediction_bundle = asyncio.run(run_dataset(dataset_path, use_gemini=args.use_gemini, case_filter=args.case_id))
     except GeminiPreflightError as exc:
@@ -467,10 +618,10 @@ def main() -> int:
 
     if args.output_json:
         args.output_json.write_text(json.dumps(prediction_bundle, ensure_ascii=False, indent=2), encoding="utf-8")
-    else:
+    elif not args.save_evaluation_bundle:
         print(json.dumps(prediction_bundle, ensure_ascii=False, indent=2))
 
-    if args.print_evaluation or args.evaluation_output:
+    if args.print_evaluation or args.evaluation_output or args.save_evaluation_bundle:
         report = build_evaluation_report(
             prediction_bundle["records"],
             truth_key="expected.verdict",
@@ -483,6 +634,23 @@ def main() -> int:
             print(format_report_text(report))
         if args.evaluation_output:
             args.evaluation_output.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+        if args.save_evaluation_bundle:
+            output_paths = save_evaluation_bundle(
+                prediction_bundle=prediction_bundle,
+                report=report,
+                dataset_path=dataset_path,
+                settings=settings,
+                use_gemini=args.use_gemini,
+                case_filter=args.case_id,
+                output_stem=args.output_stem,
+                csv_base_name=args.csv_base_name,
+            )
+            print()
+            print(f"saved folder: {output_paths['output_dir']}")
+            print(f"predictions: {output_paths['predictions_json']}")
+            print(f"evaluation: {output_paths['evaluation_json']}")
+            print(f"csv: {output_paths['csv']}")
+            print(f"plots: {output_paths['plots_dir']}")
 
     return 0
 

@@ -490,6 +490,138 @@ def test_name_correction_in_supported_claim_stays_mostly_accurate() -> None:
     assert verdict == "ほぼ正確"
 
 
+def test_kanji_name_correction_in_supported_claim_stays_mostly_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=44,
+        confidence_score=59,
+        labels=["大筋で整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+        },
+        evidence_overview={
+            "assessment_status": "概ね整合",
+            "grounding_sources": [
+                {"title": "wikipedia.org", "url": "https://example.com/a"},
+                {"title": "natalie.mu", "url": "https://example.com/b"},
+            ],
+            "claim_reviews": [
+                {
+                    "claim": "玉置浩二は、日本のシンガーソングライター、ロックバンド完全地帯のボーカリストで、北海道旭川市出身である",
+                    "verdict": "概ね整合",
+                    "reason": "玉置浩二は日本のシンガーソングライターであり、ロックバンド安全地帯のボーカリストで、北海道旭川市出身である。",
+                },
+            ],
+        },
+    )
+    assert verdict == "ほぼ正確"
+
+
+def test_split_supported_claim_with_one_name_correction_stays_mostly_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=48,
+        confidence_score=71,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "grounding_sources": [
+                {"title": "columbia.jp", "url": "https://example.com/a"},
+                {"title": "natalie.mu", "url": "https://example.com/b"},
+            ],
+            "claim_reviews": [
+                {
+                    "claim": "玉置浩二は、日本のシンガーソングライターである。",
+                    "verdict": "概ね整合",
+                    "reason": "玉置浩二は日本のシンガーソングライターである。",
+                },
+                {
+                    "claim": "玉置浩二は、ロックバンド完全地帯のボーカリストである。",
+                    "verdict": "反証あり",
+                    "reason": "玉置浩二がボーカリストを務めるロックバンドは「安全地帯」であり、「完全地帯」は誤りです。",
+                },
+                {
+                    "claim": "玉置浩二は、北海道旭川市出身である。",
+                    "verdict": "概ね整合",
+                    "reason": "玉置浩二は北海道旭川市出身である。",
+                },
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "ほぼ正確"
+
+
+def test_single_counterevidence_review_with_supported_core_and_name_correction_stays_mostly_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=54,
+        confidence_score=69,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "grounding_sources": [
+                {"title": "columbia.jp", "url": "https://example.com/a"},
+                {"title": "wikipedia.org", "url": "https://example.com/b"},
+            ],
+            "claim_reviews": [
+                {
+                    "claim": "玉置浩二は、日本のシンガーソングライター、ロックバンド完全地帯のボーカリストで、北海道旭川市出身である",
+                    "verdict": "反証あり",
+                    "reason": "玉置浩二は日本のシンガーソングライターであり、北海道旭川市出身であることは複数の情報源で確認できる。しかし、所属するロックバンドの名称は「安全地帯」であり、「完全地帯」ではないため、主張は一部誤りである。",
+                },
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "ほぼ正確"
+
+
+def test_self_inflicted_death_correction_in_supported_claim_stays_mostly_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=34,
+        confidence_score=71,
+        labels=["一次ソースと整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "概ね整合",
+            "grounding_sources": [
+                {"title": "city.kameoka.kyoto.jp", "url": "https://example.com/a"},
+                {"title": "wikipedia.org", "url": "https://example.com/b"},
+            ],
+            "claim_reviews": [
+                {
+                    "claim": "織田信長は本能寺の変で明智光秀に殺された。",
+                    "verdict": "概ね整合",
+                    "reason": "複数の歴史資料や報道機関の記事が、織田信長が本能寺の変において明智光秀の謀反により死亡したことを示しています。信長は本能寺で襲撃され、自害したとされています。",
+                },
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "ほぼ正確"
+
+
 def test_counterevidence_with_supported_core_and_corrective_detail_can_be_mostly_accurate() -> None:
     verdict = derive_public_verdict(
         risk_score=79,

@@ -1,6 +1,14 @@
 from collections import Counter
 
-from app.dataset_runner import REAL_DATASET_PATH, evaluate_result, load_dataset, normalize_case_schema
+from app.dataset_runner import (
+    REAL_DATASET_PATH,
+    build_fixture_page,
+    build_settings,
+    evaluate_result,
+    load_dataset,
+    normalize_case_schema,
+)
+from app.evidence_search import extract_claim_candidates
 from app.models import AnalysisResult, EvidenceOverview, SourceSnapshot, StyleOverview
 
 
@@ -83,7 +91,26 @@ def test_normalize_case_schema_supports_simplified_expected_fields() -> None:
         {"name": "real_article_dataset_v2"},
     )
 
-    assert case["title"] == "case-1"
+    assert case["title"] == "判定材料が不足している。"
     assert case["site_name"] == "real_article_dataset_v2"
     assert case["expected"]["verdict"] == "判断保留"
     assert case["expected"]["domain"] == "一般"
+
+
+def test_extract_claim_candidates_skips_dataset_case_slug_titles() -> None:
+    case = normalize_case_schema(
+        {
+            "id": "positive-accurate-17-toyota-city-japan-name",
+            "expected_verdict": "正確",
+            "expected_domain": "一般",
+            "analysis_mode": "claim",
+            "claim_text": "日本の豊田市は、自動車メーカーであるトヨタ自動車にちなんで名付けられた。",
+            "analysis_text": "日本の豊田市は、自動車メーカーであるトヨタ自動車にちなんで名付けられた。",
+        },
+        {"name": "real_article_dataset_v2"},
+    )
+
+    page = build_fixture_page(case, build_settings(False))
+    claims = extract_claim_candidates(page, case["expected"]["domain"])
+
+    assert claims == ["日本の豊田市は、自動車メーカーであるトヨタ自動車にちなんで名付けられた"]
