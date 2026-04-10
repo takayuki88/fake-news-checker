@@ -247,9 +247,15 @@ COUNTEREVIDENCE_MATERIAL_ROLE_HINTS = [
 STRONG_FALSE_CONSPIRACY_HINTS = ["陰謀論", "科学的根拠がなく", "科学的根拠はなく", "繰り返し否定"]
 STRONG_FALSE_NONEXISTENT_LAW_HINTS = ["制定されていません", "存在しません"]
 STRONG_FALSE_FAKE_QUOTE_HINTS = ["事実はなく", "原文の解釈も誤っている", "誤訳"]
-STRONG_FALSE_FAKE_IMAGE_HINTS = ["加工された", "意図的に加工", "フェイク画像", "生成ai", "ディープフェイク"]
+STRONG_FALSE_FAKE_QUOTE_ABSENCE_HINTS = [
+    "確認できませんでした",
+    "確認されていません",
+    "報道や公的発表は確認できません",
+    "発表や報道はなく",
+]
+STRONG_FALSE_FAKE_QUOTE_MISATTRIBUTION_HINTS = ["誤情報", "誤りである", "紐づくものではありません", "まとめサイト"]
+STRONG_FALSE_FAKE_IMAGE_HINTS = ["加工された", "意図的に加工", "フェイク画像", "生成ai", "ディープフェイク", "合成", "捏造"]
 STRONG_FALSE_GEOCENTRISM_REASON_HINTS = ["天動説", "地動説", "公転", "科学的に確立"]
-STRONG_FALSE_5G_COVID_REASON_HINTS = ["世界保健機関", "電波", "モバイルネットワーク", "5gがない", "科学的専門家"]
 STRONG_FALSE_VACCINE_CANCER_REASON_HINTS = ["因果関係", "主張は誤り", "認めたという主張は誤り"]
 STRONG_FALSE_VACCINE_CANCER_DISCLAIMER_HINTS = [
     "関連性を示す発表や報道もありません",
@@ -628,7 +634,7 @@ def derive_public_verdict(
                 return "ほぼ正確"
             if counterevidence_minor_detail_correction and confidence_score >= 48 and risk_score < 60:
                 return "ほぼ正確"
-            if strong_false_counterevidence and confidence_score >= 60:
+            if strong_false_counterevidence and confidence_score >= 58:
                 return "誤り"
             return "誤り" if risk_score >= 60 and confidence_score >= 40 else "不正確"
         if overall_verdict in {"一次ソース未確認", "判定不能", "要追加確認"}:
@@ -2436,8 +2442,11 @@ def has_strong_false_counterevidence(claim_reviews: list[dict[str, Any]]) -> boo
         is_nonexistent_law_false = ("法" in claim_text or "法律" in claim_text) and any(
             hint in reason_text for hint in STRONG_FALSE_NONEXISTENT_LAW_HINTS
         )
-        is_fake_quote_false = ("発言" in claim_text or "「" in claim_text) and any(
-            hint in reason_text for hint in STRONG_FALSE_FAKE_QUOTE_HINTS
+        has_fake_quote_absence = any(hint in reason_text for hint in STRONG_FALSE_FAKE_QUOTE_ABSENCE_HINTS)
+        has_fake_quote_misattribution = any(hint in reason_text for hint in STRONG_FALSE_FAKE_QUOTE_MISATTRIBUTION_HINTS)
+        is_fake_quote_false = ("発言" in claim_text or "「" in claim_text) and (
+            any(hint in reason_text for hint in STRONG_FALSE_FAKE_QUOTE_HINTS)
+            or (has_fake_quote_absence and has_fake_quote_misattribution)
         )
         is_fake_image_false = any(hint in reason_text for hint in ("画像", "写真")) and any(
             hint in reason_text_lower for hint in STRONG_FALSE_FAKE_IMAGE_HINTS
@@ -2449,12 +2458,28 @@ def has_strong_false_counterevidence(claim_reviews: list[dict[str, Any]]) -> boo
             and any(hint in reason_text for hint in STRONG_FALSE_GEOCENTRISM_REASON_HINTS[:2])
             and any(hint in reason_text for hint in STRONG_FALSE_GEOCENTRISM_REASON_HINTS[2:])
         )
+        has_5g_authoritative_denial = (
+            "世界保健機関" in reason_text
+            or "who" in reason_text_lower
+            or "公的機関" in reason_text
+            or "ファクトチェック機関" in reason_text
+        )
+        has_5g_transmission_denial = any(
+            hint in reason_text_lower for hint in ("電波", "モバイルネットワーク", "移動せず", "移動できず")
+        )
+        has_5g_counterexample = any(
+            hint in reason_text_lower for hint in ("5gがない", "5gネットワークがない", "導入されていない地域")
+        )
+        has_5g_no_causation = any(
+            hint in reason_text_lower
+            for hint in ("因果関係がない", "関連がない", "関連性がない", "科学的な因果関係がない")
+        )
         is_5g_covid_false = (
             "5g" in claim_text_lower
             and ("新型コロナ" in claim_text or "コロナ" in claim_text)
-            and (STRONG_FALSE_5G_COVID_REASON_HINTS[0] in reason_text or "who" in reason_text_lower)
-            and any(hint in reason_text_lower for hint in STRONG_FALSE_5G_COVID_REASON_HINTS[1:3])
-            and any(hint in reason_text_lower for hint in STRONG_FALSE_5G_COVID_REASON_HINTS[3:])
+            and has_5g_authoritative_denial
+            and (has_5g_transmission_denial or has_5g_no_causation)
+            and (has_5g_counterexample or has_5g_no_causation)
         )
         is_vaccine_cancer_false = (
             "ワクチン" in claim_text

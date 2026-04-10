@@ -1393,3 +1393,111 @@ def test_false_claim_mode_mmr_autism_counterevidence_escalates_to_false() -> Non
         claim_mode=True,
     )
     assert verdict == "誤り"
+
+
+def test_false_claim_mode_fake_quote_absence_and_misattribution_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=52,
+        confidence_score=68,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "世田谷区で韓国籍女性が殺害された事件について、韓国の李在明大統領が「日本は謝罪と賠償をするべきだ」と発言した。",
+                    "verdict": "反証あり",
+                    "reason": "李在明大統領がこの事件に言及したという直接的な報道や公的発表は確認できませんでした。この主張はまとめサイト由来の誤情報であり、過去の別発言をこの事件に紐づけたものではありません。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_modified_image_with_confidence_59_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=51,
+        confidence_score=59,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "朝日新聞の入社式では、社旗の脇に韓国と中国の国旗を並べ、ハングル文字を掲げていた。",
+                    "verdict": "反証あり",
+                    "reason": "この主張の根拠画像は、入社式写真を第三者が意図的に加工したもので、加工された痕跡も確認されています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_5g_covid_variation_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=52,
+        confidence_score=74,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "5Gが新型コロナを引き起こす。",
+                    "verdict": "反証あり",
+                    "reason": "世界保健機関（WHO）や各国の公的機関、ファクトチェック機関が、5Gと新型コロナウイルスの間に科学的な因果関係がないことを明確に否定しています。ウイルスは電波に乗って移動せず、5Gが導入されていない地域でも感染拡大は起きています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_synthetic_image_variation_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=52,
+        confidence_score=71,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "ギザのピラミッド上空に水星、金星、土星が見える。これは2373年に1度起こる現象である。",
+                    "verdict": "反証あり",
+                    "reason": "この画像は合成であり実際のものではありません。NASAの説明でも、このような惑星の並びは数千年に一度の現象ではないとされています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
