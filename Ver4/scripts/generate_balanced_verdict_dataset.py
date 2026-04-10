@@ -4,9 +4,9 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parent.parent
-REAL_DATASET_PATH = ROOT / "testdata" / "real_article_dataset.json"
-POSITIVE_FACTCHECK_CASES_PATH = ROOT / "testdata" / "positive_factcheck_cases.json"
-JFC_CURATED_CASES_PATH = ROOT / "testdata" / "jfc_curated_factcheck_cases.json"
+REAL_DATASET_PATH = ROOT.parent / "testdata" / "shared" / "real_article_dataset.json"
+POSITIVE_FACTCHECK_CASES_PATH = ROOT.parent / "testdata" / "sources" / "positive_factcheck_cases.json"
+JFC_CURATED_CASES_PATH = ROOT.parent / "testdata" / "sources" / "jfc_curated_factcheck_cases.json"
 DATASET_VERSION = 10
 DATASET_CURATED_ON = "2026-03-31"
 

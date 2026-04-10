@@ -1,5 +1,5 @@
 param(
-    [string]$DatasetPath = "..\Ver3\testdata\real_article_dataset_v2.json",
+    [string]$DatasetPath = "..\testdata\shared\real_article_dataset_v2.json",
     [switch]$UseGemini = $true,
     [string]$OutputStem = "real_v2_use_gemini",
     [string]$CsvBaseName = "",

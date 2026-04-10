@@ -24,9 +24,11 @@ from scripts.plot_evaluation import (
 )
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
+REPO_ROOT = ROOT_DIR.parent
 VERSION_LABEL = "Ver4"
-DEFAULT_DATASET_PATH = ROOT_DIR / "testdata" / "article_dataset.json"
-REAL_DATASET_PATH = ROOT_DIR / "testdata" / "real_article_dataset.json"
+SHARED_TESTDATA_DIR = REPO_ROOT / "testdata" / "shared"
+DEFAULT_DATASET_PATH = SHARED_TESTDATA_DIR / "article_dataset.json"
+REAL_DATASET_PATH = SHARED_TESTDATA_DIR / "real_article_dataset.json"
 URL_PATTERN = re.compile(r"https?://[^\s)>\"]+")
 MAX_CONCURRENT_CASES = 4
 MAX_CONCURRENT_GEMINI_CASES = 8

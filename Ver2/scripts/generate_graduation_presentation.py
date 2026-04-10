@@ -12,7 +12,7 @@ from pptx.util import Inches, Pt
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DATASET_PATH = ROOT / "testdata" / "real_article_dataset.json"
+DATASET_PATH = ROOT.parent / "testdata" / "shared" / "real_article_dataset.json"
 EVAL_PATH = ROOT / "eval_real.json"
 PLOTS_DIR = ROOT / "eval_real_plots"
 OUTPUT_PATH = ROOT.parent / "卒業発表会_フェイクニュースチェッカー_20260329.pptx"

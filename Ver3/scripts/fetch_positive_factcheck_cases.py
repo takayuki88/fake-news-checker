@@ -7,7 +7,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parent.parent
-OUTPUT_PATH = ROOT / "testdata" / "positive_factcheck_cases.json"
+OUTPUT_PATH = ROOT.parent / "testdata" / "sources" / "positive_factcheck_cases.json"
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0",

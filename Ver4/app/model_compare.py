@@ -14,6 +14,7 @@ from .evaluation import build_evaluation_report
 from .time_utils import get_current_app_datetime
 
 DEFAULT_MODELS = ("gpt-4.1-mini", "gpt-5-mini", "gpt-5.4-mini")
+SHARED_TESTDATA_DIR = ROOT_DIR.parent / "testdata" / "shared"
 
 
 def sanitize_model_id(model_id: str) -> str:
@@ -25,10 +26,10 @@ def resolve_dataset_path(dataset_json: Path | None, dataset_name: str | None) ->
     if dataset_json:
         return dataset_json
     if dataset_name == "default":
-        return ROOT_DIR / "testdata" / "article_dataset.json"
+        return SHARED_TESTDATA_DIR / "article_dataset.json"
     if dataset_name == "real":
-        return ROOT_DIR / "testdata" / "real_article_dataset.json"
-    default_path = ROOT_DIR / "testdata" / "article_dataset.json"
+        return SHARED_TESTDATA_DIR / "real_article_dataset.json"
+    default_path = SHARED_TESTDATA_DIR / "article_dataset.json"
     if default_path.exists():
         return default_path
     raise ValueError("データセット JSON を指定してください。例: python -m app.model_compare --dataset real")

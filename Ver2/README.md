@@ -115,10 +115,10 @@ python -m app.dataset_runner .\eval_cases.json --output-json .\predictions.json
 ```
 
 このリポジトリには、公開 verdict の 5区分を評価する 100 件 dataset も同梱しています。
-この `real_article_dataset.json` は、`正確 / ほぼ正確 / 判断保留 / 不正確 / 誤り` を含みます。
+この共通 dataset `..\testdata\shared\real_article_dataset.json` は、`正確 / ほぼ正確 / 判断保留 / 不正確 / 誤り` を含みます。
 判定対象は `analysis_text` の中心命題で、`正確 / ほぼ正確 / 判断保留 / 不正確 / 誤り` を各20件ずつ含みます。
 短文 dataset には `analysis_mode / claim_text / review_focus / human_note / contested_span` の補助列も持たせています。
-同じフォルダにある `*_reading_guide.csv` は、人が見返すための補助一覧です。
+対応する `..\testdata\shared\*_reading_guide.csv` は、人が見返すための補助一覧です。
 
 ```powershell
 python -m app.dataset_runner --dataset real --output-json .\predictions_real.json --print-evaluation --evaluation-output .\eval_real.json

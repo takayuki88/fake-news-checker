@@ -5,7 +5,7 @@
     "curated_on": "2026-04-08",
     "language": "ja",
     "description": "real_article_dataset_v2.xlsx の4列をそのまま採用した簡略スキーマの評価用データセットです。 短文claim評価用の補助列を追加しています。",
-    "source_excel": "エクセル/real_article_dataset_v2.xlsx",
+    "source_excel": "legacy Excel workbook removed from repo; canonical dataset now lives under testdata/shared",
     "schema_fields": [
       "id",
       "expected_verdict",

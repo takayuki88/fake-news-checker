@@ -1,7 +1,7 @@
-# Excel vs real_article_dataset.json Diff
+# Excel vs Shared real_article_dataset.json Diff
 
-- Excel: `real_article_dataset (1).xlsx`
-- JSON: `real_article_dataset.json`
+- Legacy Excel source: `../エクセル/real_article_dataset (1).xlsx` (removed from the repo in the current layout)
+- JSON: `../../testdata/shared/real_article_dataset.json`
 - JSON version: `7`
 - JSON curated_on: `2026-03-31`
 - Diff rows: `15`

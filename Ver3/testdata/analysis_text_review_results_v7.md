@@ -3,7 +3,7 @@
 - Reviewer: Codex
 - Date: 2026-03-31
 - Dataset version: 7
-- Scope: `real_article_dataset.json` 100件を [analysis_text_review_checklist.md](./analysis_text_review_checklist.md) に沿って順番に点検
+- Scope: `../../testdata/shared/real_article_dataset.json` 100件を [analysis_text_review_checklist.md](../../testdata/docs/analysis_text_review_checklist.md) に沿って順番に点検
 
 ## Summary
 

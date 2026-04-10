@@ -3,8 +3,8 @@
 - Reviewer: Codex
 - Date: 2026-03-31
 - Dataset version: 10
-- Base file: `real_article_dataset.json`
-- Checklist: `analysis_text_review_checklist.md`
+- Base file: `../../testdata/shared/real_article_dataset.json`
+- Checklist: [analysis_text_review_checklist.md](../../testdata/docs/analysis_text_review_checklist.md)
 
 ## Final Confirmation
 

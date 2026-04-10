@@ -9,7 +9,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parent.parent
-OUTPUT_PATH = ROOT / "testdata" / "jfc_curated_factcheck_cases.json"
+OUTPUT_PATH = ROOT.parent / "testdata" / "sources" / "jfc_curated_factcheck_cases.json"
 SITEMAP_URL = "https://www.factcheckcenter.jp/sitemap-posts.xml"
 SITE_NAME = "日本ファクトチェックセンター"
 NS = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
