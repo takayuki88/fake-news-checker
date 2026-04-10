@@ -1080,13 +1080,13 @@
     {
       "id": "jfc-false-15-false-100k-demo-osaka-yoon",
       "expected_verdict": "誤り",
-      "analysis_text": "大阪で10万人のデモ隊が韓国の尹錫悦大統領の罷免と拘束や、日本と断交し北朝鮮やロシアと国交を回復することを要求した。",
+      "analysis_text": "大阪で在日コリアン10万人のデモ隊が日本と断交し、北朝鮮やロシアと国交を回復することを要求した。",
       "expected_domain": "政治",
       "analysis_mode": "claim",
-      "claim_text": "大阪で10万人のデモ隊が韓国の尹錫悦大統領の罷免と拘束や、日本と断交し北朝鮮やロシアと国交を回復することを要求した。",
+      "claim_text": "大阪で在日コリアン10万人のデモ隊が日本と断交し、北朝鮮やロシアと国交を回復することを要求した。",
       "review_focus": "主張の中核が外部根拠で反証されるかを見る。",
       "human_note": "短文claim評価用に、主張の中心部分が反証されるケースです。",
-      "contested_span": "大阪で10万人のデモ隊が韓国の尹錫悦大統領の罷免と拘束や、日本と断交し北朝鮮やロシアと国交を回復することを要求した。",
+      "contested_span": "大阪で在日コリアン10万人のデモ隊が日本と断交し、北朝鮮やロシアと国交を回復することを要求した。",
       "source_url": "https://www.factcheckcenter.jp/fact-check/korea/false-100k-demo-osaka-yoon/"
     },
     {
