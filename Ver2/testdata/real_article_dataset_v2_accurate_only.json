@@ -5,7 +5,7 @@
     "curated_on": "2026-04-08",
     "language": "ja",
     "description": "real_article_dataset_v2.json から expected_verdict=正確 の20件のみ抽出した評価用データセットです。 短文claim評価用の補助列を追加しています。",
-    "source_excel": "エクセル/real_article_dataset_v2.xlsx",
+    "source_excel": "legacy Excel workbook removed from repo; canonical dataset now lives under testdata/shared",
     "schema_fields": [
       "id",
       "expected_verdict",
@@ -21,7 +21,7 @@
     "verdict_distribution": {
       "正確": 20
     },
-    "source_dataset": "c:\\Users\\oneuk\\OneDrive\\Desktop\\datamix\\講義\\05_インテグレーションステップ\\fake-news-checker\\Ver3\\testdata\\real_article_dataset_v2.json",
+    "source_dataset": "c:\\Users\\oneuk\\OneDrive\\Desktop\\datamix\\講義\\05_インテグレーションステップ\\fake-news-checker\\testdata\\shared\\real_article_dataset_v2.json",
     "analysis_mode": "claim",
     "helper_fields": [
       "analysis_mode",
@@ -90,13 +90,13 @@
     {
       "id": "positive-accurate-06-wasegg220314-8",
       "expected_verdict": "正確",
-      "analysis_text": "ドドドンパ・ジェットコースター、骨折事故発生を受け運行停止",
+      "analysis_text": "ド・ドドンパ・ジェットコースターは骨折事故発生を受け、営業を終了した。",
       "expected_domain": "一般",
       "analysis_mode": "claim",
-      "claim_text": "ドドドンパ・ジェットコースター、骨折事故発生を受け運行停止",
+      "claim_text": "ド・ドドンパ・ジェットコースターは骨折事故発生を受け、営業を終了した。",
       "review_focus": "主張全体が公開情報と素直に整合するかを確認する。",
       "human_note": "短文claim評価用に、確認したい主張の要点だけを残したケースです。",
-      "contested_span": "ドドドンパ・ジェットコースター、骨折事故発生を受け運行停止"
+      "contested_span": "ド・ドドンパ・ジェットコースターは骨折事故発生を受け、営業を終了した。"
     },
     {
       "id": "positive-accurate-07-infact220706",
