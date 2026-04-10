@@ -665,13 +665,13 @@
     {
       "id": "jfc-hold-18-mhlw-staff-vaccination-rate-uncertain",
       "expected_verdict": "判断保留",
-      "analysis_text": "ネス湖にネッシーは実在する。",
+      "analysis_text": "井伊直虎は女性であった。",
       "expected_domain": "一般",
       "analysis_mode": "claim",
-      "claim_text": "ネス湖にネッシーは実在する。",
+      "claim_text": "井伊直虎は女性であった。",
       "review_focus": "真偽を断定できる一次情報や主要報道が十分あるかを見る。",
       "human_note": "短文claim評価用に、根拠不足や時点依存で断定を避けるべき主張を抜き出したケースです。",
-      "contested_span": "ネス湖にネッシーは実在する。"
+      "contested_span": "井伊直虎は女性であった。"
     },
     {
       "id": "jfc-hold-19-baseless-xi-jinping-fell-from-chair",

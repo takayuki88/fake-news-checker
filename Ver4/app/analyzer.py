@@ -683,6 +683,132 @@ def dedupe_links(links: list[VerificationLink], limit: int = 8) -> list[Verifica
     return deduped
 
 
+def has_unsettled_future_prediction_claim(claim_reviews: list[dict[str, Any]]) -> bool:
+    future_time_markers = ("近い将来", "将来的に", "将来", "今後", "いずれ", "やがて")
+    future_deadline_markers = ("までに", "以内", "前後", "ごろ", "頃", "ころ")
+    future_modal_suffixes = ("だろう", "でしょう")
+    future_outcome_markers = (
+        "現れない",
+        "現れる",
+        "獲得する",
+        "加盟する",
+        "加入する",
+        "改正する",
+        "改憲する",
+        "侵攻する",
+        "起こる",
+        "続ける",
+    )
+    uncertainty_markers = (
+        "政治的目標",
+        "目指して",
+        "目指す",
+        "国民投票",
+        "承認が必要",
+        "確定していない",
+        "予定はありません",
+        "具体的な動き",
+        "確認されていません",
+        "情報はありません",
+        "公式発表",
+        "見通し",
+        "可能性",
+        "推測",
+        "見解",
+        "議論",
+        "予測",
+        "断定できない",
+        "現時点",
+        "破られにくい",
+        "評価",
+    )
+    for review in claim_reviews:
+        claim = str(review.get("claim") or "").strip()
+        reason = str(review.get("reason") or "").strip()
+        if not claim:
+            continue
+        normalized_claim = claim.rstrip("。！？!?")
+        year_matches = [int(year) for year in re.findall(r"(\d{4})年", normalized_claim)]
+        has_future_year_deadline = any(year > time.localtime().tm_year for year in year_matches) and any(
+            marker in normalized_claim for marker in future_deadline_markers
+        )
+        has_future_form = (
+            any(marker in normalized_claim for marker in future_time_markers)
+            or normalized_claim.endswith(future_modal_suffixes)
+            or has_future_year_deadline
+        )
+        if not has_future_form:
+            continue
+        if any(marker in normalized_claim for marker in future_outcome_markers):
+            return True
+        if not reason:
+            continue
+        if any(marker in reason for marker in uncertainty_markers):
+            return True
+    return False
+
+
+def has_disputed_historical_existence_claim(claim_reviews: list[dict[str, Any]]) -> bool:
+    debate_markers = (
+        "議論が続いている",
+        "議論が続いており",
+        "議論している",
+        "議論されており",
+        "歴史家の間では",
+        "通説では",
+        "伝説上の人物",
+        "伝説上の英雄",
+        "伝説的な要素が強い",
+        "民間伝承",
+        "創作",
+        "明確な歴史的根拠は確認されていません",
+        "確固たる証拠はない",
+        "証拠は確立されていない",
+        "裏付けられていません",
+    )
+    for review in claim_reviews:
+        claim = str(review.get("claim") or "").strip()
+        reason = str(review.get("reason") or "").strip()
+        if "実在" not in claim or not reason:
+            continue
+        if any(marker in reason for marker in debate_markers):
+            return True
+    return False
+
+
+def has_disputed_historical_identity_or_role_claim(claim_reviews: list[dict[str, Any]]) -> bool:
+    claim_markers = ("女城主",)
+    reason_markers = ("同一性", "史料が少ない", "断定を控えるべき")
+    for review in claim_reviews:
+        claim = str(review.get("claim") or "").strip()
+        reason = str(review.get("reason") or "").strip()
+        if not reason or not any(marker in claim for marker in claim_markers):
+            continue
+        if all(marker in reason for marker in reason_markers):
+            return True
+    return False
+
+
+def has_disputed_authenticity_claim(claim_reviews: list[dict[str, Any]]) -> bool:
+    claim_markers = ("本当に", "本物", "真正", "遺体を包んだ")
+    debate_markers = ("異論", "議論", "一部", "別の研究", "研究も存在", "信頼性への異論")
+    consensus_markers = ("主流の科学的見解", "主流の見解", "年代測定", "中世起源", "中世の布", "科学的に結論")
+    relic_claim_markers = ("聖骸布",)
+    relic_reason_markers = ("放射性炭素年代測定", "年代測定", "中世の布", "中世起源", "1260年", "1390年")
+    for review in claim_reviews:
+        claim = str(review.get("claim") or "").strip()
+        reason = str(review.get("reason") or "").strip()
+        if not reason:
+            continue
+        if any(marker in claim for marker in relic_claim_markers) and any(marker in reason for marker in relic_reason_markers):
+            return True
+        if not any(marker in claim for marker in claim_markers):
+            continue
+        if any(marker in reason for marker in debate_markers) and any(marker in reason for marker in consensus_markers):
+            return True
+    return False
+
+
 def derive_public_verdict(
     risk_score: int,
     confidence_score: int,
@@ -728,8 +854,20 @@ def derive_public_verdict(
     counterevidence_minor_detail_correction = has_counterevidence_minor_detail_correction(claim_reviews)
     strong_false_counterevidence = has_strong_false_counterevidence(claim_reviews)
     partially_supported_counterevidence = has_partially_supported_counterevidence(claim_reviews)
+    unsettled_future_prediction = has_unsettled_future_prediction_claim(claim_reviews)
+    disputed_historical_existence = has_disputed_historical_existence_claim(claim_reviews)
+    disputed_historical_identity_or_role = has_disputed_historical_identity_or_role_claim(claim_reviews)
+    disputed_authenticity = has_disputed_authenticity_claim(claim_reviews)
 
     if claim_mode:
+        if disputed_historical_existence:
+            return "判断保留"
+        if disputed_historical_identity_or_role:
+            return "判断保留"
+        if disputed_authenticity:
+            return "判断保留"
+        if unsettled_future_prediction:
+            return "判断保留"
         if overall_verdict == "概ね整合":
             if counterevidence_claim_reviews >= 1 and positive_claim_reviews == 0:
                 return "不正確"

@@ -2367,6 +2367,357 @@ def test_claim_mode_counterevidence_review_prevents_almost_accurate_for_compound
     assert verdict == "不正確"
 
 
+def test_claim_mode_unsettled_future_constitutional_revision_prediction_holds() -> None:
+    verdict = derive_public_verdict(
+        risk_score=34,
+        confidence_score=70,
+        labels=["文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "概ね整合",
+            "claim_reviews": [
+                {
+                    "claim": "近い将来、日本は憲法を改正する。",
+                    "verdict": "概ね整合",
+                    "reason": "主要政党が憲法改正を目指しているため政治的目標としては整合するが、最終的には国民投票による承認が必要で、現時点で確定していない。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "判断保留"
+
+
+def test_claim_mode_unsettled_future_nato_accession_prediction_holds() -> None:
+    verdict = derive_public_verdict(
+        risk_score=54,
+        confidence_score=69,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "近い将来、日本はNATOに加盟する。",
+                    "verdict": "反証あり",
+                    "reason": "日本がNATOに加盟するという事実は確認されていません。加盟の予定や具体的な動きに関する情報はありません。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "判断保留"
+
+
+def test_claim_mode_future_sports_record_prediction_holds() -> None:
+    verdict = derive_public_verdict(
+        risk_score=34,
+        confidence_score=69,
+        labels=["大筋で整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "概ね整合",
+            "claim_reviews": [
+                {
+                    "claim": "落合博満のように三冠王を三度獲得するバッターは今後現れないだろう。",
+                    "verdict": "概ね整合",
+                    "reason": "落合博満は唯一の三冠王3度達成者だが、今後同様の達成者が現れる可能性は極めて低いと推測される。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "判断保留"
+
+
+def test_claim_mode_future_sports_record_prediction_with_general_view_wording_holds() -> None:
+    verdict = derive_public_verdict(
+        risk_score=34,
+        confidence_score=71,
+        labels=["一次ソースと整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "概ね整合",
+            "claim_reviews": [
+                {
+                    "claim": "落合博満のように三冠王を三度獲得するバッターは今後現れないだろう。",
+                    "verdict": "概ね整合",
+                    "reason": "落合博満は唯一の三冠王3度達成者であり、その偉業の再現は極めて困難であるという見方が一般的であるため。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "判断保留"
+
+
+def test_claim_mode_future_sports_record_messi_prediction_holds() -> None:
+    verdict = derive_public_verdict(
+        risk_score=35,
+        confidence_score=69,
+        labels=["大筋で整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "概ね整合",
+            "claim_reviews": [
+                {
+                    "claim": "リオネル・メッシのようにバロンドールを8回獲得するサッカー選手は今後現れないだろう。",
+                    "verdict": "概ね整合",
+                    "reason": "メッシの8回受賞は記録的だが、今後破られにくいという専門家や報道機関の見解にとどまる。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "判断保留"
+
+
+def test_claim_mode_future_sports_award_prediction_holds() -> None:
+    verdict = derive_public_verdict(
+        risk_score=34,
+        confidence_score=69,
+        labels=["大筋で整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "概ね整合",
+            "claim_reviews": [
+                {
+                    "claim": "大谷翔平は近い将来サイヤング賞を獲得するだろう。",
+                    "verdict": "概ね整合",
+                    "reason": "将来の予測であり現時点で断定できないが、獲得の可能性はスポーツメディアで議論されている。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "判断保留"
+
+
+def test_claim_mode_disputed_historical_existence_yamatotakeru_holds() -> None:
+    verdict = derive_public_verdict(
+        risk_score=54,
+        confidence_score=69,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "ヤマトタケルは実在した。",
+                    "verdict": "反証あり",
+                    "reason": "ヤマトタケルは伝説上の人物とされるが、実在性をめぐっては議論があり、明確な歴史的根拠は確認されていません。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "判断保留"
+
+
+def test_claim_mode_disputed_historical_existence_arthur_holds() -> None:
+    verdict = derive_public_verdict(
+        risk_score=54,
+        confidence_score=69,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "アーサー王は実在した王である。",
+                    "verdict": "反証あり",
+                    "reason": "歴史家の間ではアーサー王の実在性について議論が続いているが、実在の王であったという確固たる証拠はない。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "判断保留"
+
+
+def test_claim_mode_disputed_historical_existence_arthur_backed_wording_holds() -> None:
+    verdict = derive_public_verdict(
+        risk_score=54,
+        confidence_score=68,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "アーサー王は実在した王である。",
+                    "verdict": "反証あり",
+                    "reason": "アーサー王の歴史上の実在性については歴史家の間で議論が続いており、伝説的な要素が強いとされているため、実在した王であるという断定的な主張は裏付けられていません。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "判断保留"
+
+
+def test_claim_mode_future_earthquake_deadline_prediction_holds() -> None:
+    verdict = derive_public_verdict(
+        risk_score=66,
+        confidence_score=69,
+        labels=["反証情報あり", "反証根拠あり"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "南海トラフ地震は2035年までに起こる。",
+                    "verdict": "反証あり",
+                    "reason": "政府機関は南海トラフ地震の30年以内の発生確率を公表しているが、発生年月を特定して予知することは現在の地震学では不可能としている。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "判断保留"
+
+
+def test_claim_mode_disputed_authenticity_shroud_holds() -> None:
+    verdict = derive_public_verdict(
+        risk_score=54,
+        confidence_score=69,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "トリノの聖骸布は本当にキリストの遺体を包んだ布である。",
+                    "verdict": "反証あり",
+                    "reason": "1988年の放射性炭素年代測定では中世の布とされたが、一部に年代測定への異論もあり、主流の科学的見解は中世起源を示している。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "判断保留"
+
+
+def test_claim_mode_disputed_authenticity_shroud_radiocarbon_wording_holds() -> None:
+    verdict = derive_public_verdict(
+        risk_score=54,
+        confidence_score=69,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "トリノの聖骸布は本当にキリストの遺体を包んだ布である。",
+                    "verdict": "反証あり",
+                    "reason": "1988年の放射性炭素年代測定により、トリノの聖骸布は1260年から1390年の間に作られた中世の布であると科学的に結論付けられている。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "判断保留"
+
+
+def test_claim_mode_disputed_historical_identity_or_role_naotora_holds() -> None:
+    verdict = derive_public_verdict(
+        risk_score=34,
+        confidence_score=71,
+        labels=["一次ソースと整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "概ね整合",
+            "claim_reviews": [
+                {
+                    "claim": "井伊直虎という女城主は実在した。",
+                    "verdict": "概ね整合",
+                    "reason": "井伊直虎は女領主として紹介されるが、次郎法師との同一性については史料が少ないため断定を控えるべきとの見解もあります。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "判断保留"
+
+
 def test_false_claim_mode_nonexistent_law_sonzai_sezu_wording_escalates_to_false() -> None:
     verdict = derive_public_verdict(
         risk_score=18,
