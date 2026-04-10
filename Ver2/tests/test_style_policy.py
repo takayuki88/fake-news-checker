@@ -1258,3 +1258,138 @@ def test_false_claim_mode_mistranslated_quote_counterevidence_escalates_to_false
         claim_mode=True,
     )
     assert verdict == "誤り"
+
+
+def test_false_claim_mode_geocentrism_counterevidence_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=14,
+        confidence_score=82,
+        labels=["反証情報あり"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": True,
+            "trusted_source": True,
+            "correction_article": True,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "地球は宇宙の中心にあり、地球の回りを太陽やその他の星々が回っている。",
+                    "verdict": "反証あり",
+                    "reason": "この主張は天動説であり、コペルニクス、ガリレオ、ケプラー、ニュートンらの研究により、地球が太陽の周りを公転する地動説が科学的に確立されています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_5g_covid_counterevidence_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=16,
+        confidence_score=73,
+        labels=["反証情報あり"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": True,
+            "trusted_source": True,
+            "correction_article": True,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "5Gが新型コロナを引き起こす。",
+                    "verdict": "反証あり",
+                    "reason": "世界保健機関（WHO）は、ウイルスは電波やモバイルネットワーク上を移動できず、5Gがない多くの国でも新型コロナウイルス感染症が拡大していると明言しています。また、科学的専門家も5Gがウイルスを生成することはないと述べています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_vaccine_cancer_counterevidence_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=19,
+        confidence_score=82,
+        labels=["反証情報あり"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": True,
+            "trusted_source": True,
+            "correction_article": True,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "新型コロナワクチンを接種すると大腸がんになる。",
+                    "verdict": "反証あり",
+                    "reason": "ファイザー社が新型コロナワクチンと大腸がんの因果関係を認めたという主張は誤りであり、関連性を示す発表や報道もありません。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_birther_counterevidence_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=16,
+        confidence_score=81,
+        labels=["反証情報あり"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": True,
+            "trusted_source": True,
+            "correction_article": True,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "バラク・オバマはアメリカ生まれではない。",
+                    "verdict": "反証あり",
+                    "reason": "バラク・オバマは1961年8月4日にハワイ州ホノルルで生まれ、2011年には出生証明書の長式版が公開されています。アメリカ生まれではないという主張は「バーサー運動」と呼ばれる陰謀論であり、複数のファクトチェック機関や公的機関によって否定されています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_mmr_autism_counterevidence_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=22,
+        confidence_score=73,
+        labels=["反証情報あり"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": True,
+            "trusted_source": True,
+            "correction_article": True,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "MMRワクチンで自閉症になる。",
+                    "verdict": "反証あり",
+                    "reason": "MMRワクチンと自閉症の関連性を示唆した1998年の論文は、データ不正により撤回され、著者の医師免許も剥奪されました。その後の大規模な疫学研究でも、MMRワクチンと自閉症の関連性は確認されていません。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
