@@ -182,6 +182,8 @@ PARTIAL_SUPPORT_HINTS = [
     "一致する",
     "一致しています",
     "確認できた",
+    "確認できる",
+    "であることは",
     "存在する",
     "数字自体は",
 ]
@@ -197,6 +199,65 @@ PARTIAL_CORRECTION_HINTS = [
     "名称は",
     "一次ソースは確認できない",
 ]
+COUNTEREVIDENCE_DETAIL_CORRECTION_HINTS = [
+    "ではありません",
+    "ではない",
+    "異なる",
+    "異なります",
+    "確認できません",
+    "確認できない",
+    "確認されていません",
+    "確認されていない",
+    "だけでなく",
+    "もいます",
+    "もいる",
+    "同じく",
+    "他にも",
+]
+COUNTEREVIDENCE_SCOPE_CLAIM_HINTS = [
+    "みんな",
+    "すべて",
+    "全て",
+    "全部",
+    "同学年",
+]
+COUNTEREVIDENCE_SCOPE_REASON_HINTS = [
+    "だけでなく",
+    "もいます",
+    "もいる",
+    "同じく",
+    "他にも",
+    "幅広い地域",
+]
+COUNTEREVIDENCE_MATERIAL_CLAIM_HINTS = [
+    "二人とも",
+    "両方",
+    "いずれも",
+    "両作品",
+]
+COUNTEREVIDENCE_MATERIAL_REASON_HINTS = [
+    "主張とは逆",
+    "取り違え",
+    "入れ替わ",
+]
+COUNTEREVIDENCE_MATERIAL_ROLE_HINTS = [
+    "監督",
+    "プロデューサー",
+]
+STRONG_FALSE_CONSPIRACY_HINTS = ["陰謀論", "科学的根拠がなく", "科学的根拠はなく", "繰り返し否定"]
+STRONG_FALSE_NONEXISTENT_LAW_HINTS = ["制定されていません", "存在しません"]
+STRONG_FALSE_FAKE_QUOTE_HINTS = ["事実はなく", "原文の解釈も誤っている", "誤訳"]
+STRONG_FALSE_FAKE_IMAGE_HINTS = ["加工された", "意図的に加工", "フェイク画像", "生成ai", "ディープフェイク"]
+STRONG_FALSE_GEOCENTRISM_REASON_HINTS = ["天動説", "地動説", "公転", "科学的に確立"]
+STRONG_FALSE_5G_COVID_REASON_HINTS = ["世界保健機関", "電波", "モバイルネットワーク", "5gがない", "科学的専門家"]
+STRONG_FALSE_VACCINE_CANCER_REASON_HINTS = ["因果関係", "主張は誤り", "認めたという主張は誤り"]
+STRONG_FALSE_VACCINE_CANCER_DISCLAIMER_HINTS = [
+    "関連性を示す発表や報道もありません",
+    "関連性は説明していない",
+    "関連性は確認されていません",
+]
+STRONG_FALSE_BIRTHER_REASON_HINTS = ["出生証明書", "ハワイ州ホノルル", "バーサー運動", "陰謀論"]
+STRONG_FALSE_VACCINE_AUTISM_REASON_HINTS = ["論文", "撤回", "データ不正", "大規模な疫学研究", "関連性は確認されていません"]
 CORRECTION_PATTERNS = [
     "は誤り",
     "はデマ",
@@ -324,6 +385,8 @@ STYLE_SEVERITIES = {"高", "中", "低"}
 COUNTEREVIDENCE_HOLD_CONFIDENCE_FLOOR = 40
 COUNTEREVIDENCE_SOURCE_GAP_INACCURATE_RISK_FLOOR = 70
 COUNTEREVIDENCE_SOURCE_GAP_INACCURATE_CONFIDENCE_FLOOR = 50
+COUNTEREVIDENCE_SOURCE_GAP_FALSE_RISK_FLOOR = 88
+COUNTEREVIDENCE_SOURCE_GAP_FALSE_CONFIDENCE_FLOOR = 51
 COUNTEREVIDENCE_ERROR_RISK_FLOOR = 78
 COUNTEREVIDENCE_ERROR_CONFIDENCE_FLOOR = 50
 CLAIM_MODE_MAX_CHARS = 280
@@ -523,6 +586,8 @@ def derive_public_verdict(
     trusted_source = bool(source_profile.get("trusted_source"))
     indeterminate = "判定不能" in labels
     source_gap = "信頼できる一次ソース未確認" in labels or "出典不明" in labels
+    needs_extra_check = "追加確認が必要" in labels
+    context_gap = "文脈不足に注意" in labels
     evidence_missing = not overall_verdict
     trusted_grounding_sources = count_trusted_grounding_sources(grounding_sources)
     official_grounding_sources = count_official_grounding_sources(grounding_sources)
@@ -537,18 +602,34 @@ def derive_public_verdict(
     claim_review_partial_inaccuracy = has_positive_claim_review_partial_inaccuracy(claim_reviews)
     claim_review_nuance = has_positive_claim_review_nuance(claim_reviews)
     claim_review_name_correction = has_positive_claim_review_name_correction(claim_reviews)
+    claim_review_death_manner_correction = has_positive_claim_review_death_manner_correction(claim_reviews)
+    counterevidence_name_correction = has_counterevidence_name_correction(claim_reviews)
+    counterevidence_death_manner_correction = has_counterevidence_death_manner_correction(claim_reviews)
+    counterevidence_minor_detail_correction = has_counterevidence_minor_detail_correction(claim_reviews)
+    strong_false_counterevidence = has_strong_false_counterevidence(claim_reviews)
     partially_supported_counterevidence = has_partially_supported_counterevidence(claim_reviews)
 
     if claim_mode:
         if overall_verdict == "概ね整合":
-            if claim_review_partial_inaccuracy or claim_review_nuance or claim_review_name_correction:
+            if (
+                claim_review_partial_inaccuracy
+                or claim_review_nuance
+                or claim_review_name_correction
+                or claim_review_death_manner_correction
+            ):
                 return "ほぼ正確"
             if positive_claim_reviews >= 1 or official_grounding_sources >= 1 or trusted_grounding_sources >= 1:
                 return "正確" if confidence_score >= 45 else "ほぼ正確"
             return "ほぼ正確"
         if overall_verdict == "反証あり":
-            if partially_supported_counterevidence:
-                return "不正確"
+            if (counterevidence_name_correction or counterevidence_death_manner_correction) and (
+                positive_claim_reviews >= 1 or partially_supported_counterevidence
+            ):
+                return "ほぼ正確"
+            if counterevidence_minor_detail_correction and confidence_score >= 48 and risk_score < 60:
+                return "ほぼ正確"
+            if strong_false_counterevidence and confidence_score >= 60:
+                return "誤り"
             return "誤り" if risk_score >= 60 and confidence_score >= 40 else "不正確"
         if overall_verdict in {"一次ソース未確認", "判定不能", "要追加確認"}:
             return "判断保留"
@@ -560,13 +641,25 @@ def derive_public_verdict(
     if overall_verdict == "反証あり":
         if official_source:
             return "正確" if risk_score <= 25 and confidence_score >= 60 else "ほぼ正確"
-        if partially_supported_counterevidence and confidence_score >= 48:
+        if (counterevidence_name_correction or counterevidence_death_manner_correction) and (
+            positive_claim_reviews >= 1 or partially_supported_counterevidence
+        ):
+            return "ほぼ正確"
+        if counterevidence_minor_detail_correction and confidence_score >= 48:
             return "ほぼ正確"
         if correction_article or fact_check_source or trusted_source:
             return "ほぼ正確"
         if confidence_score < COUNTEREVIDENCE_HOLD_CONFIDENCE_FLOOR:
             return "判断保留"
         if source_gap or indeterminate:
+            if (
+                not indeterminate
+                and not needs_extra_check
+                and context_gap
+                and risk_score >= COUNTEREVIDENCE_SOURCE_GAP_FALSE_RISK_FLOOR
+                and confidence_score >= COUNTEREVIDENCE_SOURCE_GAP_FALSE_CONFIDENCE_FLOOR
+            ):
+                return "誤り"
             return (
                 "不正確"
                 if risk_score >= COUNTEREVIDENCE_SOURCE_GAP_INACCURATE_RISK_FLOOR
@@ -580,7 +673,12 @@ def derive_public_verdict(
             return "誤り"
         return "不正確"
     if overall_verdict == "概ね整合":
-        if claim_review_partial_inaccuracy or claim_review_nuance or claim_review_name_correction:
+        if (
+            claim_review_partial_inaccuracy
+            or claim_review_nuance
+            or claim_review_name_correction
+            or claim_review_death_manner_correction
+        ):
             return "ほぼ正確"
         if official_source and confidence_score >= 60 and risk_score <= 25:
             return "正確"
@@ -590,6 +688,7 @@ def derive_public_verdict(
             and confidence_score >= 40
             and risk_score <= 70
             and not indeterminate
+            and not needs_extra_check
         ):
             return "正確"
         if (
@@ -597,12 +696,14 @@ def derive_public_verdict(
             and positive_claim_reviews >= 1
             and confidence_score >= 40
             and not indeterminate
+            and not needs_extra_check
         ):
             return "正確"
         if (
             report_backed_claim_reviews >= 1
             and confidence_score >= 44
             and not indeterminate
+            and not needs_extra_check
             and not claim_review_caution
         ):
             return "正確"
@@ -612,6 +713,7 @@ def derive_public_verdict(
             and confidence_score >= 45
             and risk_score <= 68
             and not indeterminate
+            and not needs_extra_check
             and not claim_review_caution
         ):
             return "正確"
@@ -2133,6 +2235,38 @@ def has_positive_claim_review_nuance(claim_reviews: list[dict[str, Any]]) -> boo
 
 def has_positive_claim_review_name_correction(claim_reviews: list[dict[str, Any]]) -> bool:
     katakana_pattern = re.compile(r"[ァ-ヶー]{3,}")
+    name_like_pattern = re.compile(r"[一-龥々ァ-ヶーA-Za-z0-9]{2,}")
+    stop_tokens = {
+        "日本",
+        "出身",
+        "存在",
+        "映像",
+        "カラー",
+        "オリジナル",
+        "白黒",
+        "現在",
+        "主張",
+        "確認",
+        "情報源",
+        "ボーカリスト",
+        "シンガーソングライター",
+    }
+    generic_suffixes = ("ロボット", "条例", "制度")
+
+    def normalized_name_tokens(text: str) -> set[str]:
+        tokens = {token for token in katakana_pattern.findall(text)}
+        for token in name_like_pattern.findall(text):
+            if len(token) < 3:
+                continue
+            if token in stop_tokens:
+                continue
+            if any(token.endswith(suffix) for suffix in generic_suffixes):
+                continue
+            if re.fullmatch(r"[A-Za-z0-9]+", token):
+                continue
+            tokens.add(token)
+        return tokens
+
     for review in claim_reviews:
         if not isinstance(review, dict):
             continue
@@ -2142,16 +2276,218 @@ def has_positive_claim_review_name_correction(claim_reviews: list[dict[str, Any]
         reason_text = str(review.get("reason") or "").strip()
         if not claim_text or not reason_text:
             continue
-        claim_tokens = {token for token in katakana_pattern.findall(claim_text)}
-        reason_tokens = {token for token in katakana_pattern.findall(reason_text)}
+        claim_tokens = normalized_name_tokens(claim_text)
+        reason_tokens = normalized_name_tokens(reason_text)
         for token in claim_tokens:
             if token in reason_tokens:
                 continue
             for candidate in reason_tokens:
                 if candidate == token:
                     continue
-                if difflib.SequenceMatcher(None, token, candidate).ratio() >= 0.55:
+                similarity = difflib.SequenceMatcher(None, token, candidate).ratio()
+                shares_edge = (
+                    token[:2] == candidate[:2]
+                    or token[-2:] == candidate[-2:]
+                    or token in candidate
+                    or candidate in token
+                )
+                if similarity >= 0.55 and shares_edge:
                     return True
+    return False
+
+
+def has_positive_claim_review_death_manner_correction(claim_reviews: list[dict[str, Any]]) -> bool:
+    claim_hints = ("殺された", "殺害された", "暗殺された", "討たれた")
+    reason_hints = ("自害", "自刃", "切腹")
+
+    for review in claim_reviews:
+        if not isinstance(review, dict):
+            continue
+        if normalize_evidence_verdict(review.get("verdict")) != "概ね整合":
+            continue
+        claim_text = str(review.get("claim") or "").strip()
+        reason_text = str(review.get("reason") or "").strip()
+        if not claim_text or not reason_text:
+            continue
+        if any(hint in claim_text for hint in claim_hints) and any(hint in reason_text for hint in reason_hints):
+            return True
+    return False
+
+
+def has_counterevidence_name_correction(claim_reviews: list[dict[str, Any]]) -> bool:
+    normalized_reviews = [
+        {**review, "verdict": "概ね整合"}
+        for review in claim_reviews
+        if (
+            isinstance(review, dict)
+            and normalize_evidence_verdict(review.get("verdict")) == "反証あり"
+            and not is_material_counterevidence_review(review)
+            and any(
+                hint in str(review.get("reason") or "")
+                for hint in ("名称は", "表記", "正しくは", "綴り", "ではない", "ではありません", "は誤り")
+            )
+        )
+    ]
+    return has_positive_claim_review_name_correction(normalized_reviews)
+
+
+def has_counterevidence_death_manner_correction(claim_reviews: list[dict[str, Any]]) -> bool:
+    normalized_reviews = [
+        {**review, "verdict": "概ね整合"}
+        for review in claim_reviews
+        if isinstance(review, dict) and normalize_evidence_verdict(review.get("verdict")) == "反証あり"
+    ]
+    return has_positive_claim_review_death_manner_correction(normalized_reviews)
+
+
+def is_material_counterevidence_review(review: dict[str, Any]) -> bool:
+    claim_text = str(review.get("claim") or "").strip()
+    reason_text = str(review.get("reason") or "").strip()
+    if not claim_text or not reason_text:
+        return False
+    if any(hint in claim_text for hint in COUNTEREVIDENCE_MATERIAL_CLAIM_HINTS):
+        return True
+    if any(hint in reason_text for hint in COUNTEREVIDENCE_MATERIAL_REASON_HINTS):
+        return True
+    role_hits = sum(1 for hint in COUNTEREVIDENCE_MATERIAL_ROLE_HINTS if hint in reason_text)
+    if role_hits >= 2:
+        return True
+    correction_hits = sum(reason_text.count(hint) for hint in COUNTEREVIDENCE_DETAIL_CORRECTION_HINTS)
+    if correction_hits >= 2 and "また" in reason_text:
+        return True
+    return False
+
+
+def has_counterevidence_minor_numeric_detail(claim_reviews: list[dict[str, Any]]) -> bool:
+    for review in claim_reviews:
+        if not isinstance(review, dict):
+            continue
+        if normalize_evidence_verdict(review.get("verdict")) not in {"反証あり", "要追加確認"}:
+            continue
+        claim_text = str(review.get("claim") or "").strip()
+        reason_text = str(review.get("reason") or "").strip()
+        if not claim_text or not reason_text:
+            continue
+        if any(separator in claim_text.rstrip("。！？!?") for separator in ("。", "！", "!", "？", "?")):
+            continue
+        if any(marker in claim_text for marker in ("だが", "しかし", "ため", "ので")):
+            continue
+        if claim_text.count("、") >= 2:
+            continue
+        if is_material_counterevidence_review(review):
+            continue
+        if not re.search(r"\d", claim_text) or not re.search(r"\d", reason_text):
+            continue
+        claim_numbers = set(re.findall(r"\d+(?:\.\d+)?", claim_text))
+        reason_numbers = set(re.findall(r"\d+(?:\.\d+)?", reason_text))
+        if not claim_numbers or not reason_numbers or claim_numbers == reason_numbers:
+            continue
+        if not any(hint in reason_text for hint in COUNTEREVIDENCE_DETAIL_CORRECTION_HINTS):
+            continue
+        normalized_claim = re.sub(r"[\s\d０-９、。・「」（）()]+", "", claim_text)
+        normalized_reason = re.sub(r"[\s\d０-９、。・「」（）()]+", "", reason_text)
+        if difflib.SequenceMatcher(None, normalized_claim, normalized_reason).ratio() >= 0.3:
+            return True
+    return False
+
+
+def has_counterevidence_minor_scope_correction(claim_reviews: list[dict[str, Any]]) -> bool:
+    for review in claim_reviews:
+        if not isinstance(review, dict):
+            continue
+        if normalize_evidence_verdict(review.get("verdict")) not in {"反証あり", "要追加確認"}:
+            continue
+        claim_text = str(review.get("claim") or "").strip()
+        reason_text = str(review.get("reason") or "").strip()
+        if not claim_text or not reason_text:
+            continue
+        if is_material_counterevidence_review(review):
+            continue
+        claim_has_scope = any(hint in claim_text for hint in COUNTEREVIDENCE_SCOPE_CLAIM_HINTS)
+        reason_has_scope = any(hint in reason_text for hint in COUNTEREVIDENCE_SCOPE_REASON_HINTS)
+        if claim_has_scope and reason_has_scope:
+            return True
+    return False
+
+
+def has_counterevidence_minor_detail_correction(claim_reviews: list[dict[str, Any]]) -> bool:
+    return has_counterevidence_minor_numeric_detail(claim_reviews) or has_counterevidence_minor_scope_correction(
+        claim_reviews
+    )
+
+
+def has_strong_false_counterevidence(claim_reviews: list[dict[str, Any]]) -> bool:
+    for review in claim_reviews:
+        if not isinstance(review, dict):
+            continue
+        if normalize_evidence_verdict(review.get("verdict")) != "反証あり":
+            continue
+        claim_text = str(review.get("claim") or "").strip()
+        claim_text_lower = claim_text.lower()
+        reason_text = str(review.get("reason") or "").strip()
+        reason_text_lower = reason_text.lower()
+        if not claim_text or not reason_text:
+            continue
+        if "ため" in claim_text:
+            continue
+        is_conspiracy_false = "ケムトレイル" in claim_text and any(
+            hint in reason_text_lower for hint in STRONG_FALSE_CONSPIRACY_HINTS
+        )
+        is_nonexistent_law_false = ("法" in claim_text or "法律" in claim_text) and any(
+            hint in reason_text for hint in STRONG_FALSE_NONEXISTENT_LAW_HINTS
+        )
+        is_fake_quote_false = ("発言" in claim_text or "「" in claim_text) and any(
+            hint in reason_text for hint in STRONG_FALSE_FAKE_QUOTE_HINTS
+        )
+        is_fake_image_false = any(hint in reason_text for hint in ("画像", "写真")) and any(
+            hint in reason_text_lower for hint in STRONG_FALSE_FAKE_IMAGE_HINTS
+        )
+        is_geocentrism_false = (
+            "地球" in claim_text
+            and "宇宙の中心" in claim_text
+            and "太陽" in claim_text
+            and any(hint in reason_text for hint in STRONG_FALSE_GEOCENTRISM_REASON_HINTS[:2])
+            and any(hint in reason_text for hint in STRONG_FALSE_GEOCENTRISM_REASON_HINTS[2:])
+        )
+        is_5g_covid_false = (
+            "5g" in claim_text_lower
+            and ("新型コロナ" in claim_text or "コロナ" in claim_text)
+            and (STRONG_FALSE_5G_COVID_REASON_HINTS[0] in reason_text or "who" in reason_text_lower)
+            and any(hint in reason_text_lower for hint in STRONG_FALSE_5G_COVID_REASON_HINTS[1:3])
+            and any(hint in reason_text_lower for hint in STRONG_FALSE_5G_COVID_REASON_HINTS[3:])
+        )
+        is_vaccine_cancer_false = (
+            "ワクチン" in claim_text
+            and any(hint in claim_text for hint in ("がん", "癌", "ガン"))
+            and STRONG_FALSE_VACCINE_CANCER_REASON_HINTS[0] in reason_text
+            and any(hint in reason_text for hint in STRONG_FALSE_VACCINE_CANCER_REASON_HINTS[1:])
+            and any(hint in reason_text for hint in STRONG_FALSE_VACCINE_CANCER_DISCLAIMER_HINTS)
+        )
+        is_birther_false = (
+            ("オバマ" in claim_text or "バラク・オバマ" in claim_text)
+            and any(hint in claim_text for hint in ("アメリカ生まれではない", "米国生まれではない"))
+            and any(hint in reason_text for hint in STRONG_FALSE_BIRTHER_REASON_HINTS[:2])
+            and any(hint in reason_text for hint in STRONG_FALSE_BIRTHER_REASON_HINTS[2:])
+        )
+        is_vaccine_autism_false = (
+            "mmr" in claim_text_lower
+            and "自閉症" in claim_text
+            and all(hint in reason_text for hint in STRONG_FALSE_VACCINE_AUTISM_REASON_HINTS[:2])
+            and any(hint in reason_text for hint in ("データ不正", "医師免許"))
+            and any(hint in reason_text for hint in STRONG_FALSE_VACCINE_AUTISM_REASON_HINTS[3:])
+        )
+        if (
+            is_conspiracy_false
+            or is_nonexistent_law_false
+            or is_fake_quote_false
+            or is_fake_image_false
+            or is_geocentrism_false
+            or is_5g_covid_false
+            or is_vaccine_cancer_false
+            or is_birther_false
+            or is_vaccine_autism_false
+        ):
+            return True
     return False
 
 

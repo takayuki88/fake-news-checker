@@ -715,3 +715,739 @@ def test_apply_gemini_primary_review_keeps_seed_when_primary_review_missing() ->
     merged = apply_gemini_primary_review(seed, {})
 
     assert merged is seed
+
+
+def test_kanji_name_correction_in_supported_claim_stays_mostly_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=44,
+        confidence_score=59,
+        labels=["大筋で整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+        },
+        evidence_overview={
+            "assessment_status": "概ね整合",
+            "grounding_sources": [
+                {"title": "wikipedia.org", "url": "https://example.com/a"},
+                {"title": "natalie.mu", "url": "https://example.com/b"},
+            ],
+            "claim_reviews": [
+                {
+                    "claim": "玉置浩二は、日本のシンガーソングライター、ロックバンド完全地帯のボーカリストで、北海道旭川市出身である",
+                    "verdict": "概ね整合",
+                    "reason": "玉置浩二は日本のシンガーソングライターであり、ロックバンド安全地帯のボーカリストで、北海道旭川市出身である。",
+                },
+            ],
+        },
+    )
+    assert verdict == "ほぼ正確"
+
+
+def test_split_supported_claim_with_one_name_correction_stays_mostly_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=48,
+        confidence_score=71,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "grounding_sources": [
+                {"title": "columbia.jp", "url": "https://example.com/a"},
+                {"title": "natalie.mu", "url": "https://example.com/b"},
+            ],
+            "claim_reviews": [
+                {
+                    "claim": "玉置浩二は、日本のシンガーソングライターである。",
+                    "verdict": "概ね整合",
+                    "reason": "玉置浩二は日本のシンガーソングライターである。",
+                },
+                {
+                    "claim": "玉置浩二は、ロックバンド完全地帯のボーカリストである。",
+                    "verdict": "反証あり",
+                    "reason": "玉置浩二がボーカリストを務めるロックバンドは「安全地帯」であり、「完全地帯」は誤りです。",
+                },
+                {
+                    "claim": "玉置浩二は、北海道旭川市出身である。",
+                    "verdict": "概ね整合",
+                    "reason": "玉置浩二は北海道旭川市出身である。",
+                },
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "ほぼ正確"
+
+
+def test_single_counterevidence_review_with_supported_core_and_name_correction_stays_mostly_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=54,
+        confidence_score=69,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "grounding_sources": [
+                {"title": "columbia.jp", "url": "https://example.com/a"},
+                {"title": "wikipedia.org", "url": "https://example.com/b"},
+            ],
+            "claim_reviews": [
+                {
+                    "claim": "玉置浩二は、日本のシンガーソングライター、ロックバンド完全地帯のボーカリストで、北海道旭川市出身である",
+                    "verdict": "反証あり",
+                    "reason": "玉置浩二は日本のシンガーソングライターであり、北海道旭川市出身であることは複数の情報源で確認できる。しかし、所属するロックバンドの名称は「安全地帯」であり、「完全地帯」ではないため、主張は一部誤りである。",
+                },
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "ほぼ正確"
+
+
+def test_self_inflicted_death_correction_in_supported_claim_stays_mostly_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=34,
+        confidence_score=71,
+        labels=["一次ソースと整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "概ね整合",
+            "grounding_sources": [
+                {"title": "city.kameoka.kyoto.jp", "url": "https://example.com/a"},
+                {"title": "wikipedia.org", "url": "https://example.com/b"},
+            ],
+            "claim_reviews": [
+                {
+                    "claim": "織田信長は本能寺の変で明智光秀に殺された。",
+                    "verdict": "概ね整合",
+                    "reason": "複数の歴史資料や報道機関の記事が、織田信長が本能寺の変において明智光秀の謀反により死亡したことを示しています。信長は本能寺で襲撃され、自害したとされています。",
+                },
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "ほぼ正確"
+
+
+def test_single_counterevidence_review_with_numeric_detail_correction_can_be_mostly_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=54,
+        confidence_score=69,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "イチローは29年間のプロ野球選手生活で日米通算4367安打を記録した。",
+                    "verdict": "反証あり",
+                    "reason": "イチローの日米通算安打数は4367本で複数の情報源と整合しますが、プロ野球選手生活は28年間であり、29年間ではありません。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "ほぼ正確"
+
+
+def test_single_counterevidence_review_with_scope_correction_can_be_mostly_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=50,
+        confidence_score=71,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "ペンギンはみんな南極に住んでいる。",
+                    "verdict": "反証あり",
+                    "reason": "ペンギンは南極大陸だけでなく、亜南極圏の島々、オーストラリア、南米、アフリカの各大陸南部、赤道直下のガラパゴス諸島など、南半球の幅広い地域に生息しています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "ほぼ正確"
+
+
+def test_single_counterevidence_review_with_same_group_omission_can_be_mostly_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=54,
+        confidence_score=68,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "大谷翔平と同学年の日本人メージャーリーガーは鈴木誠也である。",
+                    "verdict": "反証あり",
+                    "reason": "大谷翔平選手と鈴木誠也選手は共に1994年生まれで同学年ですが、同じく1994年生まれの日本人メジャーリーガーには藤浪晋太郎選手もいます。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "ほぼ正確"
+
+
+def test_counterevidence_with_source_gap_can_be_false_when_refutation_is_strong() -> None:
+    verdict = derive_public_verdict(
+        risk_score=88,
+        confidence_score=51,
+        labels=["反証情報あり", "出典不明", "信頼できる一次ソース未確認", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+        },
+        evidence_overview={"assessment_status": "反証あり"},
+    )
+    assert verdict == "誤り"
+
+
+def test_counterevidence_with_source_gap_and_extra_check_stays_non_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=88,
+        confidence_score=51,
+        labels=["反証情報あり", "出典不明", "信頼できる一次ソース未確認", "追加確認が必要"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+        },
+        evidence_overview={"assessment_status": "反証あり"},
+    )
+    assert verdict == "不正確"
+
+
+def test_split_claim_with_supported_core_but_wrong_manager_stays_inaccurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=51,
+        confidence_score=70,
+        labels=["反証情報あり", "大筋で整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "2023年のWBCで大谷翔平の活躍もあり、野球日本代表は優勝した。",
+                    "verdict": "概ね整合",
+                    "reason": "2023年のWBCで野球日本代表は優勝し、大谷翔平選手はMVPに輝くなど活躍しました。",
+                },
+                {
+                    "claim": "その時の監督は王貞治だった。",
+                    "verdict": "反証あり",
+                    "reason": "2023年のWBCにおける野球日本代表の監督は栗山英樹氏でした。王貞治氏は2006年のWBCで監督を務めました。",
+                },
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "不正確"
+
+
+def test_multi_error_counterevidence_review_stays_inaccurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=54,
+        confidence_score=69,
+        labels=["反証情報あり", "大筋で整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "スタジオジブリ制作のアニメ映画「となりのトトロ」と「火垂るの墓」は1988年4月に同時上映された。「となりのトトロ」は高畑勲、「火垂るの墓」は宮崎駿の監督作品で、プロデューサーは庵野秀明だった。",
+                    "verdict": "反証あり",
+                    "reason": "スタジオジブリ制作の「となりのトトロ」と「火垂るの墓」は1988年4月16日に同時上映されたことは概ね整合する。しかし、「となりのトトロ」の監督は宮崎駿、「火垂るの墓」の監督は高畑勲であり、主張とは逆である。また、両作品のプロデューサーは原徹であり、庵野秀明ではない。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "不正確"
+
+
+def test_pairwise_all_members_claim_stays_inaccurate_when_one_member_fails() -> None:
+    verdict = derive_public_verdict(
+        risk_score=54,
+        confidence_score=69,
+        labels=["反証情報あり", "大筋で整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "新選組の土方歳三・斎藤一は戊辰戦争を戦い抜いたが、最後は函館で二人とも戦死した。",
+                    "verdict": "反証あり",
+                    "reason": "土方歳三は函館戦争で戦死したが、斎藤一は戊辰戦争を生き延び、明治時代に東京で病死したことが複数の情報源で確認できるため、二人とも函館で戦死したという主張は誤りである。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "不正確"
+
+
+def test_type_noun_swap_stays_inaccurate_even_when_entity_frame_matches() -> None:
+    verdict = derive_public_verdict(
+        risk_score=54,
+        confidence_score=68,
+        labels=["反証情報あり", "大筋で整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "ドラえもんは22世紀の未来の日本から来た犬型ロボットである。",
+                    "verdict": "反証あり",
+                    "reason": "ドラえもんは22世紀の未来から来たネコ型ロボットであり、犬型ロボットではありません。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "不正確"
+
+
+def test_multi_sentence_claim_with_correct_date_but_wrong_penalty_stays_inaccurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=50,
+        confidence_score=71,
+        labels=["反証情報あり", "大筋で整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "2025年10月1日豊明市スマートフォン等の適正使用の推進に関する条例が施行された。違反すると罰金などの罰則がある。",
+                    "verdict": "反証あり",
+                    "reason": "豊明市スマートフォン等の適正使用の推進に関する条例は2025年10月1日に施行されましたが、複数の情報源によると、この条例には罰則規定がありません。この条例は理念条例であり、市民の権利を制限したり、義務を課したりするものではないとされています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "不正確"
+
+
+def test_causal_multi_clause_numeric_claim_stays_inaccurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=52,
+        confidence_score=70,
+        labels=["反証情報あり", "大筋で整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "9.11テロを起こしたウサマ・ビンラディンをイラクのサダム・フセインが匿ったため、2003年アメリカはイラクを攻撃し、イラク戦争が始まった。",
+                    "verdict": "反証あり",
+                    "reason": "9.11テロの首謀者ウサマ・ビンラディンはアフガニスタンのタリバン政権に匿われており、イラクのサダム・フセインが匿ったという事実は確認されていません。イラク戦争の開戦理由とされた大量破壊兵器の存在やテロ組織との関連性も後に否定されています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "不正確"
+
+
+def test_single_numeric_attribute_without_supported_core_can_stay_inaccurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=54,
+        confidence_score=67,
+        labels=["反証情報あり", "大筋で整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "世界最高のテノールの一人とされるルチアーノ・パヴァロッティだが、身長は160cmと小柄だった。",
+                    "verdict": "反証あり",
+                    "reason": "複数の情報源によると、ルチアーノ・パヴァロッティの身長は180cmまたは188cmであり、160cmという主張は事実と異なります。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "不正確"
+
+
+def test_false_claim_mode_conspiracy_counterevidence_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=52,
+        confidence_score=68,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "飛行機雲は、政府などが危険な化学物質を散布している「ケムトレイル」である。",
+                    "verdict": "反証あり",
+                    "reason": "「ケムトレイル」説は陰謀論であり、科学的根拠がなく、公的機関やファクトチェック機関によって誤りであると繰り返し否定されています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_nonexistent_law_counterevidence_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=52,
+        confidence_score=68,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "日本はモスク建設やブルカの着用などを禁じる反イスラム法を制定した。",
+                    "verdict": "反証あり",
+                    "reason": "日本国憲法は信教の自由を保障しており、そのような法律は制定されていません。文化庁宗務課もそのような法律の存在を否定しています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_fake_quote_counterevidence_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=52,
+        confidence_score=68,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "世田谷区で韓国籍女性が殺害された事件について、韓国の李在明大統領が「日本は謝罪と賠償をするべきだ」と発言した。",
+                    "verdict": "反証あり",
+                    "reason": "日本ファクトチェックセンターによると、そのような発言をしたという事実はなく、拡散された情報はまとめサイトによる誤りであるとされています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_fake_or_modified_image_counterevidence_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=52,
+        confidence_score=67,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "朝日新聞の入社式では、社旗の脇に韓国と中国の国旗を並べ、ハングル文字を掲げていた。",
+                    "verdict": "反証あり",
+                    "reason": "この画像は2013年度入社式の写真が第三者によって意図的に加工されたものであると確認されています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_generated_ai_image_counterevidence_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=52,
+        confidence_score=67,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "天皇陛下や上皇陛下がジェフリー・エプスタイン氏と一緒に写っている写真は本物だ。",
+                    "verdict": "反証あり",
+                    "reason": "この写真は生成AIによるフェイク画像であり、実際には存在しません。ディープフェイク検知でも生成AI由来と判定されています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_mistranslated_quote_counterevidence_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=52,
+        confidence_score=67,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "トランプ氏が、現在の中東情勢を受けて「私は核兵器を使う最後の人間になるだろう」と発言した。",
+                    "verdict": "反証あり",
+                    "reason": "この発言は2016年のものであり、現在の中東情勢を受けたものではなく、英語の原文の解釈も誤っていることがファクトチェック記事で指摘されています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_geocentrism_counterevidence_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=14,
+        confidence_score=82,
+        labels=["反証情報あり"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": True,
+            "trusted_source": True,
+            "correction_article": True,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "地球は宇宙の中心にあり、地球の回りを太陽やその他の星々が回っている。",
+                    "verdict": "反証あり",
+                    "reason": "この主張は天動説であり、コペルニクス、ガリレオ、ケプラー、ニュートンらの研究により、地球が太陽の周りを公転する地動説が科学的に確立されています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_5g_covid_counterevidence_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=16,
+        confidence_score=73,
+        labels=["反証情報あり"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": True,
+            "trusted_source": True,
+            "correction_article": True,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "5Gが新型コロナを引き起こす。",
+                    "verdict": "反証あり",
+                    "reason": "世界保健機関（WHO）は、ウイルスは電波やモバイルネットワーク上を移動できず、5Gがない多くの国でも新型コロナウイルス感染症が拡大していると明言しています。また、科学的専門家も5Gがウイルスを生成することはないと述べています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_vaccine_cancer_counterevidence_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=19,
+        confidence_score=82,
+        labels=["反証情報あり"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": True,
+            "trusted_source": True,
+            "correction_article": True,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "新型コロナワクチンを接種すると大腸がんになる。",
+                    "verdict": "反証あり",
+                    "reason": "ファイザー社が新型コロナワクチンと大腸がんの因果関係を認めたという主張は誤りであり、関連性を示す発表や報道もありません。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_birther_counterevidence_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=16,
+        confidence_score=81,
+        labels=["反証情報あり"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": True,
+            "trusted_source": True,
+            "correction_article": True,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "バラク・オバマはアメリカ生まれではない。",
+                    "verdict": "反証あり",
+                    "reason": "バラク・オバマは1961年8月4日にハワイ州ホノルルで生まれ、2011年には出生証明書の長式版が公開されています。アメリカ生まれではないという主張は「バーサー運動」と呼ばれる陰謀論であり、複数のファクトチェック機関や公的機関によって否定されています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_mmr_autism_counterevidence_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=22,
+        confidence_score=73,
+        labels=["反証情報あり"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": True,
+            "trusted_source": True,
+            "correction_article": True,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "MMRワクチンで自閉症になる。",
+                    "verdict": "反証あり",
+                    "reason": "MMRワクチンと自閉症の関連性を示唆した1998年の論文は、データ不正により撤回され、著者の医師免許も剥奪されました。その後の大規模な疫学研究でも、MMRワクチンと自閉症の関連性は確認されていません。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
