@@ -11,6 +11,7 @@ from app.analyzer import (
     style_score_display,
 )
 from app.config import Settings
+from app.evidence_search import build_evidence_links
 from app.models import AnalysisSignal, ResolvedPage
 
 
@@ -76,6 +77,8 @@ def test_build_prompt_omits_style_review_when_disabled() -> None:
         Settings(gemini_style_review_enabled=False),
     )
     assert '"style_review"' not in prompt
+    assert '"primary_review"' not in prompt
+    assert "役割は次の1つ" in prompt
 
 
 def test_build_prompt_mentions_short_claim_guidance_for_short_input() -> None:
@@ -95,6 +98,36 @@ def test_build_prompt_mentions_short_claim_guidance_for_short_input() -> None:
 
     assert "短文claim評価" in prompt
     assert "それだけで「出典不明」や「信頼できる一次ソース未確認」を付けないでください。" in prompt
+
+
+def test_build_prompt_mentions_quote_verification_guidance_for_claim_mode() -> None:
+    page = make_page()
+    prompt = build_prompt(
+        page,
+        {
+            "domain": "一般",
+            "labels": [],
+            "reasons": [],
+            "source_snapshot": page,
+            "evidence_overview": {"claims": [], "links": []},
+            "source_profile": {},
+        },
+        Settings(gemini_style_review_enabled=False),
+    )
+
+    assert "引用句そのもの、話者、発言時期、元の文脈" in prompt
+    assert "英語原文や過去発言" in prompt
+
+
+def test_build_evidence_links_add_quote_search_links_for_quoted_claim() -> None:
+    links = build_evidence_links(
+        ["トランプ氏が「私は核兵器を使う最後の人間になるだろう」と発言した。"],
+        "一般",
+    )
+
+    assert links[0].kind == "外部根拠探索/引用検索"
+    assert links[1].kind == "外部根拠探索/引用文脈"
+    assert "私は核兵器を使う最後の人間になるだろう" in links[0].title
 
 
 def test_merge_style_overview_stays_local_when_gemini_style_review_disabled() -> None:
@@ -715,6 +748,103 @@ def test_apply_gemini_primary_review_keeps_seed_when_primary_review_missing() ->
     merged = apply_gemini_primary_review(seed, {})
 
     assert merged is seed
+
+
+def test_apply_gemini_primary_review_skips_claim_mode_seed() -> None:
+    seed = {
+        "risk_score": 35,
+        "confidence": "モデルの確信度",
+        "confidence_score": 60,
+        "status": "自動判定",
+        "summary": "heuristic summary",
+        "labels": [],
+        "reasons": ["heuristic reason"],
+        "domain": "一般",
+        "caution_level": "ほぼ正確",
+        "signal_breakdown": [],
+        "source_profile": {"claim_mode": True},
+    }
+    llm_output = {
+        "primary_review": {
+            "domain": "医療",
+            "risk_score": 90,
+            "confidence_score": 90,
+            "summary": "Gemini の一次判定です。",
+            "labels": ["反証情報あり"],
+            "reasons": ["Gemini reason"],
+        }
+    }
+
+    merged = apply_gemini_primary_review(seed, llm_output)
+
+    assert merged is seed
+
+
+def test_false_claim_mode_helpers_accept_current_reason_wordings() -> None:
+    cases = [
+        (
+            "5Gが新型コロナを引き起こす",
+            "5Gの電磁波が新型コロナウイルスを引き起こしたり、ウイルスの拡散を助けたりするという科学的根拠は全くありません。WHOやCDCなどの専門機関がこの主張を否定しており、5Gが導入されていない地域でも新型コロナウイルスは蔓延しています。",
+            16,
+            81,
+        ),
+        (
+            "1969年のアポロ月面着陸は捏造である",
+            "アポロ計画による月面着陸は、月面から持ち帰られた岩石、月面に設置されたレーザー反射鏡、現代の月探査機による着陸地点の痕跡の撮影、および多数の関係者が関与しているにもかかわらず捏造を認める証言がないことなど、複数の科学的証拠と独立した検証によって事実であることが確認されています。旗がなびいているように見える、星が写っていない、影の異常といった陰謀論の主な根拠も、科学的に説明されています。",
+            34,
+            81,
+        ),
+        (
+            "ミスタージャイアンツとはイチローのことである",
+            "「ミスタージャイアンツ」は、読売ジャイアンツで活躍した長嶋茂雄氏の愛称として広く知られており、イチロー氏を指すという情報は見つかりませんでした。",
+            16,
+            81,
+        ),
+        (
+            "工藤新一と江戸川コナンは同一人物でない",
+            "漫画『名探偵コナン』の主人公である江戸川コナンの本名は工藤新一であり、黒の組織の薬によって体が小さくなった姿であると公式情報や関連情報で明記されているため、同一人物でないという主張は誤りである。",
+            16,
+            80,
+        ),
+        (
+            "関東大震災で朝鮮人が井戸に毒を入れた",
+            "関東大震災時に「朝鮮人が井戸に毒を入れた」という情報は、当時の混乱の中で広まった根拠のないデマ（流言）であり、事実ではないことが複数の資料で確認されています。このデマが朝鮮人虐殺を引き起こしました。",
+            14,
+            82,
+        ),
+        (
+            "西郷隆盛は西南戦争で勝利した",
+            "西南戦争は1877年に発生した日本最後の内戦であり、明治政府（新政府軍）が勝利し、西郷隆盛率いる私学校党は敗北しました。西郷隆盛は城山での最後の戦いで最期を遂げています。",
+            16,
+            80,
+        ),
+    ]
+
+    for claim, reason, risk_score, confidence_score in cases:
+        verdict = derive_public_verdict(
+            risk_score=risk_score,
+            confidence_score=confidence_score,
+            labels=["反証情報あり", "文脈不足に注意"],
+            source_profile={
+                "official_source": False,
+                "fact_check_source": False,
+                "trusted_source": False,
+                "correction_article": False,
+                "claim_mode": True,
+            },
+            evidence_overview={
+                "assessment_status": "反証あり",
+                "claim_reviews": [
+                    {
+                        "claim": claim,
+                        "verdict": "反証あり",
+                        "reason": reason,
+                    }
+                ],
+            },
+            claim_mode=True,
+        )
+        assert verdict == "誤り"
 
 
 def test_kanji_name_correction_in_supported_claim_stays_mostly_accurate() -> None:
@@ -1553,6 +1683,843 @@ def test_false_claim_mode_synthetic_image_variation_escalates_to_false() -> None
                     "claim": "ギザのピラミッド上空に水星、金星、土星が見える。これは2373年に1度起こる現象である。",
                     "verdict": "反証あり",
                     "reason": "この画像は合成であり実際のものではありません。NASAの説明でも、このような惑星の並びは数千年に一度の現象ではないとされています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_5g_covid_brief_denial_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=16,
+        confidence_score=80,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "5Gが新型コロナを引き起こす。",
+                    "verdict": "反証あり",
+                    "reason": "科学的根拠がなく、WHOなどの専門機関が明確に否定しているため。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_vaccine_cancer_authority_denial_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=20,
+        confidence_score=84,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "新型コロナワクチンを接種すると大腸がんになる。",
+                    "verdict": "反証あり",
+                    "reason": "ファイザー社は新型コロナワクチンと大腸がんの因果関係を認めておらず、厚生労働省や国立がん研究センターもワクチンががんを誘発する根拠はないと発表しています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_birther_birthplace_confirmation_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=14,
+        confidence_score=82,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "バラク・オバマはアメリカ生まれではない。",
+                    "verdict": "反証あり",
+                    "reason": "バラク・オバマは1961年8月4日にアメリカ合衆国ハワイ州ホノルルで誕生したことが、複数の信頼できる情報源によって確認されています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_nickname_alias_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=16,
+        confidence_score=81,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "ミスタージャイアンツとはイチローのことである。",
+                    "verdict": "反証あり",
+                    "reason": "「ミスタージャイアンツ」は、読売ジャイアンツの元選手・監督である長嶋茂雄氏の愛称として広く知られています。イチロー氏がこの愛称で呼ばれるという情報は見当たりません。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_record_holder_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=16,
+        confidence_score=81,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "バロンドールの最多受賞者は中田英寿である。",
+                    "verdict": "反証あり",
+                    "reason": "バロンドールの最多受賞者はリオネル・メッシ選手（8回）であり、中田英寿選手ではありません。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_first_winner_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=16,
+        confidence_score=78,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "バロンドールの最初の受賞者は中村俊輔である。",
+                    "verdict": "反証あり",
+                    "reason": "バロンドールは1956年に創設され、記念すべき第1回の受賞者はイングランドのスタンリー・マシューズである。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_recontextualized_quote_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=54,
+        confidence_score=66,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "トランプ氏が、現在の中東情勢を受けて「私は核兵器を使う最後の人間になるだろう」と発言した",
+                    "verdict": "反証あり",
+                    "reason": "トランプ氏の「私は核兵器を使う最後の人間になるだろう」という発言は、2016年8月6日にニューハンプシャー州ウィンダム高校での選挙集会で行われたものであり、2026年の現在の中東情勢を受けての発言ではありません。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_mmr_autism_wording_variation_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=19,
+        confidence_score=83,
+        labels=["反証情報あり"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": True,
+            "trusted_source": True,
+            "correction_article": True,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "MMRワクチンで自閉症になる。",
+                    "verdict": "反証あり",
+                    "reason": "MMRワクチンと自閉症の関連性については、多数の疫学研究で否定されており、関連性を示す証拠はありません。この主張の根拠となった論文は、データ改ざんが発覚し撤回されています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_unconfirmed_quote_wording_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=54,
+        confidence_score=61,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": True,
+            "trusted_source": True,
+            "correction_article": True,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "世田谷区で韓国籍女性が殺害された事件について、韓国の李在明大統領が「日本は謝罪と賠償をするべきだ」と発言した。",
+                    "verdict": "反証あり",
+                    "reason": "日本ファクトチェックセンターの検証により、李在明大統領がこの事件に関して「日本は謝罪と賠償をするべきだ」と発言したという事実は確認されておらず、誤りであるとされています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_same_person_negation_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=16,
+        confidence_score=80,
+        labels=["反証情報あり"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "工藤新一と江戸川コナンは同一人物でない。",
+                    "verdict": "反証あり",
+                    "reason": "『名探偵コナン』の主人公である江戸川コナンは、毒薬によって体が小さくなった工藤新一の仮の姿であり、同一人物であると公式情報や関連サイトで明記されています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_japan_northernmost_point_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=14,
+        confidence_score=82,
+        labels=["反証情報あり"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "日本の最北端は知床岬である。",
+                    "verdict": "反証あり",
+                    "reason": "日本の最北端は択捉島であり、一般人が到達できる最北端は北海道の宗谷岬である。知床岬は日本の最北端ではない。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_historical_poison_rumor_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=14,
+        confidence_score=82,
+        labels=["反証情報あり"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "関東大震災で朝鮮人が井戸に毒を入れた。",
+                    "verdict": "反証あり",
+                    "reason": "関東大震災時に「朝鮮人が井戸に毒を入れた」という流言が広まったが、警視庁の資料や内閣府の報告書など複数の公的資料で、朝鮮人による暴動や投毒の噂は誤りであったと確認されている。このデマが朝鮮人虐殺の背景となった。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_recontextualized_quote_current_situation_variation_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=54,
+        confidence_score=67,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "トランプ氏が、現在の中東情勢を受けて「私は核兵器を使う最後の人間になるだろう」と発言した",
+                    "verdict": "反証あり",
+                    "reason": "トランプ氏が「私は核兵器を使う最後の人間になるだろう」と発言したのは2016年8月6日の選挙集会であり、現在の情勢を受けたものではないため、主張の前提が誤っています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_5g_covid_generation_denial_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=16,
+        confidence_score=80,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "5Gが新型コロナを引き起こす。",
+                    "verdict": "反証あり",
+                    "reason": "世界保健機関（WHO）は、5Gが新型コロナウイルス感染症（COVID-19）を広めないこと、ウイルスは電波やモバイルネットワーク上を移動できないことを明確に述べています。また、専門家も5Gがウイルスを生成しないと指摘しています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_mmr_autism_fabrication_variation_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=20,
+        confidence_score=82,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "MMRワクチンで自閉症になる。",
+                    "verdict": "反証あり",
+                    "reason": "MMRワクチンと自閉症の関連を示唆した論文は、データ捏造などの不正が発覚し撤回されました。その後の大規模な疫学研究では、MMRワクチンと自閉症の間に因果関係がないことが一貫して示されています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_apollo_moon_landing_hoax_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=34,
+        confidence_score=80,
+        labels=["反証情報あり", "既知のデマ類型に類似", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "1969年のアポロ月面着陸は捏造である",
+                    "verdict": "反証あり",
+                    "reason": "アポロ計画の月面着陸は、日本の月周回衛星「かぐや」による着陸地点のクレーター撮影や、NASAのルナリコネッサンスオービターによる高解像度画像によって確認されています。また、ソビエト連邦を含む複数の国がアポロミッションを独立して監視しており、陰謀論の主な根拠も科学的に説明されています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_geocentrism_established_wording_variation_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=14,
+        confidence_score=82,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "地球は宇宙の中心にあり、地球の回りを太陽やその他の星々が回っている",
+                    "verdict": "反証あり",
+                    "reason": "地球が宇宙の中心にあり、太陽や他の天体がその周りを回るという天動説は、コペルニクス、ガリレオ、ケプラー、ニュートンらの研究により科学的に反証され、太陽が中心の地動説が確立されています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_mmr_autism_unreliable_data_wording_variation_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=20,
+        confidence_score=82,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "MMRワクチンで自閉症になる。",
+                    "verdict": "反証あり",
+                    "reason": "MMRワクチンと自閉症の関連性を示唆した1998年の論文は、不正なデータと倫理的違反により撤回されました。その後の多数の大規模疫学研究では、MMRワクチン接種と自閉症リスクの増加との関連性は認められていません。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_japan_northernmost_claim_is_wrong_wording_variation_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=14,
+        confidence_score=82,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "日本の最北端は知床岬である。",
+                    "verdict": "反証あり",
+                    "reason": "日本の最北端は択捉島であり、一般人が到達できる最北端は宗谷岬であるため、知床岬であるという主張は誤りです。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_trump_current_mideast_quote_wording_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=54,
+        confidence_score=66,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "トランプ氏が、現在の中東情勢を受けて「私は核兵器を使う最後の人間になるだろう」と発言した。",
+                    "verdict": "反証あり",
+                    "reason": "トランプ氏の「私は核兵器を使う最後の人間になるだろう」という発言は、2016年8月6日にニューハンプシャー州のウィンダム高校で行われた大統領選集会でのものであり、現在の中東情勢を受けてのものではありません。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_5g_covid_scientific_knowledge_wording_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=16,
+        confidence_score=81,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "5Gが新型コロナを引き起こす。",
+                    "verdict": "反証あり",
+                    "reason": "科学的知見や実験確認例は全くなく、WHOなどの専門機関が5Gと新型コロナウイルス感染症の関連性を否定しているため。ウイルスは電波やモバイルネットワーク上を移動できない。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_mmr_autism_no_scientific_evidence_wording_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=20,
+        confidence_score=82,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "MMRワクチンで自閉症になる。",
+                    "verdict": "反証あり",
+                    "reason": "MMRワクチンと自閉症の関連性を示す科学的証拠はなく、関連性を主張した元の論文は不正行為により撤回され、著者の医師免許も剥奪されています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_lee_fake_quote_jfc_wording_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=52,
+        confidence_score=68,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "世田谷区で韓国籍女性が殺害された事件について、韓国の李在明大統領が「日本は謝罪と賠償をするべきだ」と発言した。",
+                    "verdict": "反証あり",
+                    "reason": "日本ファクトチェックセンター（JFC）がこの主張を検証し、李在明大統領がそのような発言をしたという事実はないと結論付けています。この情報はまとめサイトによって拡散された誤りです。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_claim_mode_counterevidence_review_prevents_almost_accurate_for_compound_claim() -> None:
+    verdict = derive_public_verdict(
+        risk_score=41,
+        confidence_score=78,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "概ね整合",
+            "claim_reviews": [
+                {
+                    "claim": "スタジオジブリ制作のアニメ映画「となりのトトロ」と「火垂るの墓」は1988年4月に同時上映された。「となりのトトロ」は高畑勲、「火垂るの墓」は宮崎駿の監督作品である。",
+                    "verdict": "反証あり",
+                    "reason": "「となりのトトロ」の監督は宮崎駿、「火垂るの墓」の監督は高畑勲であり、主張と逆です。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "不正確"
+
+
+def test_false_claim_mode_nonexistent_law_sonzai_sezu_wording_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=18,
+        confidence_score=82,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "日本はモスク建設やブルカの着用などを禁じる反イスラム法を制定した。",
+                    "verdict": "反証あり",
+                    "reason": "日本にそのような反イスラム法は存在せず、憲法や文化庁の方針にも反します。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_context_mismatch_quote_wording_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=52,
+        confidence_score=68,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "世田谷区で韓国籍女性が殺害された事件について、韓国の李在明大統領が「日本は謝罪と賠償をするべきだ」と発言した。",
+                    "verdict": "反証あり",
+                    "reason": "そのような報道は確認できないうえ、過去の歴史問題に関する談話が本件とは異なる文脈で流用されています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_first_ballon_dor_winner_plain_desu_wording_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=16,
+        confidence_score=81,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "バロンドールの最初の受賞者は中村俊輔である。",
+                    "verdict": "反証あり",
+                    "reason": "バロンドールは1956年に創設され、最初の受賞者はスタンリー・マシューズです。中村俊輔は2007年にバロンドールの候補者にはなりましたが、受賞はしていません。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_mmr_autism_denied_relatedness_wording_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=19,
+        confidence_score=83,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "MMRワクチンで自閉症になる。",
+                    "verdict": "反証あり",
+                    "reason": "1998年の論文が不正なデータにより撤回され、その後の大規模な疫学研究でMMRワクチンと自閉症の関連性は否定されているため。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_apollo_hoax_flag_and_witness_wording_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=34,
+        confidence_score=81,
+        labels=["反証情報あり", "既知のデマ類型に類似", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "1969年のアポロ月面着陸は捏造である",
+                    "verdict": "反証あり",
+                    "reason": "アポロ月面着陸はNASAによって複数回成功しており、捏造説の主な根拠（旗の揺れ、星の不在など）は科学的に反証されている。また、40万人もの関係者から捏造を認める証言は出ていない。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_saigo_boshin_death_claim_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=13,
+        confidence_score=81,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "西郷隆盛は戊辰戦争で戦死した。",
+                    "verdict": "反証あり",
+                    "reason": "西郷隆盛は戊辰戦争で新政府軍の参謀として活躍しましたが、戦死したのは1877年の西南戦争です。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_saigo_seinan_victory_claim_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=13,
+        confidence_score=81,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "西郷隆盛は西南戦争で勝利した。",
+                    "verdict": "反証あり",
+                    "reason": "西南戦争は明治政府軍の勝利で終結し、西郷隆盛は敗北し自刃しました。",
                 }
             ],
         },

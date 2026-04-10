@@ -720,13 +720,13 @@
     {
       "id": "jfc-inaccurate-03-japan-is-not-expanding-the-pakistani-intake-to-50thousands",
       "expected_verdict": "不正確",
-      "analysis_text": "スタジオジブリ制作のアニメ映画「となりのトトロ」と「火垂るの墓」は1988年4月に同時上映された。「となりのトトロ」は高畑勲、「火垂るの墓」は宮崎駿の監督作品で、プロデューサーは庵野秀明だった。",
+      "analysis_text": "スタジオジブリ制作のアニメ映画「となりのトトロ」と「火垂るの墓」は1988年4月に同時上映された。「となりのトトロ」は高畑勲、「火垂るの墓」は宮崎駿の監督作品である。",
       "expected_domain": "一般",
       "analysis_mode": "claim",
-      "claim_text": "スタジオジブリ制作のアニメ映画「となりのトトロ」と「火垂るの墓」は1988年4月に同時上映された。「となりのトトロ」は高畑勲、「火垂るの墓」は宮崎駿の監督作品で、プロデューサーは庵野秀明だった。",
+      "claim_text": "スタジオジブリ制作のアニメ映画「となりのトトロ」と「火垂るの墓」は1988年4月に同時上映された。「となりのトトロ」は高畑勲、「火垂るの墓」は宮崎駿の監督作品である。",
       "review_focus": "主張の一部や条件にズレがあり、言い切り過ぎになっていないかを見る。",
       "human_note": "短文claim評価用に、主張の一部や条件がずれているケースです。",
-      "contested_span": "スタジオジブリ制作のアニメ映画「となりのトトロ」と「火垂るの墓」は1988年4月に同時上映された。「となりのトトロ」は高畑勲、「火垂るの墓」は宮崎駿の監督作品で、プロデューサーは庵野秀明だった。"
+      "contested_span": "スタジオジブリ制作のアニメ映画「となりのトトロ」と「火垂るの墓」は1988年4月に同時上映された。「となりのトトロ」は高畑勲、「火垂るの墓」は宮崎駿の監督作品である。"
     },
     {
       "id": "jfc-inaccurate-04-inaccurate-kyoto-hotel-prices-collapse",
@@ -1057,13 +1057,13 @@
     {
       "id": "jfc-false-13-false-koizumi-radiated-soil-video",
       "expected_verdict": "誤り",
-      "analysis_text": "小泉進次郎農水大臣が放射能汚染土を日本中にばら撒いた。",
+      "analysis_text": "工藤新一と江戸川コナンは同一人物でない。",
       "expected_domain": "政治",
       "analysis_mode": "claim",
-      "claim_text": "小泉進次郎農水大臣が放射能汚染土を日本中にばら撒いた。",
+      "claim_text": "工藤新一と江戸川コナンは同一人物でない。",
       "review_focus": "主張の中核が外部根拠で反証されるかを見る。",
       "human_note": "短文claim評価用に、主張の中心部分が反証されるケースです。",
-      "contested_span": "小泉進次郎農水大臣が放射能汚染土を日本中にばら撒いた。",
+      "contested_span": "工藤新一と江戸川コナンは同一人物でない。",
       "source_url": "https://www.factcheckcenter.jp/fact-check/nuclear/false-koizumi-radiated-soil-video/"
     },
     {
@@ -1080,13 +1080,13 @@
     {
       "id": "jfc-false-15-false-100k-demo-osaka-yoon",
       "expected_verdict": "誤り",
-      "analysis_text": "大阪で在日コリアン10万人のデモ隊が日本と断交し、北朝鮮やロシアと国交を回復することを要求した。",
+      "analysis_text": "日本の最北端は知床岬である。",
       "expected_domain": "政治",
       "analysis_mode": "claim",
-      "claim_text": "大阪で在日コリアン10万人のデモ隊が日本と断交し、北朝鮮やロシアと国交を回復することを要求した。",
+      "claim_text": "日本の最北端は知床岬である。",
       "review_focus": "主張の中核が外部根拠で反証されるかを見る。",
       "human_note": "短文claim評価用に、主張の中心部分が反証されるケースです。",
-      "contested_span": "大阪で在日コリアン10万人のデモ隊が日本と断交し、北朝鮮やロシアと国交を回復することを要求した。",
+      "contested_span": "日本の最北端は知床岬である。",
       "source_url": "https://www.factcheckcenter.jp/fact-check/korea/false-100k-demo-osaka-yoon/"
     },
     {
@@ -1128,13 +1128,13 @@
     {
       "id": "jfc-false-19-former-ukrainian-commander-zarzhinyi-53-million-dollar-retirement-bbc",
       "expected_verdict": "誤り",
-      "analysis_text": "バロンドールの最初の受賞者は中村俊輔である。",
+      "analysis_text": "西郷隆盛は西南戦争で勝利した。",
       "expected_domain": "一般",
       "analysis_mode": "claim",
-      "claim_text": "バロンドールの最初の受賞者は中村俊輔である。",
+      "claim_text": "西郷隆盛は西南戦争で勝利した。",
       "review_focus": "主張の中核が外部根拠で反証されるかを見る。",
       "human_note": "短文claim評価用に、主張の中心部分が反証されるケースです。",
-      "contested_span": "バロンドールの最初の受賞者は中村俊輔である。",
+      "contested_span": "西郷隆盛は西南戦争で勝利した。",
       "source_url": "https://www.factcheckcenter.jp/fact-check/masukomi/former-ukrainian-commander-zarzhinyi-53-million-dollar-retirement-bbc/"
     },
     {

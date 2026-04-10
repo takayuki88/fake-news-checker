@@ -283,25 +283,95 @@ COUNTEREVIDENCE_MATERIAL_ROLE_HINTS = [
     "プロデューサー",
 ]
 STRONG_FALSE_CONSPIRACY_HINTS = ["陰謀論", "科学的根拠がなく", "科学的根拠はなく", "繰り返し否定"]
-STRONG_FALSE_NONEXISTENT_LAW_HINTS = ["制定されていません", "存在しません"]
-STRONG_FALSE_FAKE_QUOTE_HINTS = ["事実はなく", "原文の解釈も誤っている", "誤訳"]
+STRONG_FALSE_NONEXISTENT_LAW_HINTS = ["制定されていません", "存在しません", "存在せず"]
+STRONG_FALSE_FAKE_QUOTE_HINTS = ["事実はなく", "事実はない", "原文の解釈も誤っている", "誤訳"]
 STRONG_FALSE_FAKE_QUOTE_ABSENCE_HINTS = [
     "確認できませんでした",
     "確認されていません",
+    "確認されておらず",
+    "報道は確認できない",
     "報道や公的発表は確認できません",
     "発表や報道はなく",
 ]
-STRONG_FALSE_FAKE_QUOTE_MISATTRIBUTION_HINTS = ["誤情報", "誤りである", "紐づくものではありません", "まとめサイト"]
+STRONG_FALSE_FAKE_QUOTE_MISATTRIBUTION_HINTS = ["誤情報", "誤りである", "誤りです", "紐づくものではありません", "まとめサイト"]
+STRONG_FALSE_FAKE_QUOTE_CONTEXT_HINTS = [
+    "受けての発言ではありません",
+    "受けてのものではありません",
+    "受けたものではない",
+    "とは無関係",
+    "古い引用",
+    "別の時期",
+    "主張の前提が誤って",
+    "異なる文脈",
+    "本件とは異なる文脈",
+]
 STRONG_FALSE_FAKE_IMAGE_HINTS = ["加工された", "意図的に加工", "フェイク画像", "生成ai", "ディープフェイク", "合成", "捏造"]
-STRONG_FALSE_GEOCENTRISM_REASON_HINTS = ["天動説", "地動説", "公転", "科学的に確立"]
+STRONG_FALSE_GEOCENTRISM_REASON_HINTS = ["天動説", "地動説", "公転", "科学的に確立", "確立されています"]
+STRONG_FALSE_5G_COVID_NO_SCIENCE_HINTS = [
+    "科学的根拠がなく",
+    "科学的根拠はなく",
+    "科学的根拠がない",
+    "科学的知見や実験確認例は全くなく",
+    "明確に否定",
+]
 STRONG_FALSE_VACCINE_CANCER_REASON_HINTS = ["因果関係", "主張は誤り", "認めたという主張は誤り"]
+STRONG_FALSE_VACCINE_CANCER_AUTHORITY_HINTS = ["ファイザー社", "厚生労働省", "国立がん研究センター"]
+STRONG_FALSE_VACCINE_CANCER_NO_BASIS_HINTS = ["根拠はない", "根拠がない", "誘発する根拠はない", "科学的根拠はない"]
 STRONG_FALSE_VACCINE_CANCER_DISCLAIMER_HINTS = [
     "関連性を示す発表や報道もありません",
     "関連性は説明していない",
     "関連性は確認されていません",
 ]
 STRONG_FALSE_BIRTHER_REASON_HINTS = ["出生証明書", "ハワイ州ホノルル", "バーサー運動", "陰謀論"]
-STRONG_FALSE_VACCINE_AUTISM_REASON_HINTS = ["論文", "撤回", "データ不正", "大規模な疫学研究", "関連性は確認されていません"]
+STRONG_FALSE_BIRTHER_BIRTHPLACE_HINTS = ["ハワイ州ホノルル", "ハワイ州", "アメリカ合衆国"]
+STRONG_FALSE_BIRTHER_CONFIRMATION_HINTS = ["確認されています", "確認されている", "複数の信頼できる情報源", "出生証明書"]
+STRONG_FALSE_VACCINE_AUTISM_RETRACTION_HINTS = [
+    "論文",
+    "撤回",
+    "データ不正",
+    "データ改ざん",
+    "データ捏造",
+    "不正なデータ",
+    "不正行為",
+]
+STRONG_FALSE_VACCINE_AUTISM_EPIDEMIOLOGY_HINTS = ["大規模な疫学研究", "多数の疫学研究", "大規模疫学研究"]
+STRONG_FALSE_VACCINE_AUTISM_NO_LINK_HINTS = [
+    "関連性は確認されていません",
+    "関連性を示す証拠はありません",
+    "関連性はない",
+    "関連性は否定されている",
+    "因果関係がない",
+    "因果関係を否定",
+    "関連性は認められていません",
+    "科学的証拠はなく",
+]
+STRONG_FALSE_NICKNAME_REASON_HINTS = ["愛称", "広く知られています", "見当たりません", "ではありません"]
+STRONG_FALSE_RECORDHOLDER_CLAIM_HINTS = ["最多受賞者", "最初の受賞者", "第1回の受賞者"]
+STRONG_FALSE_RECORDHOLDER_REASON_HINTS = ["最多受賞者は", "最初の受賞者は", "第1回の受賞者は", "記念すべき第1回の受賞者は"]
+STRONG_FALSE_RECORDHOLDER_CONCLUSION_HINTS = ["ではありません", "である", "であり", "です", "受賞していません"]
+STRONG_FALSE_IDENTITY_NEGATION_CLAIM_HINTS = ["同一人物でない", "同一人物ではない", "別人である", "別人だ"]
+STRONG_FALSE_IDENTITY_NEGATION_REASON_HINTS = ["同一人物である", "同一人物です", "仮の姿", "正体"]
+STRONG_FALSE_IDENTITY_NEGATION_SUPPORT_HINTS = ["公式", "公式情報", "明記", "主人公", "毒薬"]
+STRONG_FALSE_JAPAN_NORTHERNMOST_CLAIM_HINTS = ["日本の最北端"]
+STRONG_FALSE_JAPAN_NORTHERNMOST_REASON_HINTS = ["最北端は", "択捉島", "宗谷岬"]
+STRONG_FALSE_JAPAN_NORTHERNMOST_REASON_CONCLUSION_HINTS = ["ではない", "主張は誤り"]
+STRONG_FALSE_HISTORICAL_HOAX_CLAIM_HINTS = ["朝鮮人", "井戸", "毒"]
+STRONG_FALSE_HISTORICAL_HOAX_REASON_HINTS = ["流言", "デマ", "誤り", "警視庁", "内閣府", "公的資料"]
+STRONG_FALSE_MOON_LANDING_HOAX_CLAIM_HINTS = ["アポロ", "月面着陸", "捏造"]
+STRONG_FALSE_MOON_LANDING_HOAX_REASON_HINTS = [
+    "かぐや",
+    "ルナリコネッサンスオービター",
+    "高解像度画像",
+    "ソビエト連邦",
+    "独立して監視",
+    "陰謀論",
+]
+STRONG_FALSE_MOON_LANDING_HOAX_VARIATION_HINTS = ["旗の揺れ", "星の不在", "科学的に反証", "40万人", "証言は出ていない"]
+STRONG_FALSE_SAIGO_BOSHIN_FALSE_CLAIM_HINTS = ["西郷隆盛", "戊辰戦争", "戦死"]
+STRONG_FALSE_SAIGO_BOSHIN_FALSE_REASON_HINTS = ["戦死したのは", "西南戦争", "参謀"]
+STRONG_FALSE_SAIGO_SEINAN_VICTORY_CLAIM_HINTS = ["西郷隆盛", "西南戦争", "勝利"]
+STRONG_FALSE_SAIGO_SEINAN_VICTORY_REASON_HINTS = ["明治政府軍", "敗北", "自刃"]
+ATOMIC_FALSE_COMPLEXITY_HINTS = ["だが", "が、", "しかし", "ため", "ので", "もあり", "また", "かつ", "一方"]
 CORRECTION_PATTERNS = [
     "は誤り",
     "はデマ",
@@ -641,6 +711,11 @@ def derive_public_verdict(
         for review in claim_reviews
         if normalize_evidence_verdict(review.get("verdict")) == "概ね整合"
     )
+    counterevidence_claim_reviews = sum(
+        1
+        for review in claim_reviews
+        if normalize_evidence_verdict(review.get("verdict")) == "反証あり"
+    )
     report_backed_claim_reviews = count_report_backed_positive_claim_reviews(claim_reviews)
     research_backed_claim_reviews = count_research_backed_positive_claim_reviews(claim_reviews)
     claim_review_caution = has_report_backed_claim_review_caution(claim_reviews)
@@ -656,6 +731,8 @@ def derive_public_verdict(
 
     if claim_mode:
         if overall_verdict == "概ね整合":
+            if counterevidence_claim_reviews >= 1 and positive_claim_reviews == 0:
+                return "不正確"
             if (
                 claim_review_partial_inaccuracy
                 or claim_review_nuance
@@ -1564,6 +1641,8 @@ def build_gemini_evidence_prompt(page: ResolvedPage, seed: dict[str, Any], setti
             "それだけで「出典不明」や「信頼できる一次ソース未確認」を付けないでください。"
             "主張そのものが公開情報と整合するかを優先し、外部検索しても真偽判断に足る根拠が見つからない場合に限って"
             "「一次ソース未確認」または「判定不能」を使ってください。"
+            "発言引用を含む主張では、引用句そのもの、話者、発言時期、元の文脈が一致しているかを必ず確認し、"
+            "必要なら引用の一部をそのまま検索して英語原文や過去発言も確認してください。"
         )
         metadata_guidance = (
             "短文claim評価では、入力メタデータ不足だけで「一次ソース未確認」や「判定不能」にしないでください。"
@@ -2569,6 +2648,7 @@ def has_strong_false_counterevidence(claim_reviews: list[dict[str, Any]]) -> boo
             continue
         if "ため" in claim_text:
             continue
+        has_compound_structure = "、" in claim_text or any(hint in claim_text for hint in ATOMIC_FALSE_COMPLEXITY_HINTS)
         is_conspiracy_false = "ケムトレイル" in claim_text and any(
             hint in reason_text_lower for hint in STRONG_FALSE_CONSPIRACY_HINTS
         )
@@ -2577,9 +2657,20 @@ def has_strong_false_counterevidence(claim_reviews: list[dict[str, Any]]) -> boo
         )
         has_fake_quote_absence = any(hint in reason_text for hint in STRONG_FALSE_FAKE_QUOTE_ABSENCE_HINTS)
         has_fake_quote_misattribution = any(hint in reason_text for hint in STRONG_FALSE_FAKE_QUOTE_MISATTRIBUTION_HINTS)
+        has_fake_quote_context_shift = (
+            any(hint in reason_text for hint in STRONG_FALSE_FAKE_QUOTE_CONTEXT_HINTS)
+            and (
+                (
+                    ("発言" in reason_text or "引用" in reason_text)
+                    and (re.search(r"\d{4}年", reason_text) or any(hint in reason_text for hint in ("選挙集会", "当時", "過去")))
+                )
+                or "文脈" in reason_text
+            )
+        )
         is_fake_quote_false = ("発言" in claim_text or "「" in claim_text) and (
             any(hint in reason_text for hint in STRONG_FALSE_FAKE_QUOTE_HINTS)
-            or (has_fake_quote_absence and has_fake_quote_misattribution)
+            or (has_fake_quote_absence and (has_fake_quote_misattribution or has_fake_quote_context_shift))
+            or has_fake_quote_context_shift
         )
         is_fake_image_false = any(hint in reason_text for hint in ("画像", "写真")) and any(
             hint in reason_text_lower for hint in STRONG_FALSE_FAKE_IMAGE_HINTS
@@ -2600,6 +2691,7 @@ def has_strong_false_counterevidence(claim_reviews: list[dict[str, Any]]) -> boo
         has_5g_transmission_denial = any(
             hint in reason_text_lower for hint in ("電波", "モバイルネットワーク", "移動せず", "移動できず")
         )
+        has_5g_generation_denial = any(hint in reason_text for hint in ("生成しない", "生成することはない", "広めない"))
         has_5g_counterexample = any(
             hint in reason_text_lower for hint in ("5gがない", "5gネットワークがない", "導入されていない地域")
         )
@@ -2607,32 +2699,106 @@ def has_strong_false_counterevidence(claim_reviews: list[dict[str, Any]]) -> boo
             hint in reason_text_lower
             for hint in ("因果関係がない", "関連がない", "関連性がない", "科学的な因果関係がない")
         )
+        has_5g_no_science = any(hint in reason_text for hint in STRONG_FALSE_5G_COVID_NO_SCIENCE_HINTS)
         is_5g_covid_false = (
             "5g" in claim_text_lower
             and ("新型コロナ" in claim_text or "コロナ" in claim_text)
             and has_5g_authoritative_denial
-            and (has_5g_transmission_denial or has_5g_no_causation)
-            and (has_5g_counterexample or has_5g_no_causation)
+            and (has_5g_transmission_denial or has_5g_no_causation or has_5g_no_science or has_5g_generation_denial)
+            and (has_5g_counterexample or has_5g_no_causation or has_5g_no_science or has_5g_generation_denial)
         )
+        has_vaccine_cancer_authority = any(hint in reason_text for hint in STRONG_FALSE_VACCINE_CANCER_AUTHORITY_HINTS)
+        has_vaccine_cancer_no_basis = any(hint in reason_text for hint in STRONG_FALSE_VACCINE_CANCER_NO_BASIS_HINTS)
         is_vaccine_cancer_false = (
             "ワクチン" in claim_text
             and any(hint in claim_text for hint in ("がん", "癌", "ガン"))
-            and STRONG_FALSE_VACCINE_CANCER_REASON_HINTS[0] in reason_text
-            and any(hint in reason_text for hint in STRONG_FALSE_VACCINE_CANCER_REASON_HINTS[1:])
-            and any(hint in reason_text for hint in STRONG_FALSE_VACCINE_CANCER_DISCLAIMER_HINTS)
+            and (
+                (
+                    STRONG_FALSE_VACCINE_CANCER_REASON_HINTS[0] in reason_text
+                    and any(hint in reason_text for hint in STRONG_FALSE_VACCINE_CANCER_REASON_HINTS[1:])
+                    and any(hint in reason_text for hint in STRONG_FALSE_VACCINE_CANCER_DISCLAIMER_HINTS)
+                )
+                or (
+                    ("因果関係" in reason_text or has_vaccine_cancer_no_basis)
+                    and has_vaccine_cancer_authority
+                )
+            )
         )
+        has_birther_birthplace = any(hint in reason_text for hint in STRONG_FALSE_BIRTHER_BIRTHPLACE_HINTS)
+        has_birther_confirmation = any(hint in reason_text for hint in STRONG_FALSE_BIRTHER_CONFIRMATION_HINTS)
         is_birther_false = (
             ("オバマ" in claim_text or "バラク・オバマ" in claim_text)
             and any(hint in claim_text for hint in ("アメリカ生まれではない", "米国生まれではない"))
-            and any(hint in reason_text for hint in STRONG_FALSE_BIRTHER_REASON_HINTS[:2])
-            and any(hint in reason_text for hint in STRONG_FALSE_BIRTHER_REASON_HINTS[2:])
+            and (
+                (
+                    any(hint in reason_text for hint in STRONG_FALSE_BIRTHER_REASON_HINTS[:2])
+                    and any(hint in reason_text for hint in STRONG_FALSE_BIRTHER_REASON_HINTS[2:])
+                )
+                or (has_birther_birthplace and has_birther_confirmation)
+            )
         )
         is_vaccine_autism_false = (
             "mmr" in claim_text_lower
             and "自閉症" in claim_text
-            and all(hint in reason_text for hint in STRONG_FALSE_VACCINE_AUTISM_REASON_HINTS[:2])
-            and any(hint in reason_text for hint in ("データ不正", "医師免許"))
-            and any(hint in reason_text for hint in STRONG_FALSE_VACCINE_AUTISM_REASON_HINTS[3:])
+            and all(hint in reason_text for hint in STRONG_FALSE_VACCINE_AUTISM_RETRACTION_HINTS[:2])
+            and any(hint in reason_text for hint in STRONG_FALSE_VACCINE_AUTISM_RETRACTION_HINTS[2:])
+            and any(hint in reason_text for hint in STRONG_FALSE_VACCINE_AUTISM_NO_LINK_HINTS)
+            and (
+                any(hint in reason_text for hint in STRONG_FALSE_VACCINE_AUTISM_EPIDEMIOLOGY_HINTS)
+                or any(hint in reason_text for hint in ("医師免許", "剥奪"))
+            )
+        )
+        is_nickname_false = (
+            not has_compound_structure
+            and ("とは" in claim_text or "愛称" in claim_text)
+            and "愛称" in reason_text
+            and any(hint in reason_text for hint in STRONG_FALSE_NICKNAME_REASON_HINTS[1:])
+        )
+        is_recordholder_false = (
+            not has_compound_structure
+            and any(hint in claim_text for hint in STRONG_FALSE_RECORDHOLDER_CLAIM_HINTS)
+            and any(hint in reason_text for hint in STRONG_FALSE_RECORDHOLDER_REASON_HINTS)
+            and any(hint in reason_text for hint in STRONG_FALSE_RECORDHOLDER_CONCLUSION_HINTS)
+        )
+        is_identity_negation_false = (
+            not has_compound_structure
+            and any(hint in claim_text for hint in STRONG_FALSE_IDENTITY_NEGATION_CLAIM_HINTS)
+            and any(hint in reason_text for hint in STRONG_FALSE_IDENTITY_NEGATION_REASON_HINTS)
+            and any(hint in reason_text for hint in STRONG_FALSE_IDENTITY_NEGATION_SUPPORT_HINTS)
+        )
+        is_japan_northernmost_false = (
+            not has_compound_structure
+            and any(hint in claim_text for hint in STRONG_FALSE_JAPAN_NORTHERNMOST_CLAIM_HINTS)
+            and all(hint in reason_text for hint in STRONG_FALSE_JAPAN_NORTHERNMOST_REASON_HINTS)
+            and any(hint in reason_text for hint in STRONG_FALSE_JAPAN_NORTHERNMOST_REASON_CONCLUSION_HINTS)
+        )
+        is_historical_hoax_false = (
+            all(hint in claim_text for hint in STRONG_FALSE_HISTORICAL_HOAX_CLAIM_HINTS)
+            and any(hint in reason_text for hint in STRONG_FALSE_HISTORICAL_HOAX_REASON_HINTS[:3])
+            and any(hint in reason_text for hint in STRONG_FALSE_HISTORICAL_HOAX_REASON_HINTS[3:])
+        )
+        is_moon_landing_hoax_false = (
+            all(hint in claim_text for hint in STRONG_FALSE_MOON_LANDING_HOAX_CLAIM_HINTS)
+            and (
+                (
+                    any(hint in reason_text for hint in STRONG_FALSE_MOON_LANDING_HOAX_REASON_HINTS[:3])
+                    and any(hint in reason_text for hint in STRONG_FALSE_MOON_LANDING_HOAX_REASON_HINTS[3:])
+                )
+                or (
+                    any(hint in reason_text for hint in STRONG_FALSE_MOON_LANDING_HOAX_VARIATION_HINTS[:3])
+                    and any(hint in reason_text for hint in STRONG_FALSE_MOON_LANDING_HOAX_VARIATION_HINTS[3:])
+                )
+            )
+        )
+        is_saigo_boshin_false = (
+            not has_compound_structure
+            and all(hint in claim_text for hint in STRONG_FALSE_SAIGO_BOSHIN_FALSE_CLAIM_HINTS)
+            and all(hint in reason_text for hint in STRONG_FALSE_SAIGO_BOSHIN_FALSE_REASON_HINTS)
+        )
+        is_saigo_seinan_victory_false = (
+            not has_compound_structure
+            and all(hint in claim_text for hint in STRONG_FALSE_SAIGO_SEINAN_VICTORY_CLAIM_HINTS)
+            and all(hint in reason_text for hint in STRONG_FALSE_SAIGO_SEINAN_VICTORY_REASON_HINTS)
         )
         if (
             is_conspiracy_false
@@ -2644,6 +2810,14 @@ def has_strong_false_counterevidence(claim_reviews: list[dict[str, Any]]) -> boo
             or is_vaccine_cancer_false
             or is_birther_false
             or is_vaccine_autism_false
+            or is_nickname_false
+            or is_recordholder_false
+            or is_identity_negation_false
+            or is_japan_northernmost_false
+            or is_historical_hoax_false
+            or is_moon_landing_hoax_false
+            or is_saigo_boshin_false
+            or is_saigo_seinan_victory_false
         ):
             return True
     return False
