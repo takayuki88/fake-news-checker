@@ -976,6 +976,121 @@ def test_single_counterevidence_review_with_supported_core_and_name_correction_s
     assert verdict == "ほぼ正確"
 
 
+def test_supported_claim_with_numeric_phrase_is_not_mistaken_for_name_correction_and_can_be_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=35,
+        confidence_score=62,
+        labels=["大筋で整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "概ね整合",
+            "grounding_sources": [
+                {"title": "factcheckcenter.jp", "url": "https://example.com/a"},
+                {"title": "factcheckcenter.jp", "url": "https://example.com/b"},
+            ],
+            "claim_reviews": [
+                {
+                    "claim": "NHKが「集団生贄200人」という歌詞の歌を放映した",
+                    "verdict": "概ね整合",
+                    "reason": "NHKは2023年7月18日に放送された番組「まやまやぽん！」において、「いけにえたくさん見届けてきたよ しゅうだんいけにえ200人！」などの歌詞を含む歌を放映したことが、日本ファクトチェックセンターや週刊女性PRIMEなどの報道機関によって確認されています。",
+                },
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "正確"
+
+
+def test_supported_negative_fact_claim_is_not_mistaken_for_name_correction_and_can_be_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=35,
+        confidence_score=63,
+        labels=["大筋で整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "概ね整合",
+            "claim_reviews": [
+                {
+                    "claim": "日本人最初のメジャーリーガーは野茂英雄ではない。",
+                    "verdict": "概ね整合",
+                    "reason": "多くの情報源が、1964年にメジャーリーグでプレーした村上雅則が日本人初のメジャーリーガーであると報じているため。野茂英雄は1995年にメジャーデビューしたが、彼が最初ではない。",
+                },
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "正確"
+
+
+def test_supported_claim_with_honorific_suffix_is_not_mistaken_for_name_correction_and_can_be_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=23,
+        confidence_score=69,
+        labels=["大筋で整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "概ね整合",
+            "grounding_sources": [
+                {"title": "edogawa-u.ac.jp", "url": "https://example.com/a"},
+            ],
+            "claim_reviews": [
+                {
+                    "claim": "大谷翔平は、メジャーリーグ史上初めてシーズン50本塁打50盗塁を達成した。",
+                    "verdict": "概ね整合",
+                    "reason": "大谷翔平選手は2024年9月19日（日本時間20日）にメジャーリーグ史上初のシーズン50本塁打50盗塁を達成したと複数の主要報道機関や情報源が報じています。",
+                },
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "正確"
+
+
+def test_temporal_follow_up_without_caveat_can_still_be_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=44,
+        confidence_score=60,
+        labels=["大筋で整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "概ね整合",
+            "claim_reviews": [
+                {
+                    "claim": "アベノマスクには全部で500億円ほどの税金が使われた",
+                    "verdict": "概ね整合",
+                    "reason": "政府が発表した当初の契約額は260億円でしたが、その後の報道や会計検査院の報告では、調達費や事務費、保管費などを含め、総額が約486億円から543.5億円に上るとされています。このため、「500億円ほど」という主張は概ね整合しています。",
+                },
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "正確"
+
+
 def test_self_inflicted_death_correction_in_supported_claim_stays_mostly_accurate() -> None:
     verdict = derive_public_verdict(
         risk_score=34,
@@ -1007,6 +1122,141 @@ def test_self_inflicted_death_correction_in_supported_claim_stays_mostly_accurat
     assert verdict == "ほぼ正確"
 
 
+def test_staged_historical_transition_stays_mostly_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=34,
+        confidence_score=70,
+        labels=["一次ソースと整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "概ね整合",
+            "claim_reviews": [
+                {
+                    "claim": "大政奉還で江戸幕府は終焉を迎え、明治時代に移った",
+                    "verdict": "概ね整合",
+                    "reason": "大政奉還は1867年に徳川慶喜が政権を朝廷に返上した出来事であり、これにより江戸幕府の武家政治が終焉を迎えました。その後、王政復古の大号令が発令され、明治時代へと移行しました。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "ほぼ正確"
+
+
+def test_supported_claim_with_understated_numeric_result_stays_mostly_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=34,
+        confidence_score=71,
+        labels=["一次ソースと整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "概ね整合",
+            "claim_reviews": [
+                {
+                    "claim": "マサチューセッツ州の有権者は、100万ドルを超える所得に対する4％の追加税を承認し、これにより2024年度に15億ドルの歳入が得られた",
+                    "verdict": "概ね整合",
+                    "reason": "マサチューセッツ州の有権者は、2023年1月1日発効の憲法改正（フェアシェア修正案）により、100万ドルを超える所得に4%の追加税を承認しました。2024会計年度の歳入は、複数の情報源によると18億ドルから24.6億ドルの範囲であり、主張の15億ドルを上回っています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "ほぼ正確"
+
+
+def test_reported_precise_historical_quantity_stays_mostly_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=34,
+        confidence_score=71,
+        labels=["一次ソースと整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "概ね整合",
+            "claim_reviews": [
+                {
+                    "claim": "ギザのピラミッドを建設した古代エジプトの労働者たちは、毎日4～5リットルのビールを配給されていた",
+                    "verdict": "概ね整合",
+                    "reason": "複数の記事で、古代エジプトのピラミッド建設労働者には毎日4～5リットルのビールが配給されていたと記述されているためです。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "ほぼ正確"
+
+
+def test_supported_claim_with_small_numeric_drift_stays_mostly_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=34,
+        confidence_score=70,
+        labels=["一次ソースと整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "概ね整合",
+            "claim_reviews": [
+                {
+                    "claim": "岸田首相の発言「今年の春闘の賃上げ率2.08%は、過去20年で2番目に高い」",
+                    "verdict": "概ね整合",
+                    "reason": "岸田首相の発言は2022年6月21日の党首討論会で行われたもので、連合が発表した2022年春闘の賃上げ率2.09%を指していると考えられます。2.08%という数値はわずかに異なりますが、2.09%は過去20年間で2番目に高い賃上げ率であるため、発言の根幹は概ね正確です。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "ほぼ正確"
+
+
+def test_shared_authorship_claim_stays_mostly_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=34,
+        confidence_score=71,
+        labels=["一次ソースと整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "概ね整合",
+            "claim_reviews": [
+                {
+                    "claim": "日本国憲法はアメリカが作った憲法である",
+                    "verdict": "概ね整合",
+                    "reason": "日本国憲法の草案はアメリカ占領軍総司令部（GHQ）の民政局によって作成され、その後日本政府が修正を加えて制定されたため、アメリカの強い影響下にあったと言える。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "ほぼ正確"
+
+
 def test_single_counterevidence_review_with_numeric_detail_correction_can_be_mostly_accurate() -> None:
     verdict = derive_public_verdict(
         risk_score=54,
@@ -1026,6 +1276,114 @@ def test_single_counterevidence_review_with_numeric_detail_correction_can_be_mos
                     "claim": "イチローは29年間のプロ野球選手生活で日米通算4367安打を記録した。",
                     "verdict": "反証あり",
                     "reason": "イチローの日米通算安打数は4367本で複数の情報源と整合しますが、プロ野球選手生活は28年間であり、29年間ではありません。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "ほぼ正確"
+
+
+def test_multi_sentence_near_miss_count_correction_can_be_mostly_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=54,
+        confidence_score=69,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "イチローは28年のプロ野球選手生活の中でシーズン200安打以上を11回記録した。日本より試合数の多いメージャーリーグであったからこそ、11回もそれをメジャーリーグで記録することができたと考えられる。",
+                    "verdict": "反証あり",
+                    "reason": "イチローのシーズン200安打以上は日米通算で11回ですが、メジャーリーグでの達成は10回、日本プロ野球での達成は1回です。したがって、「11回もそれをメジャーリーグで記録することができた」という部分は事実と異なります。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "ほぼ正確"
+
+
+def test_release_month_correction_can_be_mostly_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=54,
+        confidence_score=69,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "X JAPANは1989年5月にアルバム『BLUE BLOOD』でメジャー・デビューした",
+                    "verdict": "反証あり",
+                    "reason": "X JAPANのメジャーデビューアルバム『BLUE BLOOD』は1989年4月21日にリリースされた。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "ほぼ正確"
+
+
+def test_ratio_rounding_correction_can_be_mostly_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=50,
+        confidence_score=71,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "アメリカの国土面積は日本の24倍である",
+                    "verdict": "反証あり",
+                    "reason": "外務省のデータによると、アメリカの国土面積は約983万平方キロメートル、日本の国土面積は約37.8万平方キロメートルであり、アメリカは日本の約26倍の広さです。他の情報源でも約25倍から26倍とされています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "ほぼ正確"
+
+
+def test_one_off_record_count_correction_can_be_mostly_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=54,
+        confidence_score=69,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "通算本塁打数の世界記録は王貞治の869本である",
+                    "verdict": "反証あり",
+                    "reason": "王貞治の通算本塁打数は868本であり、869本ではありません。NPB.jp日本野球機構や野球殿堂博物館の公式記録で確認できます。",
                 }
             ],
         },

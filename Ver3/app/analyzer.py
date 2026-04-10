@@ -175,7 +175,7 @@ MOSTLY_ACCURATE_NUANCE_HINTS = [
     "概ね整合しますが",
     "わずかな差異",
     "やや控えめ",
-    "その後",
+    "わずかに異なります",
 ]
 PARTIAL_SUPPORT_HINTS = [
     "概ね整合",
@@ -214,6 +214,12 @@ COUNTEREVIDENCE_DETAIL_CORRECTION_HINTS = [
     "同じく",
     "他にも",
 ]
+COUNTEREVIDENCE_MINOR_NUMERIC_DETAIL_SIGNAL_HINTS = [
+    "部分は事実と異なります",
+    "とされています",
+    "リリースされた",
+]
+COUNTEREVIDENCE_MINOR_NUMERIC_DETAIL_UNITS = ("年", "月", "日", "回", "倍", "本")
 COUNTEREVIDENCE_SCOPE_CLAIM_HINTS = [
     "みんな",
     "すべて",
@@ -2456,9 +2462,22 @@ def has_positive_claim_review_nuance(claim_reviews: list[dict[str, Any]]) -> boo
             continue
         if normalize_evidence_verdict(review.get("verdict")) != "概ね整合":
             continue
-        hint_text = f"{review.get('claim') or ''} {review.get('reason') or ''}".strip().lower()
+        claim_text = str(review.get("claim") or "").strip()
+        reason_text = str(review.get("reason") or "").strip()
+        hint_text = f"{claim_text} {reason_text}".strip().lower()
         if any(hint in hint_text for hint in MOSTLY_ACCURATE_NUANCE_HINTS):
             return True
+        if re.search(r"\d", claim_text) and re.search(r"\d", reason_text):
+            if any(hint in reason_text for hint in ("上回っています", "下回っています", "記述されているため")):
+                return True
+            if "複数の記事で" in reason_text and "記述されている" in reason_text:
+                return True
+        if any(hint in claim_text for hint in ("移った", "移行した", "移行した。")) and "その後" in reason_text:
+            if any(hint in reason_text for hint in ("王政復古の大号令", "を経て")):
+                return True
+        if any(hint in claim_text for hint in ("作った", "作成した")):
+            if "修正を加えて制定" in reason_text or ("修正を加え" in reason_text and "強い影響下" in reason_text):
+                return True
     return False
 
 
@@ -2481,19 +2500,55 @@ def has_positive_claim_review_name_correction(claim_reviews: list[dict[str, Any]
         "シンガーソングライター",
     }
     generic_suffixes = ("ロボット", "条例", "制度")
+    honorific_suffixes = ("選手", "氏", "さん", "容疑者", "議員", "首相", "大統領", "知事", "監督", "投手", "教授")
+    non_name_hints = (
+        "日本人",
+        "最初",
+        "史上",
+        "シーズン",
+        "本塁打",
+        "盗塁",
+        "歌詞",
+        "報道機関",
+        "メジャーリーグ",
+        "メジャーリーガー",
+        "デビュー",
+        "プレー",
+        "集団",
+        "生贄",
+    )
+
+    def normalize_name_token(token: str) -> str:
+        normalized = token.strip("「」『』()（）")
+        for suffix in honorific_suffixes:
+            if normalized.endswith(suffix) and len(normalized) - len(suffix) >= 2:
+                normalized = normalized[: -len(suffix)]
+                break
+        return normalized
 
     def normalized_name_tokens(text: str) -> set[str]:
-        tokens = {token for token in katakana_pattern.findall(text)}
+        tokens = set()
+        for token in katakana_pattern.findall(text):
+            normalized = normalize_name_token(token)
+            if len(normalized) >= 3 and not re.search(r"\d", normalized) and not any(
+                hint in normalized for hint in non_name_hints
+            ):
+                tokens.add(normalized)
         for token in name_like_pattern.findall(text):
-            if len(token) < 3:
+            normalized = normalize_name_token(token)
+            if len(normalized) < 3:
                 continue
-            if token in stop_tokens:
+            if normalized in stop_tokens:
                 continue
-            if any(token.endswith(suffix) for suffix in generic_suffixes):
+            if re.search(r"\d", normalized):
                 continue
-            if re.fullmatch(r"[A-Za-z0-9]+", token):
+            if any(normalized.endswith(suffix) for suffix in generic_suffixes):
                 continue
-            tokens.add(token)
+            if any(hint in normalized for hint in non_name_hints):
+                continue
+            if re.fullmatch(r"[A-Za-z0-9]+", normalized):
+                continue
+            tokens.add(normalized)
         return tokens
 
     for review in claim_reviews:
@@ -2587,6 +2642,44 @@ def is_material_counterevidence_review(review: dict[str, Any]) -> bool:
     return False
 
 
+def normalized_char_ngram_recall(source_text: str, target_text: str, *, n: int = 2) -> float:
+    normalized_source = re.sub(r"[\s\d０-９、。・「」（）()『』]+", "", source_text)
+    normalized_target = re.sub(r"[\s\d０-９、。・「」（）()『』]+", "", target_text)
+    if len(normalized_source) < n or len(normalized_target) < n:
+        return 0.0
+    source_ngrams = {normalized_source[i : i + n] for i in range(len(normalized_source) - n + 1)}
+    target_ngrams = {normalized_target[i : i + n] for i in range(len(normalized_target) - n + 1)}
+    if not source_ngrams:
+        return 0.0
+    return len(source_ngrams & target_ngrams) / len(source_ngrams)
+
+
+def has_minor_numeric_detail_signal(reason_text: str) -> bool:
+    return any(hint in reason_text for hint in COUNTEREVIDENCE_DETAIL_CORRECTION_HINTS) or any(
+        hint in reason_text for hint in COUNTEREVIDENCE_MINOR_NUMERIC_DETAIL_SIGNAL_HINTS
+    )
+
+
+def has_close_numeric_detail_gap(claim_text: str, reason_text: str) -> bool:
+    claim_values = [float(value) for value in re.findall(r"\d+(?:\.\d+)?", claim_text)]
+    reason_values = [float(value) for value in re.findall(r"\d+(?:\.\d+)?", reason_text)]
+    if not claim_values or not reason_values:
+        return False
+    for claim_value in claim_values:
+        for reason_value in reason_values:
+            if abs(claim_value - reason_value) < 1e-9:
+                continue
+            diff = abs(claim_value - reason_value)
+            larger = max(abs(claim_value), abs(reason_value))
+            if diff <= 1:
+                return True
+            if larger >= 10 and diff <= 2:
+                return True
+            if larger and diff / larger <= 0.08:
+                return True
+    return False
+
+
 def has_counterevidence_minor_numeric_detail(claim_reviews: list[dict[str, Any]]) -> bool:
     for review in claim_reviews:
         if not isinstance(review, dict):
@@ -2597,7 +2690,8 @@ def has_counterevidence_minor_numeric_detail(claim_reviews: list[dict[str, Any]]
         reason_text = str(review.get("reason") or "").strip()
         if not claim_text or not reason_text:
             continue
-        if any(separator in claim_text.rstrip("。！？!?") for separator in ("。", "！", "!", "？", "?")):
+        sentence_breaks = sum(claim_text.rstrip("。！？!?").count(separator) for separator in ("。", "！", "!", "？", "?"))
+        if sentence_breaks > 1:
             continue
         if any(marker in claim_text for marker in ("だが", "しかし", "ため", "ので")):
             continue
@@ -2607,15 +2701,23 @@ def has_counterevidence_minor_numeric_detail(claim_reviews: list[dict[str, Any]]
             continue
         if not re.search(r"\d", claim_text) or not re.search(r"\d", reason_text):
             continue
+        if not any(unit in claim_text for unit in COUNTEREVIDENCE_MINOR_NUMERIC_DETAIL_UNITS):
+            continue
+        if not any(unit in reason_text for unit in COUNTEREVIDENCE_MINOR_NUMERIC_DETAIL_UNITS):
+            continue
         claim_numbers = set(re.findall(r"\d+(?:\.\d+)?", claim_text))
         reason_numbers = set(re.findall(r"\d+(?:\.\d+)?", reason_text))
         if not claim_numbers or not reason_numbers or claim_numbers == reason_numbers:
             continue
-        if not any(hint in reason_text for hint in COUNTEREVIDENCE_DETAIL_CORRECTION_HINTS):
+        if not has_minor_numeric_detail_signal(reason_text):
+            continue
+        if not has_close_numeric_detail_gap(claim_text, reason_text):
             continue
         normalized_claim = re.sub(r"[\s\d０-９、。・「」（）()]+", "", claim_text)
         normalized_reason = re.sub(r"[\s\d０-９、。・「」（）()]+", "", reason_text)
-        if difflib.SequenceMatcher(None, normalized_claim, normalized_reason).ratio() >= 0.3:
+        if difflib.SequenceMatcher(None, normalized_claim, normalized_reason).ratio() >= 0.3 or normalized_char_ngram_recall(
+            claim_text, reason_text
+        ) >= 0.55:
             return True
     return False
 

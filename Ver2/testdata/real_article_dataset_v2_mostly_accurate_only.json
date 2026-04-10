@@ -34,24 +34,24 @@
     {
       "id": "positive-mostly-accurate-01-ainu-dance-filmed-1919",
       "expected_verdict": "ほぼ正確",
-      "analysis_text": "アイヌの踊りが1919年に撮影され、カラー映像で保存されていた。",
+      "analysis_text": "アイヌの踊りが1919年に撮影され、保存されていたカラー映像が2023年に拡散した。",
       "expected_domain": "一般",
       "analysis_mode": "claim",
-      "claim_text": "アイヌの踊りが1919年に撮影され、カラー映像で保存されていた。",
+      "claim_text": "アイヌの踊りが1919年に撮影され、保存されていたカラー映像が2023年に拡散した。",
       "review_focus": "大筋は合うが、条件・時点・表現の丸め過ぎがないかを見る。",
       "human_note": "短文claim評価用に、大筋は正しいが細部に注意が必要な主張を抜き出したケースです。",
-      "contested_span": "アイヌの踊りが1919年に撮影され、カラー映像で保存されていた。"
+      "contested_span": "アイヌの踊りが1919年に撮影され、保存されていたカラー映像が2023年に拡散した。"
     },
     {
       "id": "positive-mostly-accurate-02-real-image-of-jovial-swedish-people-despite-train-station-flooding-caused-by-typhoon",
       "expected_verdict": "ほぼ正確",
-      "analysis_text": "イチローは29年間のプロ野球選手生活で日米通算4367安打を記録した。",
+      "analysis_text": "イチローは28年のプロ野球選手生活の中でシーズン200安打以上を11回記録した。日本より試合数の多いメージャーリーグであったからこそ、11回もそれをメジャーリーグで記録することができたと考えられる。",
       "expected_domain": "一般",
       "analysis_mode": "claim",
-      "claim_text": "イチローは29年間のプロ野球選手生活で日米通算4367安打を記録した。",
+      "claim_text": "イチローは28年のプロ野球選手生活の中でシーズン200安打以上を11回記録した。日本より試合数の多いメージャーリーグであったからこそ、11回もそれをメジャーリーグで記録することができたと考えられる。",
       "review_focus": "大筋は合うが、条件・時点・表現の丸め過ぎがないかを見る。",
       "human_note": "短文claim評価用に、大筋は正しいが細部に注意が必要な主張を抜き出したケースです。",
-      "contested_span": "イチローは29年間のプロ野球選手生活で日米通算4367安打を記録した。"
+      "contested_span": "イチローは28年のプロ野球選手生活の中でシーズン200安打以上を11回記録した。日本より試合数の多いメージャーリーグであったからこそ、11回もそれをメジャーリーグで記録することができたと考えられる。"
     },
     {
       "id": "positive-mostly-accurate-03-almost-accurate-claim-iaea-not-verifying-filtration-performance-of-contaminated-water",
@@ -155,13 +155,13 @@
     {
       "id": "positive-mostly-accurate-12-infact220708",
       "expected_verdict": "ほぼ正確",
-      "analysis_text": "アメリカの国土面積は日本の20倍である。",
+      "analysis_text": "アメリカの国土面積は日本の24倍である。",
       "expected_domain": "一般",
       "analysis_mode": "claim",
-      "claim_text": "アメリカの国土面積は日本の20倍である。",
+      "claim_text": "アメリカの国土面積は日本の24倍である。",
       "review_focus": "大筋は合うが、条件・時点・表現の丸め過ぎがないかを見る。",
       "human_note": "短文claim評価用に、大筋は正しいが細部に注意が必要な主張を抜き出したケースです。",
-      "contested_span": "アメリカの国土面積は日本の20倍である。"
+      "contested_span": "アメリカの国土面積は日本の24倍である。"
     },
     {
       "id": "positive-mostly-accurate-13-infact220823",

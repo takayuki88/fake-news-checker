@@ -382,7 +382,7 @@
       "site_name": "Snopes",
       "source_url": "https://www.snopes.com/fact-check/japanese-robotic-monster-wolves/",
       "purpose": "Snopes の公開ファクトチェック記事を基にした、日本関連の実在ネット記事ケース",
-      "analysis_text": "日本の町がクマよけにロボットの「モンスターウルフ」を導入した。北海道などで導入例があり、音や光で野生動物を追い払う装置として実在する。",
+      "analysis_text": "日本のある町では、オオカミに偽装したロボットを使って野生動物を農地から追い払った。",
       "reference_urls": [
         "https://www.snopes.com/fact-check/japanese-robotic-monster-wolves/"
       ],

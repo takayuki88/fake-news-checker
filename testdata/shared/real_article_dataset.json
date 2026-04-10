@@ -365,7 +365,7 @@
       "site_name": "Snopes",
       "source_url": "https://www.snopes.com/fact-check/japanese-robotic-monster-wolves/",
       "purpose": "Snopes の公開ファクトチェック記事を基にした、日本関連の実在ネット記事ケース",
-      "analysis_text": "日本のある町では、住民からクマとの遭遇や目撃情報が増加しているとの報告を受け、オオカミに偽装したロボット2体を使ってクマを地域から追い払った。",
+      "analysis_text": "日本のある町では、オオカミに偽装したロボットを使って野生動物を農地から追い払った。",
       "reference_urls": [
         "https://www.snopes.com/fact-check/japanese-robotic-monster-wolves/"
       ],
