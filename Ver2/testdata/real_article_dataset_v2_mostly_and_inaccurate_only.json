@@ -134,13 +134,13 @@
     {
       "id": "positive-mostly-accurate-10-infact220704",
       "expected_verdict": "ほぼ正確",
-      "analysis_text": "岸田首相の発言「今年の春闘の賃上げ率2.08%は、過去20年で2番目に高い」",
+      "analysis_text": "岸田文雄は首相時代に「今年の春闘の賃上げ率2.08%は、過去20年で2番目に高い」と発言したことがある。",
       "expected_domain": "金融",
       "analysis_mode": "claim",
-      "claim_text": "岸田首相の発言「今年の春闘の賃上げ率2.08%は、過去20年で2番目に高い」",
+      "claim_text": "岸田文雄は首相時代に「今年の春闘の賃上げ率2.08%は、過去20年で2番目に高い」と発言したことがある。",
       "review_focus": "大筋は合うが、条件・時点・表現の丸め過ぎがないかを見る。",
       "human_note": "短文claim評価用に、大筋は正しいが細部に注意が必要な主張を抜き出したケースです。",
-      "contested_span": "岸田首相の発言「今年の春闘の賃上げ率2.08%は、過去20年で2番目に高い」"
+      "contested_span": "岸田文雄は首相時代に「今年の春闘の賃上げ率2.08%は、過去20年で2番目に高い」と発言したことがある。"
     },
     {
       "id": "positive-mostly-accurate-11-infact220706-2",
@@ -189,13 +189,13 @@
     {
       "id": "positive-mostly-accurate-15-post-22724",
       "expected_verdict": "ほぼ正確",
-      "analysis_text": "通算本塁打数の世界記録は王貞治の869本である。",
+      "analysis_text": "通算本塁打数の世界記録は王貞治が持っており、その本数は869本である。",
       "expected_domain": "一般",
       "analysis_mode": "claim",
-      "claim_text": "通算本塁打数の世界記録は王貞治の869本である。",
+      "claim_text": "通算本塁打数の世界記録は王貞治が持っており、その本数は869本である。",
       "review_focus": "大筋は合うが、条件・時点・表現の丸め過ぎがないかを見る。",
       "human_note": "短文claim評価用に、大筋は正しいが細部に注意が必要な主張を抜き出したケースです。",
-      "contested_span": "通算本塁打数の世界記録は王貞治の869本である。"
+      "contested_span": "通算本塁打数の世界記録は王貞治が持っており、その本数は869本である。"
     },
     {
       "id": "positive-mostly-accurate-16-post-22836",
@@ -211,13 +211,13 @@
     {
       "id": "positive-mostly-accurate-17-23435",
       "expected_verdict": "ほぼ正確",
-      "analysis_text": "世界最高峰のエベレストの標高は8858mである。",
+      "analysis_text": "世界最高峰のエベレストの標高は8852mである。",
       "expected_domain": "一般",
       "analysis_mode": "claim",
-      "claim_text": "世界最高峰のエベレストの標高は8858mである。",
+      "claim_text": "世界最高峰のエベレストの標高は8852mである。",
       "review_focus": "大筋は合うが、条件・時点・表現の丸め過ぎがないかを見る。",
       "human_note": "短文claim評価用に、大筋は正しいが細部に注意が必要な主張を抜き出したケースです。",
-      "contested_span": "世界最高峰のエベレストの標高は8858mである。"
+      "contested_span": "世界最高峰のエベレストの標高は8852mである。"
     },
     {
       "id": "positive-mostly-accurate-18-kobe-pension-standardly-nontaxable",
@@ -233,13 +233,13 @@
     {
       "id": "positive-mostly-accurate-19-japanese-electric-car-200km-single-charge",
       "expected_verdict": "ほぼ正確",
-      "analysis_text": "日本の自動車メーカーは1949年に、1回の充電で300km走行できる電気自動車を開発した。",
+      "analysis_text": "日本の自動車メーカーは1949年に、1回の充電で300km走行できるたま電気自動車を開発した。",
       "expected_domain": "一般",
       "analysis_mode": "claim",
-      "claim_text": "日本の自動車メーカーは1949年に、1回の充電で300km走行できる電気自動車を開発した。",
+      "claim_text": "日本の自動車メーカーは1949年に、1回の充電で300km走行できるたま電気自動車を開発した。",
       "review_focus": "大筋は合うが、条件・時点・表現の丸め過ぎがないかを見る。",
       "human_note": "短文claim評価用に、大筋は正しいが細部に注意が必要な主張を抜き出したケースです。",
-      "contested_span": "日本の自動車メーカーは1949年に、1回の充電で300km走行できる電気自動車を開発した。"
+      "contested_span": "日本の自動車メーカーは1949年に、1回の充電で300km走行できるたま電気自動車を開発した。"
     },
     {
       "id": "positive-mostly-accurate-20-blobfish-natural-environment",
@@ -255,24 +255,24 @@
     {
       "id": "jfc-inaccurate-01-politicians-zero-inheritance-tax",
       "expected_verdict": "不正確",
-      "analysis_text": "ドラえもんは22世紀の未来の日本から来た犬型ロボットである。",
+      "analysis_text": "ドラえもんは22世紀の未来の日本から、のび太をいじめるためにやって来たネコ型ロボットである。",
       "expected_domain": "一般",
       "analysis_mode": "claim",
-      "claim_text": "ドラえもんは22世紀の未来の日本から来た犬型ロボットである。",
+      "claim_text": "ドラえもんは22世紀の未来の日本から、のび太をいじめるためにやって来たネコ型ロボットである。",
       "review_focus": "主張の一部や条件にズレがあり、言い切り過ぎになっていないかを見る。",
       "human_note": "短文claim評価用に、主張の一部や条件がずれているケースです。",
-      "contested_span": "ドラえもんは22世紀の未来の日本から来た犬型ロボットである。"
+      "contested_span": "ドラえもんは22世紀の未来の日本から、のび太をいじめるためにやって来たネコ型ロボットである。"
     },
     {
       "id": "jfc-inaccurate-02-did-it-take-only-four-months-for-the-takaichi-administration-to-reach-the-mining-stage",
       "expected_verdict": "不正確",
-      "analysis_text": "KKコンビとはPL学園高校野球部で活躍した桑田真澄と清原和博のことである。高校卒業後、桑田は西武ライオンズへ、清原は読売ジャイアンツへ入団した。",
+      "analysis_text": "KKコンビとはPL学園高校野球部で活躍した桑田真澄と清原和博のことである。高校卒業後、桑田は西武ライオンズへ、清原は読売ジャイアンツへ入団し、ドラフト直後の会見では二人とも喜びを見せた。",
       "expected_domain": "一般",
       "analysis_mode": "claim",
-      "claim_text": "KKコンビとはPL学園高校野球部で活躍した桑田真澄と清原和博のことである。高校卒業後、桑田は西武ライオンズへ、清原は読売ジャイアンツへ入団した。",
+      "claim_text": "KKコンビとはPL学園高校野球部で活躍した桑田真澄と清原和博のことである。高校卒業後、桑田は西武ライオンズへ、清原は読売ジャイアンツへ入団し、ドラフト直後の会見では二人とも喜びを見せた。",
       "review_focus": "主張の一部や条件にズレがあり、言い切り過ぎになっていないかを見る。",
       "human_note": "短文claim評価用に、主張の一部や条件がずれているケースです。",
-      "contested_span": "KKコンビとはPL学園高校野球部で活躍した桑田真澄と清原和博のことである。高校卒業後、桑田は西武ライオンズへ、清原は読売ジャイアンツへ入団した。"
+      "contested_span": "KKコンビとはPL学園高校野球部で活躍した桑田真澄と清原和博のことである。高校卒業後、桑田は西武ライオンズへ、清原は読売ジャイアンツへ入団し、ドラフト直後の会見では二人とも喜びを見せた。"
     },
     {
       "id": "jfc-inaccurate-03-japan-is-not-expanding-the-pakistani-intake-to-50thousands",
@@ -288,35 +288,35 @@
     {
       "id": "jfc-inaccurate-04-inaccurate-kyoto-hotel-prices-collapse",
       "expected_verdict": "不正確",
-      "analysis_text": "1974年のセントラルリーグで読売ジャイアンツは2位となり、V10を逃した。その時のセントラルリーグの1位は阪神である。",
+      "analysis_text": "日本軍は1941年12月に真珠湾を奇襲し、太平洋戦争が開戦した。真珠湾への奇襲は成功を収め、日本軍はその後の太平洋戦争を有利に進めた。",
       "expected_domain": "一般",
       "analysis_mode": "claim",
-      "claim_text": "1974年のセントラルリーグで読売ジャイアンツは2位となり、V10を逃した。その時のセントラルリーグの1位は阪神である。",
+      "claim_text": "日本軍は1941年12月に真珠湾を奇襲し、太平洋戦争が開戦した。真珠湾への奇襲は成功を収め、日本軍はその後の太平洋戦争を有利に進めた。",
       "review_focus": "主張の一部や条件にズレがあり、言い切り過ぎになっていないかを見る。",
       "human_note": "短文claim評価用に、主張の一部や条件がずれているケースです。",
-      "contested_span": "1974年のセントラルリーグで読売ジャイアンツは2位となり、V10を逃した。その時のセントラルリーグの1位は阪神である。"
+      "contested_span": "日本軍は1941年12月に真珠湾を奇襲し、太平洋戦争が開戦した。真珠湾への奇襲は成功を収め、日本軍はその後の太平洋戦争を有利に進めた。"
     },
     {
       "id": "jfc-inaccurate-05-inaccurate-gates-abondons-climate-action",
       "expected_verdict": "不正確",
-      "analysis_text": "2023年のWBCで野球日本代表は優勝した。日本優勝決定の瞬間のピッチャーは山本由伸で、バッターはマイク・トラウトだった。",
+      "analysis_text": "2023年のWBCは大谷翔平の活躍もあり、野球日本代表は優勝したが、2023年のWBCで大谷翔平はピッチャーとして一度も投げなかった。",
       "expected_domain": "一般",
       "analysis_mode": "claim",
-      "claim_text": "2023年のWBCで野球日本代表は優勝した。日本優勝決定の瞬間のピッチャーは山本由伸で、バッターはマイク・トラウトだった。",
+      "claim_text": "2023年のWBCは大谷翔平の活躍もあり、野球日本代表は優勝したが、2023年のWBCで大谷翔平はピッチャーとして一度も投げなかった。",
       "review_focus": "主張の一部や条件にズレがあり、言い切り過ぎになっていないかを見る。",
       "human_note": "短文claim評価用に、主張の一部や条件がずれているケースです。",
-      "contested_span": "2023年のWBCで野球日本代表は優勝した。日本優勝決定の瞬間のピッチャーは山本由伸で、バッターはマイク・トラウトだった。"
+      "contested_span": "2023年のWBCは大谷翔平の活躍もあり、野球日本代表は優勝したが、2023年のWBCで大谷翔平はピッチャーとして一度も投げなかった。"
     },
     {
       "id": "jfc-inaccurate-06-inaccurate-trump-administration-admits-covid-shots-are-crime-against-humanity",
       "expected_verdict": "不正確",
-      "analysis_text": "2025年のMLBワールドシリーズでドジャースが優勝した。ワールドシリーズMVPには大谷翔平が選出された。",
+      "analysis_text": "ON砲とは読売ジャイアンツの王貞治と長嶋茂雄のコンビのことであるが、二人は非常に仲が悪かった。",
       "expected_domain": "一般",
       "analysis_mode": "claim",
-      "claim_text": "2025年のMLBワールドシリーズでドジャースが優勝した。ワールドシリーズMVPには大谷翔平が選出された。",
+      "claim_text": "ON砲とは読売ジャイアンツの王貞治と長嶋茂雄のコンビのことであるが、二人は非常に仲が悪かった。",
       "review_focus": "主張の一部や条件にズレがあり、言い切り過ぎになっていないかを見る。",
       "human_note": "短文claim評価用に、主張の一部や条件がずれているケースです。",
-      "contested_span": "2025年のMLBワールドシリーズでドジャースが優勝した。ワールドシリーズMVPには大谷翔平が選出された。"
+      "contested_span": "ON砲とは読売ジャイアンツの王貞治と長嶋茂雄のコンビのことであるが、二人は非常に仲が悪かった。"
     },
     {
       "id": "jfc-inaccurate-07-inaccurate-favoratism-toward-chinese-students",
@@ -343,35 +343,35 @@
     {
       "id": "jfc-inaccurate-09-inaccurate-claim-ministry-of-economy-trade-and-industry-did-not-state-they-did-not-measure-9-nuclides-other-than-tritium",
       "expected_verdict": "不正確",
-      "analysis_text": "サッカー選手ドラガン・ストイコビッチはピクシーの愛称を持つ。その理由は、彼がアニメ「ポケモン」に出て来るピクシーが好きだから。",
+      "analysis_text": "サッカー選手ドラガン・ストイコビッチはピクシーの愛称を持つ。その理由は、彼がゲーム「ポケモン」に出て来るピクシーが好きだから。",
       "expected_domain": "一般",
       "analysis_mode": "claim",
-      "claim_text": "サッカー選手ドラガン・ストイコビッチはピクシーの愛称を持つ。その理由は、彼がアニメ「ポケモン」に出て来るピクシーが好きだから。",
+      "claim_text": "サッカー選手ドラガン・ストイコビッチはピクシーの愛称を持つ。その理由は、彼がゲーム「ポケモン」に出て来るピクシーが好きだから。",
       "review_focus": "主張の一部や条件にズレがあり、言い切り過ぎになっていないかを見る。",
       "human_note": "短文claim評価用に、主張の一部や条件がずれているケースです。",
-      "contested_span": "サッカー選手ドラガン・ストイコビッチはピクシーの愛称を持つ。その理由は、彼がアニメ「ポケモン」に出て来るピクシーが好きだから。"
+      "contested_span": "サッカー選手ドラガン・ストイコビッチはピクシーの愛称を持つ。その理由は、彼がゲーム「ポケモン」に出て来るピクシーが好きだから。"
     },
     {
       "id": "jfc-inaccurate-10-inaccurate-kurdish-group-tv-report",
       "expected_verdict": "不正確",
-      "analysis_text": "リオネル・メッシは、長くFCバルセロナに所属していた。生まれも育ちもスペインである。",
+      "analysis_text": "大谷翔平は、2018年から2025年までの間にMLBでMVPを4回獲得した。彼はアメリカ国籍も取得した。",
       "expected_domain": "一般",
       "analysis_mode": "claim",
-      "claim_text": "リオネル・メッシは、長くFCバルセロナに所属していた。生まれも育ちもスペインである。",
+      "claim_text": "大谷翔平は、2018年から2025年までの間にMLBでMVPを4回獲得した。彼はアメリカ国籍も取得した。",
       "review_focus": "主張の一部や条件にズレがあり、言い切り過ぎになっていないかを見る。",
       "human_note": "短文claim評価用に、主張の一部や条件がずれているケースです。",
-      "contested_span": "リオネル・メッシは、長くFCバルセロナに所属していた。生まれも育ちもスペインである。"
+      "contested_span": "大谷翔平は、2018年から2025年までの間にMLBでMVPを4回獲得した。彼はアメリカ国籍も取得した。"
     },
     {
       "id": "jfc-inaccurate-11-inaccurate-volunteer-recruitment-n-noto-peninsula-earthquake",
       "expected_verdict": "不正確",
-      "analysis_text": "落合博満は三冠王を三度獲得した。1984年、85年、86年と三年連続で獲得した。",
+      "analysis_text": "9.11テロを起こしたウサマ・ビンラディンをイラクのサダム・フセインが匿ったため、2003年アメリカはイラクを攻撃し、イラク戦争が始まった。",
       "expected_domain": "一般",
       "analysis_mode": "claim",
-      "claim_text": "落合博満は三冠王を三度獲得した。1984年、85年、86年と三年連続で獲得した。",
+      "claim_text": "9.11テロを起こしたウサマ・ビンラディンをイラクのサダム・フセインが匿ったため、2003年アメリカはイラクを攻撃し、イラク戦争が始まった。",
       "review_focus": "主張の一部や条件にズレがあり、言い切り過ぎになっていないかを見る。",
       "human_note": "短文claim評価用に、主張の一部や条件がずれているケースです。",
-      "contested_span": "落合博満は三冠王を三度獲得した。1984年、85年、86年と三年連続で獲得した。"
+      "contested_span": "9.11テロを起こしたウサマ・ビンラディンをイラクのサダム・フセインが匿ったため、2003年アメリカはイラクを攻撃し、イラク戦争が始まった。"
     },
     {
       "id": "jfc-inaccurate-12-matsumoto-chief-cabinet-secretary-great-kanto-earthquake-korean-massacre-records-inaccurate",
@@ -387,13 +387,13 @@
     {
       "id": "jfc-inaccurate-13-ohio-train-derailment-disaster-hidden-reporter-arrested-false",
       "expected_verdict": "不正確",
-      "analysis_text": "徳川家康は江戸幕府を開いた人物であり、関ヶ原の戦いの後に征夷大将軍となったが、その後すぐ京都に遷都した。",
+      "analysis_text": "徳川家康は江戸幕府を開いた人物であり、関ヶ原の戦いの後に征夷大将軍となり、その後すぐ天皇を連れ江戸に遷都した。",
       "expected_domain": "一般",
       "analysis_mode": "claim",
-      "claim_text": "徳川家康は江戸幕府を開いた人物であり、関ヶ原の戦いの後に征夷大将軍となったが、その後すぐ京都に遷都した。",
+      "claim_text": "徳川家康は江戸幕府を開いた人物であり、関ヶ原の戦いの後に征夷大将軍となり、その後すぐ天皇を連れ江戸に遷都した。",
       "review_focus": "主張の一部や条件にズレがあり、言い切り過ぎになっていないかを見る。",
       "human_note": "短文claim評価用に、主張の一部や条件がずれているケースです。",
-      "contested_span": "徳川家康は江戸幕府を開いた人物であり、関ヶ原の戦いの後に征夷大将軍となったが、その後すぐ京都に遷都した。"
+      "contested_span": "徳川家康は江戸幕府を開いた人物であり、関ヶ原の戦いの後に征夷大将軍となり、その後すぐ天皇を連れ江戸に遷都した。"
     },
     {
       "id": "jfc-inaccurate-14-inaccurate-video-of-transgender-martial-artist-breaking-opponents-skull",
@@ -409,13 +409,13 @@
     {
       "id": "jfc-inaccurate-15-inaccurate-claims-about-drone-delivery",
       "expected_verdict": "不正確",
-      "analysis_text": "新選組の土方歳三は戊辰戦争を戦い抜いたが、函館で結核のため病死した。",
+      "analysis_text": "新選組の土方歳三・斎藤一は戊辰戦争を戦い抜いたが、最後は函館で二人とも戦死した。",
       "expected_domain": "一般",
       "analysis_mode": "claim",
-      "claim_text": "新選組の土方歳三は戊辰戦争を戦い抜いたが、函館で結核のため病死した。",
+      "claim_text": "新選組の土方歳三・斎藤一は戊辰戦争を戦い抜いたが、最後は函館で二人とも戦死した。",
       "review_focus": "主張の一部や条件にズレがあり、言い切り過ぎになっていないかを見る。",
       "human_note": "短文claim評価用に、主張の一部や条件がずれているケースです。",
-      "contested_span": "新選組の土方歳三は戊辰戦争を戦い抜いたが、函館で結核のため病死した。"
+      "contested_span": "新選組の土方歳三・斎藤一は戊辰戦争を戦い抜いたが、最後は函館で二人とも戦死した。"
     },
     {
       "id": "jfc-inaccurate-16-inaccuracies-in-keio-baseball-cheering",
@@ -442,13 +442,13 @@
     {
       "id": "jfc-inaccurate-18-ion-stores-atm-credit-card-inaccessibility-inaccurate",
       "expected_verdict": "不正確",
-      "analysis_text": "世界最高のテノールの一人とされるルチアーノ・パヴァロッティだが、身長は160cmと小柄だった。",
+      "analysis_text": "世界最高のテノールの一人とされるルチアーノ・パヴァロッティは、イタリア生まれだが、スペイン人である。",
       "expected_domain": "一般",
       "analysis_mode": "claim",
-      "claim_text": "世界最高のテノールの一人とされるルチアーノ・パヴァロッティだが、身長は160cmと小柄だった。",
+      "claim_text": "世界最高のテノールの一人とされるルチアーノ・パヴァロッティは、イタリア生まれだが、スペイン人である。",
       "review_focus": "主張の一部や条件にズレがあり、言い切り過ぎになっていないかを見る。",
       "human_note": "短文claim評価用に、主張の一部や条件がずれているケースです。",
-      "contested_span": "世界最高のテノールの一人とされるルチアーノ・パヴァロッティだが、身長は160cmと小柄だった。"
+      "contested_span": "世界最高のテノールの一人とされるルチアーノ・パヴァロッティは、イタリア生まれだが、スペイン人である。"
     },
     {
       "id": "jfc-inaccurate-19-factcheck-us-department-of-state-officially-declared-islam-a-threat",
