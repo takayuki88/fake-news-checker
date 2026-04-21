@@ -1,3 +1,9 @@
+"""判定ロジックの中心。
+
+まずローカルのルールで一次判定を作り、Gemini の根拠確認が使える場合は
+その結果を重ねて、最後に画面/API向けの `AnalysisResult` に整えます。
+"""
+
 import asyncio
 import difflib
 import json
@@ -35,6 +41,8 @@ ABSOLUTE_PATTERNS = [
     "断言する",
     "確実に",
 ]
+# ここから下の *_PATTERNS / *_HINTS は、文章の危険サインや補正条件を拾う辞書です。
+# 判定ロジックは「点数」だけでなく、これらの語句を理由説明にも使います。
 EMOTIONAL_PATTERNS = [
     "衝撃",
     "今すぐ",
@@ -797,6 +805,7 @@ def derive_public_verdict(
     evidence_overview: dict[str, Any],
     claim_mode: bool = False,
 ) -> str:
+    """内部スコアと根拠確認結果から、利用者に見せる5区分ラベルを決める。"""
     overall_verdict = str(evidence_overview.get("assessment_status") or "").strip()
     grounding_sources = evidence_overview.get("grounding_sources") or []
     claim_reviews = evidence_overview.get("claim_reviews") or []
@@ -1418,6 +1427,7 @@ def merge_policy_reason(page: ResolvedPage, reasons: list[str]) -> list[str]:
 
 
 def heuristic_analysis(page: ResolvedPage) -> dict[str, Any]:
+    """外部AIに聞く前に、文章特徴とメタ情報だけで一次判定を作る。"""
     text = f"{page.title}\n{page.analysis_text}"
     body = page.analysis_text
     signals: list[AnalysisSignal] = []
@@ -1642,6 +1652,7 @@ def heuristic_analysis(page: ResolvedPage) -> dict[str, Any]:
 
 
 def build_prompt(page: ResolvedPage, seed: dict[str, Any], settings: Settings) -> str:
+    """Gemini に渡すプロンプトを作る。ローカル一次判定もヒントとして入れる。"""
     source_snapshot = seed["source_snapshot"].model_dump()
     evidence_overview = seed["evidence_overview"]
     evidence_links = evidence_overview.get("links", [])
@@ -2124,6 +2135,7 @@ async def run_gemini_preflight(settings: Settings) -> None:
 
 
 async def gemini_analysis(page: ResolvedPage, settings: Settings, seed: dict[str, Any]) -> dict[str, Any] | None:
+    """Gemini に根拠確認を依頼し、JSONとして扱える形で返す。"""
     if not settings.gemini_api_key:
         return None
 
@@ -2968,6 +2980,7 @@ def score_adjustments_from_evidence(
     retrieved_urls: list[dict[str, Any]],
     source_profile: dict[str, Any],
 ) -> tuple[int, int]:
+    """Gemini の根拠確認結果を、リスク点と確信度の増減に変換する。"""
     risk_delta = 0
     confidence_delta = 0
     correction_article = bool(source_profile.get("correction_article"))
@@ -3111,6 +3124,7 @@ def build_model_used(style_overview: dict[str, Any], has_llm_output: bool, has_p
 
 
 def combine_result(page: ResolvedPage, seed: dict[str, Any], llm_bundle: dict[str, Any] | None, settings: Settings) -> AnalysisResult:
+    """ローカル一次判定と Gemini 結果を合成して最終判定を作る。"""
     result_seed = {key: value for key, value in seed.items() if key != "source_profile"}
 
     if not llm_bundle:
@@ -3187,6 +3201,7 @@ def combine_result(page: ResolvedPage, seed: dict[str, Any], llm_bundle: dict[st
 
 
 async def analyze_page(page: ResolvedPage, settings: Settings) -> AnalysisResult:
+    """1ページ分の判定を実行する最上位関数。main.py と dataset_runner.py から呼ばれる。"""
     analysis_stages: list[TimingStage] = []
 
     heuristic_started_at = time.perf_counter()

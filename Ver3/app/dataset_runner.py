@@ -1,3 +1,5 @@
+"""データセットをまとめて判定し、予測JSON・評価JSON・CSV・グラフを作る。"""
+
 import argparse
 import asyncio
 import csv
@@ -36,10 +38,13 @@ CASE_MAX_ATTEMPTS = 2
 
 
 class GeminiPreflightError(RuntimeError):
+    """データセット実行前の Gemini 接続確認で止めたい時の専用エラー。"""
+
     pass
 
 
 def format_gemini_preflight_error(detail: str) -> str:
+    """Gemini 接続エラーを、利用者が次に確認しやすいメッセージへ変換する。"""
     normalized_detail = detail.strip() or "Gemini preflight did not complete."
     lowered_detail = normalized_detail.lower()
     hints = [
@@ -77,6 +82,7 @@ def is_gemini_quota_skip(result: AnalysisResult, use_gemini: bool) -> bool:
 
 
 def normalize_case_schema(case: dict[str, Any], dataset_meta: dict[str, Any] | None = None) -> dict[str, Any]:
+    """簡略スキーマのデータセット行を、runner内部で扱う形にそろえる。"""
     expected = case.get("expected")
     if isinstance(expected, dict):
         return case
@@ -144,6 +150,7 @@ def select_cases(dataset: dict[str, Any], case_filter: str | None = None) -> lis
 
 
 def build_settings(use_gemini: bool) -> Settings:
+    """Geminiを使う/使わない設定を作る。`--no-gemini` ならAPIキーを空にする。"""
     return Settings() if use_gemini else Settings(gemini_api_key="")
 
 
@@ -152,6 +159,7 @@ def get_max_concurrent_cases(use_gemini: bool) -> int:
 
 
 async def verify_gemini_preflight(use_gemini: bool, settings: Settings) -> str:
+    """100件実行の前に、Geminiへ接続できるか軽く確認する。"""
     if not use_gemini:
         return "disabled"
     if not settings.gemini_api_key:
@@ -192,6 +200,7 @@ def normalize_analysis_mode(
 
 
 def build_fixture_page(case: dict[str, Any], settings: Settings) -> ResolvedPage:
+    """データセット1行を、通常のURL/本文入力と同じ `ResolvedPage` 形式にする。"""
     overrides = case.get("snapshot_overrides", {})
     text = str(case["analysis_text"]).strip()
     timestamp_fields = build_analysis_timestamp_fields(settings)
@@ -248,6 +257,7 @@ async def analyze_case(
     case: dict[str, Any],
     settings: Settings,
 ) -> tuple[AnalysisResult | None, list[str], bool, str | None]:
+    """データセット1件を解析し、期待値との簡易チェック結果も返す。"""
     page, error = await resolve_case_page(case, settings)
     if error or not page:
         return None, [error or "ページを解決できませんでした。"], False, error
@@ -473,6 +483,7 @@ def save_evaluation_bundle(
     output_stem: str | None = None,
     csv_base_name: str | None = None,
 ) -> dict[str, Path]:
+    """予測・評価・CSV・グラフを同じタイムスタンプフォルダに保存する。"""
     output_paths = create_evaluation_output_paths(
         dataset_path=dataset_path,
         settings=settings,
@@ -541,6 +552,7 @@ async def run_dataset(
     use_gemini: bool,
     case_filter: str | None = None,
 ) -> dict[str, Any]:
+    """データセット全体を非同期で実行し、予測レコードをまとめて返す。"""
     settings = build_settings(use_gemini)
     gemini_preflight = await verify_gemini_preflight(use_gemini, settings)
     dataset = load_dataset(dataset_path)
@@ -609,6 +621,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> int:
+    """コマンドライン実行時の入口。引数処理から保存までをまとめる。"""
     args = parse_args()
     dataset_path = resolve_dataset_path(args.dataset_json, args.dataset)
     settings = build_settings(args.use_gemini)

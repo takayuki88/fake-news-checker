@@ -1,3 +1,5 @@
+"""予測結果と正解ラベルを比べて、性能評価レポートを作る。"""
+
 import argparse
 import json
 from pathlib import Path
@@ -16,6 +18,7 @@ FAKE_POSITIVE_LABEL = "誤り"
 
 
 def get_nested_value(item: dict[str, Any], dotted_key: str) -> Any:
+    """`expected.verdict` のような dotted key でネストした値を取り出す。"""
     current: Any = item
     for part in dotted_key.split("."):
         if not isinstance(current, dict) or part not in current:
@@ -25,6 +28,7 @@ def get_nested_value(item: dict[str, Any], dotted_key: str) -> Any:
 
 
 def load_records(path: Path) -> list[dict[str, Any]]:
+    """評価対象JSONを読み込み、レコード配列として返す。"""
     with path.open("r", encoding="utf-8") as handle:
         payload = json.load(handle)
 
@@ -58,6 +62,7 @@ def collect_labels_with_options(
     id_key: str = "id",
     skip_incomplete: bool = False,
 ) -> tuple[list[str], list[str], list[dict[str, Any]], list[dict[str, Any]]]:
+    """正解ラベルと予測ラベルを取り出し、評価できない行も記録する。"""
     y_true: list[str] = []
     y_pred: list[str] = []
     rows: list[dict[str, Any]] = []
@@ -101,6 +106,7 @@ def collect_labels_with_options(
 
 
 def build_multiclass_metrics(y_true: list[str], y_pred: list[str]) -> dict[str, Any]:
+    """5区分それぞれの precision / recall / F1 と混同行列を計算する。"""
     accuracy = accuracy_score(y_true, y_pred)
     precisions, recalls, f1s, supports = precision_recall_fscore_support(
         y_true,
@@ -152,6 +158,7 @@ def build_multiclass_metrics(y_true: list[str], y_pred: list[str]) -> dict[str, 
 
 
 def build_fake_binary_metrics(y_true: list[str], y_pred: list[str]) -> dict[str, Any]:
+    """`誤り` だけを陽性として、二値分類の性能を見る。"""
     y_true_binary = [label == FAKE_POSITIVE_LABEL for label in y_true]
     y_pred_binary = [label == FAKE_POSITIVE_LABEL for label in y_pred]
     precision, recall, f1, support = precision_recall_fscore_support(
@@ -176,6 +183,7 @@ def build_evaluation_report(
     id_key: str = "id",
     skip_incomplete: bool = False,
 ) -> dict[str, Any]:
+    """評価に必要な全指標を1つのJSON互換dictにまとめる。"""
     y_true, y_pred, rows, skipped = collect_labels_with_options(
         records,
         truth_key=truth_key,
@@ -203,6 +211,7 @@ def format_float(value: float) -> str:
 
 
 def format_report_text(report: dict[str, Any]) -> str:
+    """評価レポートをターミナルで読みやすいテキストに変換する。"""
     lines: list[str] = []
     meta = report["meta"]
     multi = report["multiclass"]
