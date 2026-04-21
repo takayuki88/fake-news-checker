@@ -59,7 +59,7 @@
 ## セットアップ
 
 ```powershell
-cd "C:\Users\oneuk\OneDrive\Desktop\datamix\講義\05_インテグレーションステップ\fake-news-checker\Ver4"
+cd "C:\Users\oneuk\OneDrive\Desktop\datamix\01 講義\05_インテグレーションステップ\fake-news-checker\Ver4"
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt

@@ -21,7 +21,7 @@
     "verdict_distribution": {
       "正確": 20
     },
-    "source_dataset": "c:\\Users\\oneuk\\OneDrive\\Desktop\\datamix\\講義\\05_インテグレーションステップ\\fake-news-checker\\testdata\\shared\\real_article_dataset_v2.json",
+    "source_dataset": "c:\\Users\\oneuk\\OneDrive\\Desktop\\datamix\\01 講義\\05_インテグレーションステップ\\fake-news-checker\\testdata\\shared\\real_article_dataset_v2.json",
     "analysis_mode": "claim",
     "helper_fields": [
       "analysis_mode",

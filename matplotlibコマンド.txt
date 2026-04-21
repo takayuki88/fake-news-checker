@@ -2,7 +2,7 @@
 fake-news-checker/Ver2 での手順は、予測生成 → 評価 → 可視化 の 3 段階です。
 
 まず作業ディレクトリに移動して、依存を入れます。
-cd C:\Users\oneuk\OneDrive\Desktop\datamix\講義\05_インテグレーションステップ\fake-news-checker\Ver2
+cd C:\Users\oneuk\OneDrive\Desktop\datamix\01 講義\05_インテグレーションステップ\fake-news-checker\Ver2
 python -m pip install -r requirements.txt
 
 次に、100件の real dataset で予測結果を作ります。

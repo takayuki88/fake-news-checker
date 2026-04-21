@@ -53,6 +53,11 @@ CURRENT_VER2_EVAL_PATH = PROJECT_ROOT / "Ver2" / "evaluation_outputs" / "2026041
 CURRENT_VER2_PREDICTIONS_PATH = PROJECT_ROOT / "Ver2" / "evaluation_outputs" / "20260411-0509" / "predictions_real_article_dataset_v2_use_gemini.json"
 CURRENT_VER2_CSV_PATH = PROJECT_ROOT / "Ver2" / "evaluation_outputs" / "20260411-0509" / "Ver2_real_article_dataset_v2_with_predicted_verdict_attention_score.csv"
 CURRENT_VER2_PLOTS_DIR = PROJECT_ROOT / "Ver2" / "evaluation_outputs" / "20260411-0509" / "plots"
+SCREENSHOT_DIR = Path(r"c:\Users\oneuk\OneDrive\Desktop\画像素材\新しいフォルダー")
+SCREENSHOT_INPUT = SCREENSHOT_DIR / "スクリーンショット (439).png"
+SCREENSHOT_LOADING = SCREENSHOT_DIR / "スクリーンショット (464).png"
+SCREENSHOT_RESULT = SCREENSHOT_DIR / "スクリーンショット (465).png"
+SCREENSHOT_REASON = SCREENSHOT_DIR / "スクリーンショット 2026-04-11 065005.png"
 
 OUTPUT_PPTX = PRESENTATION_DIR / "fake_news_checker_presentation_20260411_integrated.pptx"
 OUTPUT_NOTES = PRESENTATION_DIR / "fake_news_checker_presentation_20260411_integrated_notes.md"
@@ -79,6 +84,17 @@ def add_picture_contained(slide, image_path: Path, left, top, width, height) -> 
     pic.height = int(pic.height * scale)
     pic.left = left + int((width - pic.width) / 2)
     pic.top = top + int((height - pic.height) / 2)
+
+
+def add_screenshot_card(slide, image_path: Path, left, top, width, height, label: str, accent) -> None:
+    frame = add_panel(slide, left, top, width, height, fill_rgb=WHITE, line_rgb=LINE)
+    frame.line.color.rgb = LINE
+    band = slide.shapes.add_shape(MSO_AUTO_SHAPE_TYPE.RECTANGLE, left, top, width, Inches(0.09))
+    band.fill.solid()
+    band.fill.fore_color.rgb = accent
+    band.line.fill.background()
+    add_picture_contained(slide, image_path, left + Inches(0.12), top + Inches(0.18), width - Inches(0.24), height - Inches(0.62))
+    add_textbox(slide, left + Inches(0.12), top + height - Inches(0.3), width - Inches(0.24), Inches(0.18), label, 12, SUBTLE, True, PP_ALIGN.CENTER)
 
 
 def representative_mismatch_examples(csv_path: Path, eval_path: Path) -> list[str]:
@@ -132,36 +148,42 @@ def build_notes(dataset: DatasetSummary, legacy: EvalSnapshot, current: EvalSnap
         "- 初期仮説・分析アプローチは元資料の構成を保ち、ローカル一次判定と Gemini 比較の流れを説明する。",
         "",
         "## Slide 5",
+        "- UI の実行例として、入力 -> 判定中 -> 結果表示 の 3 ステップをスクリーンショットで示す。",
+        "",
+        "## Slide 6",
+        "- 出力例では、要注意度・判定・理由がどのように返るかを説明する。",
+        "",
+        "## Slide 7",
         f"- 初期版は accuracy {score(legacy.accuracy)} / macro F1 {score(legacy.macro_f1)} / 誤り recall {score(legacy.binary_recall)}。",
         f"- 最新版は accuracy {score(current.accuracy)} / macro F1 {score(current.macro_f1)} / 誤り recall {score(current.binary_recall)}。",
         "- 改善が大きかったことをこのスライドで強く伝える。",
         "",
-        "## Slide 6",
+        "## Slide 8",
         f"- 最新版の主な誤分類は {', '.join(top_current)}。",
         "- ほぼ正確の境界と、誤りを不正確へ落とすケースが残課題。",
         "",
-        "## Slide 7",
+        "## Slide 9",
         "- 精度 84% まで来たことで、説明付き確認支援ツールとしての実用性が高まったと話す。",
         "",
-        "## Slide 8",
+        "## Slide 10",
         "- shared dataset 集約、5 plots、CSV/XLSX bundle 化など運用面の工夫を説明する。",
         "",
-        "## Slide 9",
+        "## Slide 11",
         "- 次の改善テーマは 誤り -> 不正確 の圧縮と、ほぼ正確の境界調整。",
         "",
-        "## Slide 10",
+        "## Slide 12",
         f"- summary_metrics.png では Accuracy {score(current.accuracy)}、Binary F1 {score(current.binary_f1)} を確認する。",
         "",
-        "## Slide 11",
+        "## Slide 13",
         f"- per_class_metrics.png では ほぼ正確 recall {score(current.per_class['ほぼ正確']['recall'])} が弱点であることを確認する。",
         "",
-        "## Slide 12",
+        "## Slide 14",
         "- confusion_matrix.png では ほぼ正確 -> 正確 6件、誤り -> 不正確 4件に注目する。",
         "",
-        "## Slide 13",
+        "## Slide 15",
         f"- evaluation_overview.png では mismatches {current.mismatch_total}件、sample_count 100、skipped 0 を確認する。",
         "",
-        "## Slide 14-17",
+        "## Slide 16-19",
         "- 最後は参考資料として図を単独表示し、質疑応答で使えるようにする。",
         "",
     ]
@@ -354,6 +376,53 @@ def build_presentation(dataset: DatasetSummary, legacy: EvalSnapshot, current: E
     # Slide 5
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_slide_bg(slide)
+    add_header(slide, "3. プログラムの実行例", "入力から判定結果の表示までを、実際の画面で確認する")
+    add_screenshot_card(slide, SCREENSHOT_INPUT, Inches(0.58), Inches(1.62), Inches(4.05), Inches(4.6), "1. 入力画面", TEAL)
+    add_screenshot_card(slide, SCREENSHOT_LOADING, Inches(4.64), Inches(1.62), Inches(4.05), Inches(4.6), "2. 判定中", ORANGE)
+    add_screenshot_card(slide, SCREENSHOT_RESULT, Inches(8.7), Inches(1.62), Inches(4.05), Inches(4.6), "3. 結果表示", GREEN)
+    add_panel(slide, Inches(0.82), Inches(6.36), Inches(11.75), Inches(0.44), fill_rgb=SAND, line_rgb=SAND)
+    add_textbox(
+        slide,
+        Inches(1.0),
+        Inches(6.46),
+        Inches(11.2),
+        Inches(0.18),
+        "URL または本文を入力すると、判定中表示を経て、要注意度・5区分の判定・理由が返る。",
+        15,
+        INK,
+        False,
+        PP_ALIGN.CENTER,
+    )
+    add_footer(slide, FOOTER_NOTE)
+
+    # Slide 6
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    set_slide_bg(slide)
+    add_header(slide, "3. 出力の見方", "判定ラベルだけでなく、理由と確認補助情報も返す設計")
+    add_panel(slide, Inches(0.68), Inches(1.56), Inches(7.1), Inches(5.34), fill_rgb=WHITE)
+    add_panel(slide, Inches(8.0), Inches(1.56), Inches(4.62), Inches(2.82), fill_rgb=WHITE)
+    add_panel(slide, Inches(8.0), Inches(4.54), Inches(4.62), Inches(2.36), fill_rgb=MINT)
+    add_picture_contained(slide, SCREENSHOT_RESULT, Inches(0.88), Inches(1.82), Inches(6.72), Inches(4.86))
+    add_picture_contained(slide, SCREENSHOT_REASON, Inches(8.18), Inches(1.78), Inches(4.24), Inches(2.38))
+    add_textbox(slide, Inches(8.28), Inches(4.82), Inches(2.2), Inches(0.28), "この画面で伝えたいこと", 18, TEAL, True)
+    add_bullets(
+        slide,
+        Inches(8.24),
+        Inches(5.18),
+        Inches(3.9),
+        Inches(1.35),
+        [
+            "要注意度は 0〜100% で直感的に表示する",
+            "判定は 5 区分で返し、白黒だけに寄せない",
+            "理由は短い箇条書きで、利用者が次の確認行動を取りやすくする",
+        ],
+        font_size=15,
+    )
+    add_footer(slide, FOOTER_NOTE)
+
+    # Slide 7
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    set_slide_bg(slide)
     add_header(slide, "4. 分析結果", "2026-04-01 の初期版から、2026-04-11 の最新 rerun で大幅に改善した")
     add_picture_contained(slide, plot_path(current.plots_dir, "evaluation_dashboard.png"), Inches(0.72), Inches(1.62), Inches(7.2), Inches(5.1))
     add_panel(slide, Inches(8.1), Inches(1.62), Inches(4.25), Inches(5.05), fill_rgb=SAND)
@@ -378,7 +447,7 @@ def build_presentation(dataset: DatasetSummary, legacy: EvalSnapshot, current: E
     )
     add_footer(slide, FOOTER_NOTE)
 
-    # Slide 6
+    # Slide 8
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_slide_bg(slide)
     add_header(slide, "4. 考察", "現在の Ver2 はかなり実用的だが、境界ラベルの調整はまだ必要")
@@ -390,7 +459,7 @@ def build_presentation(dataset: DatasetSummary, legacy: EvalSnapshot, current: E
     add_bullets(slide, Inches(6.96), Inches(4.34), Inches(4.85), Inches(1.3), current_examples, font_size=15)
     add_footer(slide, FOOTER_NOTE)
 
-    # Slide 7
+    # Slide 9
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_slide_bg(slide)
     add_header(slide, "5. ビジネスインパクト", "最新評価では、説明付き確認支援ツールとしてかなり使える水準に近づいた")
@@ -414,7 +483,7 @@ def build_presentation(dataset: DatasetSummary, legacy: EvalSnapshot, current: E
     )
     add_footer(slide, FOOTER_NOTE)
 
-    # Slide 8
+    # Slide 10
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_slide_bg(slide)
     add_header(slide, "6. 工夫点", "評価可能な形に落とし込み、レビューしやすい運用まで整えた")
@@ -459,7 +528,7 @@ def build_presentation(dataset: DatasetSummary, legacy: EvalSnapshot, current: E
     add_textbox(slide, Inches(7.1), Inches(5.5), Inches(4.2), Inches(0.26), "evaluation_overview.png も同じ bundle に保存", 12, SUBTLE, True)
     add_footer(slide, FOOTER_NOTE)
 
-    # Slide 9
+    # Slide 11
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_slide_bg(slide)
     add_header(slide, "6. 今後さらに実施してみたいこと", "最新評価を踏まえると、次の焦点はかなり明確になった")
@@ -495,7 +564,7 @@ def build_presentation(dataset: DatasetSummary, legacy: EvalSnapshot, current: E
     )
     add_footer(slide, FOOTER_NOTE)
 
-    # Slide 10
+    # Slide 12
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_slide_bg(slide)
     add_header(slide, "図の説明: summary_metrics.png", "全体指標はかなり改善したが、誤り recall にはまだ伸びしろがある")
@@ -518,7 +587,7 @@ def build_presentation(dataset: DatasetSummary, legacy: EvalSnapshot, current: E
     )
     add_footer(slide, FOOTER_NOTE)
 
-    # Slide 11
+    # Slide 13
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_slide_bg(slide)
     add_header(slide, "図の説明: per_class_metrics.png", "クラスごとに見ると、保留と不正確は強く、ほぼ正確の回収が弱い")
@@ -541,7 +610,7 @@ def build_presentation(dataset: DatasetSummary, legacy: EvalSnapshot, current: E
     )
     add_footer(slide, FOOTER_NOTE)
 
-    # Slide 12
+    # Slide 14
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_slide_bg(slide)
     add_header(slide, "図の説明: confusion_matrix.png", "どのラベルへ流れているかを見ると、今の残課題がはっきり見える")
@@ -564,7 +633,7 @@ def build_presentation(dataset: DatasetSummary, legacy: EvalSnapshot, current: E
     )
     add_footer(slide, FOOTER_NOTE)
 
-    # Slide 13
+    # Slide 15
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_slide_bg(slide)
     add_header(slide, "図の説明: evaluation_overview.png", "集計サマリーからも、かなり改善したことと残課題が同時に確認できる")
@@ -587,28 +656,28 @@ def build_presentation(dataset: DatasetSummary, legacy: EvalSnapshot, current: E
     )
     add_footer(slide, FOOTER_NOTE)
 
-    # Slide 14
+    # Slide 16
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_slide_bg(slide)
     add_header(slide, "参考資料: confusion_matrix.png", "Ver2 / evaluation_outputs/20260411-0509/plots")
     add_picture_contained(slide, plot_path(current.plots_dir, "confusion_matrix.png"), Inches(1.0), Inches(1.5), Inches(11.2), Inches(5.3))
     add_footer(slide, FOOTER_NOTE)
 
-    # Slide 15
+    # Slide 17
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_slide_bg(slide)
     add_header(slide, "参考資料: evaluation_overview.png", "Ver2 / evaluation_outputs/20260411-0509/plots")
     add_picture_contained(slide, plot_path(current.plots_dir, "evaluation_overview.png"), Inches(3.15), Inches(1.45), Inches(6.9), Inches(5.45))
     add_footer(slide, FOOTER_NOTE)
 
-    # Slide 16
+    # Slide 18
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_slide_bg(slide)
     add_header(slide, "参考資料: per_class_metrics.png", "Ver2 / evaluation_outputs/20260411-0509/plots")
     add_picture_contained(slide, plot_path(current.plots_dir, "per_class_metrics.png"), Inches(0.76), Inches(1.54), Inches(11.85), Inches(5.35))
     add_footer(slide, FOOTER_NOTE)
 
-    # Slide 17
+    # Slide 19
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_slide_bg(slide)
     add_header(slide, "参考資料: summary_metrics.png", "Ver2 / evaluation_outputs/20260411-0509/plots")
