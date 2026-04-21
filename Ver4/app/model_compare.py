@@ -1,3 +1,5 @@
+"""Ver4 で複数モデルの評価結果を比較するためのコマンドライン補助。"""
+
 import argparse
 import asyncio
 import csv
@@ -23,6 +25,7 @@ def sanitize_model_id(model_id: str) -> str:
 
 
 def resolve_dataset_path(dataset_json: Path | None, dataset_name: str | None) -> Path:
+    """指定された引数から、比較に使うデータセットパスを決める。"""
     if dataset_json:
         return dataset_json
     if dataset_name == "default":
@@ -88,6 +91,7 @@ def save_model_outputs(
     dataset_path: Path,
     output_dir: Path,
 ) -> dict[str, Path]:
+    """1モデル分の予測・評価・CSVを保存する。"""
     output_dir.mkdir(parents=True, exist_ok=True)
     paths = {
         "predictions_json": output_dir / "predictions.json",
@@ -164,6 +168,7 @@ def build_summary_markdown(
     case_filter: str | None,
     entries: list[dict[str, Any]],
 ) -> str:
+    """モデル比較の概要を Markdown テーブルとして作る。"""
     lines = [
         "# OpenAI primary model comparison",
         "",
@@ -203,6 +208,7 @@ def run_model_comparison(
     case_filter: str | None,
     output_root: Path,
 ) -> dict[str, Any]:
+    """指定モデルを順番に実行し、評価指標を比較用にまとめる。"""
     output_root.mkdir(parents=True, exist_ok=True)
     previous_model = os.environ.get("OPENAI_PRIMARY_MODEL")
     entries: list[dict[str, Any]] = []
@@ -301,6 +307,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> int:
+    """コマンドライン実行時の入口。"""
     args = parse_args()
     dataset_path = resolve_dataset_path(args.dataset_json, args.dataset)
     output_root = build_comparison_output_dir(args.label)

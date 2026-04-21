@@ -1,3 +1,9 @@
+"""環境変数や `.env` からアプリ設定を読み込む。
+
+APIキー、モデル名、タイムアウト、本文文字数の下限など、
+実行環境ごとに変わりやすい値はこのファイルに集めています。
+"""
+
 from functools import lru_cache
 from pathlib import Path
 
@@ -7,6 +13,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 class Settings(BaseSettings):
+    """アプリ全体で使う設定値の一覧。"""
+
     gemini_api_key: str = ""
     gemini_model: str = "gemini-2.5-flash"
     gemini_style_review_enabled: bool = False
@@ -38,4 +46,5 @@ class Settings(BaseSettings):
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
+    """設定を1回だけ読み込み、以後は同じ設定オブジェクトを再利用する。"""
     return Settings()

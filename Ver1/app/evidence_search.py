@@ -1,3 +1,5 @@
+"""確認すべき主張を抜き出し、検索用リンクを作る補助モジュール。"""
+
 import re
 from urllib.parse import quote_plus
 
@@ -66,6 +68,7 @@ MAX_LINKS = 8
 
 
 def normalize_whitespace(value: str) -> str:
+    """全角スペースや連続空白を、検索しやすい形にそろえる。"""
     return " ".join(value.replace("\u3000", " ").split())
 
 
@@ -75,12 +78,14 @@ def trim_claim(value: str, max_chars: int = 90) -> str:
 
 
 def split_sentences(text: str) -> list[str]:
+    """本文を文単位に分け、短すぎる空文字を取り除く。"""
     raw_parts = CLAIM_SPLIT_PATTERN.split(text)
     sentences = [trim_claim(part) for part in raw_parts]
     return [sentence for sentence in sentences if sentence]
 
 
 def looks_like_noise(text: str) -> bool:
+    """ログイン文言やURLなど、検証対象にしにくい文を除外する。"""
     if len(text) < 18:
         return True
     lowered = text.lower()
@@ -90,6 +95,7 @@ def looks_like_noise(text: str) -> bool:
 
 
 def score_claim(text: str, domain: str) -> int:
+    """主張らしさを簡易採点する。点が高い文ほど確認リンクの候補になる。"""
     keywords = DOMAIN_KEYWORDS.get(domain, DOMAIN_KEYWORDS["一般"])
     score = 0
     if any(keyword in text for keyword in keywords):
@@ -120,6 +126,7 @@ def dedupe_claims(claims: list[str]) -> list[str]:
 
 
 def extract_claim_candidates(page: ResolvedPage, domain: str) -> list[str]:
+    """タイトルと本文から、外部確認すべき主張を最大3件選ぶ。"""
     candidates: list[tuple[int, str]] = []
     title_claim = trim_claim(page.title)
     if title_claim and not looks_like_noise(title_claim):
@@ -159,6 +166,7 @@ def shorten_for_label(claim: str, max_chars: int = 34) -> str:
 
 
 def build_evidence_links(claims: list[str], domain: str) -> list[VerificationLink]:
+    """主張ごとに、公的機関・報道・ファクトチェック検索へのリンクを作る。"""
     source_catalog = EVIDENCE_SOURCE_CATALOG.get(domain, EVIDENCE_SOURCE_CATALOG["一般"])
     links: list[VerificationLink] = []
 
@@ -200,6 +208,7 @@ def build_evidence_summary(claims: list[str], links: list[VerificationLink]) -> 
 
 
 def build_evidence_overview(page: ResolvedPage, domain: str) -> EvidenceOverview:
+    """画面に表示する「確認候補リンク」全体を組み立てる。"""
     claims = extract_claim_candidates(page, domain)
     links = build_evidence_links(claims, domain)
     status = "探索リンク生成済み" if links else "探索リンク限定"

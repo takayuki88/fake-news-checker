@@ -1,3 +1,5 @@
+"""OpenAI による Ver4 の一次レビューを担当する補助モジュール。"""
+
 from __future__ import annotations
 
 import json
@@ -92,6 +94,7 @@ def supports_temperature(model_name: str) -> bool:
 
 
 def build_openai_primary_payload(prompt: str, model_name: str) -> dict[str, Any]:
+    """Responses API に送るリクエスト本文を作る。"""
     payload = {
         "model": model_name,
         "input": prompt,
@@ -110,6 +113,7 @@ def build_openai_primary_payload(prompt: str, model_name: str) -> dict[str, Any]
 
 
 def build_gpt_primary_prompt(page: Any, seed: dict[str, Any]) -> str:
+    """ページ本文とローカル一次判定から、OpenAI 用プロンプトを組み立てる。"""
     prompt_seed = {
         "local_domain": seed.get("domain"),
         "local_labels": seed.get("labels", []),
@@ -158,6 +162,7 @@ def build_gpt_primary_prompt(page: Any, seed: dict[str, Any]) -> str:
 
 
 def normalize_openai_primary_review(raw_output: dict[str, Any] | None) -> dict[str, Any] | None:
+    """OpenAI のJSON出力を、後続処理が使いやすい形に整える。"""
     if not isinstance(raw_output, dict):
         return None
 
@@ -221,6 +226,7 @@ def format_openai_error(exc: Exception) -> str:
 
 
 async def run_openai_primary_review(page: Any, seed: dict[str, Any], settings: Any) -> dict[str, Any] | None:
+    """OpenAI API を呼び出し、一次レビュー結果を返す。失敗時はエラー情報を返す。"""
     if not getattr(settings, "openai_api_key", ""):
         return None
     if not getattr(settings, "openai_primary_model", ""):

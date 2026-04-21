@@ -1,7 +1,14 @@
+"""アプリ内で受け渡しするデータの形を定義する。
+
+Pydantic の BaseModel を使うことで、画面/API/判定処理の間で
+「どんな項目を持つデータなのか」を明示できます。
+"""
+
 from pydantic import BaseModel, Field, HttpUrl, field_validator, model_validator
 
 
 def current_min_text_chars() -> int:
+    """本文入力の最小文字数を設定から取得する。設定読み込み失敗時は安全な既定値を使う。"""
     try:
         from .config import get_settings
 
@@ -11,6 +18,8 @@ def current_min_text_chars() -> int:
 
 
 class AnalyzeForm(BaseModel):
+    """ユーザー入力を受け取るためのモデル。URLか本文のどちらかが必要。"""
+
     page_text: str | None = Field(default=None, max_length=12000)
     page_url: HttpUrl | None = None
     skip_policy_check: bool = False
@@ -34,12 +43,16 @@ class AnalyzeForm(BaseModel):
 
 
 class VerificationLink(BaseModel):
+    """利用者が次に確認できる外部リンクを表す。"""
+
     title: str
     url: str
     kind: str
 
 
 class AnalysisSignal(BaseModel):
+    """ローカル判定で検出した注意シグナル。点数加減の理由にも使う。"""
+
     title: str
     score_delta: int
     tone: str
@@ -76,6 +89,8 @@ class TimingOverview(BaseModel):
 
 
 class EvidenceOverview(BaseModel):
+    """Gemini などによる根拠確認結果をまとめる。"""
+
     status: str
     summary: str
     claims: list[str] = Field(default_factory=list)
@@ -91,6 +106,8 @@ class EvidenceOverview(BaseModel):
 
 
 class StyleOverview(BaseModel):
+    """文章表現の強さや煽り度合いをまとめる。"""
+
     status: str
     summary: str
     score: int | None = Field(default=None, ge=0, le=100)
@@ -115,6 +132,8 @@ class ScoreCalculation(BaseModel):
 
 
 class SourceSnapshot(BaseModel):
+    """判定対象ページから取り出したメタ情報と本文概要。"""
+
     title: str
     site_name: str
     source_url: str | None = None
@@ -141,11 +160,15 @@ class SourceSnapshot(BaseModel):
 
 
 class ResolvedPage(SourceSnapshot):
+    """解析できる状態まで整えたページ情報。`analysis_text` が判定本文。"""
+
     analysis_text: str = Field(min_length=10)
     timing_overview: TimingOverview | None = None
 
 
 class AnalysisResult(BaseModel):
+    """画面/APIに返す最終的な判定結果。"""
+
     verdict: str
     verdict_key: str
     verdict_display: str
