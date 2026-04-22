@@ -19,10 +19,12 @@ Ver1/evaluation_outputs/
 Ver2/evaluation_outputs/
 Ver3/evaluation_outputs/
 Ver4/evaluation_outputs/
+Ver5/evaluation_outputs/
 
 # Local temp artifacts
 Ver3/tmp_kobe_pdf/
 Ver4/tmp_ver4_case_*
+Ver5/tmp_kobe_pdf/
 
 # Local spreadsheet working files
 Ver4/testdata/エクセル/real_article_dataset_v2.xlsx
