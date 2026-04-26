@@ -4252,3 +4252,192 @@ def test_false_claim_mode_saigo_seinan_suicide_wording_escalates_to_false() -> N
         claim_mode=True,
     )
     assert verdict == "誤り"
+
+
+def test_claim_mode_approximate_cost_support_can_remain_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=34,
+        confidence_score=60,
+        labels=["大筋で整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "概ね整合",
+            "claim_reviews": [
+                {
+                    "claim": "アベノマスクには全部で500億円ほどの税金が使われた。",
+                    "verdict": "概ね整合",
+                    "reason": "追加発注や配送費、保管費、不良品の検品費用などを含めると、総額は500億円程度、またはそれ以上になると複数の報道機関やファクトチェック記事で報じられています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "正確"
+
+
+def test_claim_mode_supported_name_variants_are_not_name_corrections() -> None:
+    verdict = derive_public_verdict(
+        risk_score=27,
+        confidence_score=66,
+        labels=["大筋で整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "概ね整合",
+            "claim_reviews": [
+                {
+                    "claim": "マクドナルドのマスコットキャラクターは日本ではドナルド・マクドナルドの名前で呼ばれているが、英語の原名はロナルド・マクドナルドである。",
+                    "verdict": "概ね整合",
+                    "reason": "マクドナルドのマスコットキャラクターは、日本では「ドナルド・マクドナルド」として知られていますが、英語圏での正式名称は「ロナルド・マクドナルド」です。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "正確"
+
+
+def test_claim_mode_colored_archive_footage_detail_stays_mostly_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=54,
+        confidence_score=66,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "アイヌの踊りが1919年に撮影され、保存されていたカラー映像が2023年に拡散した",
+                    "verdict": "反証あり",
+                    "reason": "1919年に撮影されたアイヌの踊りの映像は存在し、保存もされていますが、2023年に拡散したカラー映像はAIによって着色されたものであり、オリジナルは白黒であるためです。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "ほぼ正確"
+
+
+def test_claim_mode_iraq_war_causal_composite_stays_inaccurate_with_no_relationship_wording() -> None:
+    verdict = derive_public_verdict(
+        risk_score=60,
+        confidence_score=67,
+        labels=["反証情報あり", "反証根拠あり"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "9.11テロを起こしたウサマ・ビンラディンをイラクのサダム・フセインが匿ったため、2003年アメリカはイラクを攻撃し、イラク戦争が始まった。",
+                    "verdict": "反証あり",
+                    "reason": "イラク戦争は2003年に開始されたが、その主な開戦理由はイラクの大量破壊兵器保有疑惑であり、サダム・フセインがウサマ・ビンラディンを匿っていた、または9.11テロに関与していたという事実は確認されておらず、両者の間には協力関係がなかったとされています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "不正確"
+
+
+def test_false_claim_mode_factcheck_post_absence_wording_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=56,
+        confidence_score=66,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "世田谷区で韓国籍女性が殺害された事件について、韓国の李在明大統領が「日本は謝罪と賠償をするべきだ」と発言した。",
+                    "verdict": "反証あり",
+                    "reason": "日本ファクトチェックセンターの検証により、李在明大統領が世田谷区の韓国籍女性殺害事件に関して「日本は謝罪と賠償をするべきだ」と発言したという投稿は誤りであり、そのような発言は確認されていない。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_claim_mode_bounty_increase_wording_stays_mostly_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=33,
+        confidence_score=68,
+        labels=["大筋で整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "概ね整合",
+            "claim_reviews": [
+                {
+                    "claim": "バイデン政権はマドゥロに2500万ドルの懸賞金をかけた",
+                    "verdict": "概ね整合",
+                    "reason": "米国務省は2025年1月10日、ニコラス・マドゥロ大統領の逮捕につながる情報に対する懸賞金を2500万ドルに引き上げました。これはバイデン政権下での出来事です。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "ほぼ正確"
+
+
+def test_claim_mode_false_purpose_composite_stays_inaccurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=55,
+        confidence_score=60,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "ドラえもんは22世紀の未来の日本から、のび太をいじめるためにやって来たネコ型ロボットである",
+                    "verdict": "反証あり",
+                    "reason": "ドラえもんは22世紀の未来の日本から来たネコ型ロボットであることは事実ですが、のび太をいじめるためではなく、のび太の悲惨な未来を変え、助けるために派遣されたと公式設定で明確にされています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "不正確"
