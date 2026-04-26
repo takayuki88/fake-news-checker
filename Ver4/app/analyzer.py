@@ -523,6 +523,10 @@ PRIMARY_REVIEW_RISK_WEIGHT = 0.35
 PRIMARY_REVIEW_CONFIDENCE_WEIGHT = 0.3
 PRIMARY_REVIEW_RISK_DELTA_CAP = 12
 PRIMARY_REVIEW_CONFIDENCE_DELTA_CAP = 10
+CLAIM_MODE_PRIMARY_REVIEW_RISK_WEIGHT = 0.25
+CLAIM_MODE_PRIMARY_REVIEW_CONFIDENCE_WEIGHT = 0.2
+CLAIM_MODE_PRIMARY_REVIEW_RISK_DELTA_CAP = 8
+CLAIM_MODE_PRIMARY_REVIEW_CONFIDENCE_DELTA_CAP = 6
 
 
 def elapsed_ms(started_at: float) -> int:
@@ -2028,6 +2032,24 @@ def blend_primary_score(seed_score: int, primary_score: int, weight: float, delt
     return clamp(seed_score + bounded_delta)
 
 
+def primary_review_blend_settings(seed: dict[str, Any]) -> tuple[float, float, int, int]:
+    source_profile = seed.get("source_profile")
+    claim_mode = isinstance(source_profile, dict) and bool(source_profile.get("claim_mode"))
+    if claim_mode:
+        return (
+            CLAIM_MODE_PRIMARY_REVIEW_RISK_WEIGHT,
+            CLAIM_MODE_PRIMARY_REVIEW_CONFIDENCE_WEIGHT,
+            CLAIM_MODE_PRIMARY_REVIEW_RISK_DELTA_CAP,
+            CLAIM_MODE_PRIMARY_REVIEW_CONFIDENCE_DELTA_CAP,
+        )
+    return (
+        PRIMARY_REVIEW_RISK_WEIGHT,
+        PRIMARY_REVIEW_CONFIDENCE_WEIGHT,
+        PRIMARY_REVIEW_RISK_DELTA_CAP,
+        PRIMARY_REVIEW_CONFIDENCE_DELTA_CAP,
+    )
+
+
 def apply_primary_review(
     seed: dict[str, Any],
     llm_output: dict[str, Any],
@@ -2042,17 +2064,18 @@ def apply_primary_review(
     seed_confidence_score = int(seed["confidence_score"])
     raw_risk_score = normalize_primary_score(raw_primary_review.get("risk_score"), seed_risk_score)
     raw_confidence_score = normalize_primary_score(raw_primary_review.get("confidence_score"), seed_confidence_score)
+    risk_weight, confidence_weight, risk_delta_cap, confidence_delta_cap = primary_review_blend_settings(seed)
     risk_score = blend_primary_score(
         seed_risk_score,
         raw_risk_score,
-        PRIMARY_REVIEW_RISK_WEIGHT,
-        PRIMARY_REVIEW_RISK_DELTA_CAP,
+        risk_weight,
+        risk_delta_cap,
     )
     confidence_score = blend_primary_score(
         seed_confidence_score,
         raw_confidence_score,
-        PRIMARY_REVIEW_CONFIDENCE_WEIGHT,
-        PRIMARY_REVIEW_CONFIDENCE_DELTA_CAP,
+        confidence_weight,
+        confidence_delta_cap,
     )
     domain = normalize_primary_domain(raw_primary_review.get("domain")) or str(seed["domain"])
     summary = str(raw_primary_review.get("summary") or "").strip() or str(seed["summary"])
@@ -2071,6 +2094,7 @@ def apply_primary_review(
     merged.update(
         {
             "primary_review_raw_risk_score": raw_risk_score,
+            "primary_review_raw_confidence_score": raw_confidence_score,
             "primary_review_risk_score": risk_score,
             "risk_score": risk_score,
             "confidence": "モデルの確信度" if confidence_score >= 45 else "判定不能",

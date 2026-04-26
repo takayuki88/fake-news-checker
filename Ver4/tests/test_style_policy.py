@@ -16,7 +16,7 @@ from app.analyzer import (
 from app.config import Settings
 from app.evidence_search import build_evidence_links
 from app.models import AnalysisSignal, ResolvedPage
-from app.openai_primary_review import build_openai_primary_payload
+from app.openai_primary_review import build_gpt_primary_prompt, build_openai_primary_payload
 
 
 def make_page() -> ResolvedPage:
@@ -855,6 +855,39 @@ def test_apply_primary_review_blends_seed_scores_and_summary() -> None:
     assert merged["reasons"] == ["Gemini reason", "heuristic reason"]
 
 
+def test_apply_primary_review_dampens_claim_mode_score_shift() -> None:
+    seed = {
+        "risk_score": 72,
+        "confidence": "判定不能",
+        "confidence_score": 40,
+        "status": "自動判定",
+        "summary": "heuristic summary",
+        "labels": ["判定不能"],
+        "reasons": ["heuristic reason"],
+        "domain": "一般",
+        "caution_level": "不正確",
+        "signal_breakdown": [],
+        "source_profile": {"claim_mode": True},
+    }
+    llm_output = {
+        "primary_review": {
+            "domain": "医療",
+            "risk_score": 18,
+            "confidence_score": 82,
+            "summary": "短文claimの一次判定です。",
+            "labels": ["反証情報あり"],
+            "reasons": ["primary reason"],
+        }
+    }
+
+    merged = apply_primary_review(seed, llm_output, provider_key="gpt-primary", provider_status="GPT一次判定")
+
+    assert merged["primary_review_raw_risk_score"] == 18
+    assert merged["primary_review_raw_confidence_score"] == 82
+    assert merged["risk_score"] == 64
+    assert merged["confidence_score"] == 46
+
+
 def test_apply_primary_review_keeps_seed_when_primary_review_missing() -> None:
     seed = {
         "risk_score": 35,
@@ -873,6 +906,23 @@ def test_apply_primary_review_keeps_seed_when_primary_review_missing() -> None:
     merged = apply_primary_review(seed, {}, provider_key="gpt-primary", provider_status="GPT一次判定")
 
     assert merged is seed
+
+
+def test_gpt_primary_prompt_frames_primary_review_as_hypothesis() -> None:
+    page = make_page()
+    prompt = build_gpt_primary_prompt(
+        page,
+        {
+            "domain": "一般",
+            "labels": [],
+            "reasons": [],
+            "source_snapshot": page,
+        },
+    )
+
+    assert "この一次判定は最終判定ではなく" in prompt
+    assert "外部事実を確認できない場合" in prompt
+    assert "小さな日付・数字・固有名詞・範囲の差分" in prompt
 
 
 def test_kanji_name_correction_in_supported_claim_stays_mostly_accurate() -> None:
