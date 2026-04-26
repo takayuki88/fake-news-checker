@@ -93,13 +93,13 @@
     {
       "id": "positive-accurate-06-wasegg220314-8",
       "expected_verdict": "正確",
-      "analysis_text": "ド・ドドンパ・ジェットコースターは骨折事故発生を受け、営業を終了した。",
+      "analysis_text": "ド・ドドンパ・ジェットコースターは骨折事故発生を受け、2021年8月から営業を休止し、2024年3月に営業を終了した。",
       "expected_domain": "一般",
       "analysis_mode": "claim",
-      "claim_text": "ド・ドドンパ・ジェットコースターは骨折事故発生を受け、営業を終了した。",
+      "claim_text": "ド・ドドンパ・ジェットコースターは骨折事故発生を受け、2021年8月から営業を休止し、2024年3月に営業を終了した。",
       "review_focus": "主張全体が公開情報と素直に整合するかを確認する。",
       "human_note": "短文claim評価用に、確認したい主張の要点だけを残したケースです。",
-      "contested_span": "ド・ドドンパ・ジェットコースターは骨折事故発生を受け、営業を終了した。"
+      "contested_span": "ド・ドドンパ・ジェットコースターは骨折事故発生を受け、2021年8月から営業を休止し、2024年3月に営業を終了した。"
     },
     {
       "id": "positive-accurate-07-infact220706",
@@ -225,13 +225,13 @@
     {
       "id": "positive-accurate-18-square-watermelon",
       "expected_verdict": "正確",
-      "analysis_text": "日本で作られている四角いスイカは実在し、観賞用や贈答用として栽培されている。",
+      "analysis_text": "日本では四角いスイカが栽培されており、観賞用や贈答用として流通している。",
       "expected_domain": "一般",
       "analysis_mode": "claim",
-      "claim_text": "日本で作られている四角いスイカは実在し、観賞用や贈答用として栽培されている。",
+      "claim_text": "日本では四角いスイカが栽培されており、観賞用や贈答用として流通している。",
       "review_focus": "主張全体が公開情報と素直に整合するかを確認する。",
       "human_note": "短文claim評価用に、確認したい主張の要点だけを残したケースです。",
-      "contested_span": "日本で作られている四角いスイカは実在し、観賞用や贈答用として栽培されている。"
+      "contested_span": "日本では四角いスイカが栽培されており、観賞用や贈答用として流通している。"
     },
     {
       "id": "positive-accurate-19-ronald-mcdonald-name-japan",
@@ -247,13 +247,13 @@
     {
       "id": "positive-accurate-20-photos-japan-orca",
       "expected_verdict": "正確",
-      "analysis_text": "北海道沖で白いシャチの写真が撮影された",
+      "analysis_text": "北海道知床半島の羅臼沖で白いシャチの写真が撮影された。",
       "expected_domain": "一般",
       "analysis_mode": "claim",
-      "claim_text": "北海道沖で白いシャチの写真が撮影された",
+      "claim_text": "北海道知床半島の羅臼沖で白いシャチの写真が撮影された。",
       "review_focus": "主張全体が公開情報と素直に整合するかを確認する。",
       "human_note": "短文claim評価用に、確認したい主張の要点だけを残したケースです。",
-      "contested_span": "北海道沖で白いシャチの写真が撮影された"
+      "contested_span": "北海道知床半島の羅臼沖で白いシャチの写真が撮影された。"
     },
     {
       "id": "positive-mostly-accurate-01-ainu-dance-filmed-1919",

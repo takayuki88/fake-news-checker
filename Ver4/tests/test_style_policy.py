@@ -1226,6 +1226,33 @@ def test_supported_claim_with_understated_numeric_result_stays_mostly_accurate()
     assert verdict == "ほぼ正確"
 
 
+def test_counterevidence_supported_tax_revenue_drift_stays_mostly_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=54,
+        confidence_score=59,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "マサチューセッツ州の有権者は、100万ドルを超える所得に対する4％の追加税を承認し、これにより2024年度に15億ドルの歳入が得られた。",
+                    "verdict": "反証あり",
+                    "reason": "マサチューセッツ州の有権者は2022年11月に100万ドルを超える所得に対する4%の追加税（Fair Share Amendment）を承認し、2023年1月1日に施行されました。しかし、2024年度（FY24）のこの税による歳入は、当初予算の10億ドルを上回り、22億ドルに達したと報告されており、主張の15億ドルとは異なります。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "ほぼ正確"
+
+
 def test_reported_precise_historical_quantity_stays_mostly_accurate() -> None:
     verdict = derive_public_verdict(
         risk_score=34,
@@ -1280,6 +1307,87 @@ def test_supported_claim_with_small_numeric_drift_stays_mostly_accurate() -> Non
     assert verdict == "ほぼ正確"
 
 
+def test_supported_claim_with_explicit_mostly_accurate_review_stays_mostly_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=30,
+        confidence_score=68,
+        labels=["一次ソースと整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "概ね整合",
+            "claim_reviews": [
+                {
+                    "claim": "岸田文雄は首相時代に「今年の春闘の賃上げ率2.08%は、過去20年で2番目に高い」と発言したことがある。",
+                    "verdict": "概ね整合",
+                    "reason": "岸田文雄首相は党首討論会で2.08%は過去20年間で2番目に高い給与の引き上げの数字だと発言したことが確認されています。ファクトチェック記事によると、連合が発表している賃上げ率を前提とすると、この発言はほぼ正確と評価されています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "ほぼ正確"
+
+
+def test_supported_estimated_population_count_stays_mostly_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=35,
+        confidence_score=63,
+        labels=["一次ソースと整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "概ね整合",
+            "claim_reviews": [
+                {
+                    "claim": "オーストラリアにはカンガルーが5000万頭いる",
+                    "verdict": "概ね整合",
+                    "reason": "複数の報道機関や情報源が、オーストラリアのカンガルーの個体数が近年5000万頭前後、またはそれ以上であると報告しているため。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "ほぼ正確"
+
+
+def test_supported_exact_reported_numeric_claim_can_remain_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=20,
+        confidence_score=70,
+        labels=["一次ソースと整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "概ね整合",
+            "claim_reviews": [
+                {
+                    "claim": "ある自治体の2024年度予算は100億円である",
+                    "verdict": "概ね整合",
+                    "reason": "公式資料では、2024年度予算は100億円であると報告されている。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "正確"
+
+
 def test_shared_authorship_claim_stays_mostly_accurate() -> None:
     verdict = derive_public_verdict(
         risk_score=34,
@@ -1299,6 +1407,60 @@ def test_shared_authorship_claim_stays_mostly_accurate() -> None:
                     "claim": "日本国憲法はアメリカが作った憲法である",
                     "verdict": "概ね整合",
                     "reason": "日本国憲法の草案はアメリカ占領軍総司令部（GHQ）の民政局によって作成され、その後日本政府が修正を加えて制定されたため、アメリカの強い影響下にあったと言える。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "ほぼ正確"
+
+
+def test_counterevidence_constitution_authorship_overstatement_stays_mostly_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=50,
+        confidence_score=72,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "日本国憲法はアメリカが作った憲法である",
+                    "verdict": "反証あり",
+                    "reason": "日本国憲法の原案はGHQ（アメリカ主導）が作成し日本政府に提示されたが、日本政府との交渉や帝国議会での審議を経て制定されており、日本側の関与も存在したため、完全に「アメリカが作った」とは言えない。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "ほぼ正確"
+
+
+def test_counterevidence_ev_range_overstatement_stays_mostly_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=57,
+        confidence_score=59,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "日本の自動車メーカーは1949年に、1回の充電で300km走行できるたま電気自動車を開発した。",
+                    "verdict": "反証あり",
+                    "reason": "1949年に発売された「たまセニア号」の1充電あたりの走行距離は200kmであり、一部の性能試験では231.5kmを記録しましたが、300kmという数値は外部情報で確認できません。",
                 }
             ],
         },
@@ -1407,6 +1569,60 @@ def test_ratio_rounding_correction_can_be_mostly_accurate() -> None:
                     "claim": "アメリカの国土面積は日本の24倍である",
                     "verdict": "反証あり",
                     "reason": "外務省のデータによると、アメリカの国土面積は約983万平方キロメートル、日本の国土面積は約37.8万平方キロメートルであり、アメリカは日本の約26倍の広さです。他の情報源でも約25倍から26倍とされています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "ほぼ正確"
+
+
+def test_counterevidence_ratio_rounding_public_info_wording_stays_mostly_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=45,
+        confidence_score=71,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "アメリカの国土面積は日本の24倍である",
+                    "verdict": "反証あり",
+                    "reason": "外務省のデータによるとアメリカの国土面積は日本の約26倍であり、他の情報源でも約25倍から26倍とされているため、「24倍」という主張は公開情報と整合しません。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "ほぼ正確"
+
+
+def test_counterevidence_elevation_small_numeric_drift_stays_mostly_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=52,
+        confidence_score=61,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "世界最高峰のエベレストの標高は8852mである",
+                    "verdict": "反証あり",
+                    "reason": "エベレストの公式標高は、2020年に中国とネパールが共同で発表した8,848.86mです。主張されている8,852mとは異なります。",
                 }
             ],
         },
@@ -1695,6 +1911,114 @@ def test_causal_multi_clause_numeric_claim_stays_inaccurate() -> None:
     assert verdict == "不正確"
 
 
+def test_high_risk_iraq_war_causal_mixed_claim_stays_inaccurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=60,
+        confidence_score=67,
+        labels=["反証情報あり", "反証根拠あり"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "9.11テロを起こしたウサマ・ビンラディンをイラクのサダム・フセインが匿ったため、2003年アメリカはイラクを攻撃し、イラク戦争が始まった。",
+                    "verdict": "反証あり",
+                    "reason": "サダム・フセインがウサマ・ビンラディンやアルカイダを匿っていたという決定的な証拠は見つかっておらず、米国防総省や米上院の報告書で否定されています。イラク戦争の主な開戦理由は大量破壊兵器の保有疑惑であり、9.11テロとの直接的な関連は否定されています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "不正確"
+
+
+def test_high_risk_tokugawa_relocation_mixed_claim_stays_inaccurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=62,
+        confidence_score=65,
+        labels=["反証情報あり", "反証根拠あり"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "徳川家康は江戸幕府を開いた人物であり、関ヶ原の戦いの後に征夷大将軍となり、その後すぐ天皇を連れ江戸に遷都した",
+                    "verdict": "反証あり",
+                    "reason": "徳川家康が江戸幕府を開き、関ヶ原の戦い後に征夷大将軍になったことは史実と一致します。しかし、天皇が江戸時代に江戸へ遷都したという事実はなく、天皇は明治維新まで京都に留まっていたため、この主張の後半部分は誤りです。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "不正確"
+
+
+def test_high_risk_einstein_nobel_reason_mixed_claim_stays_inaccurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=60,
+        confidence_score=71,
+        labels=["反証情報あり", "反証根拠あり"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "アインシュタインは相対性理論を提唱したことで知られるが、ノーベル賞は原子爆弾の開発功績によって受賞した。",
+                    "verdict": "反証あり",
+                    "reason": "アインシュタインが1921年に受賞したノーベル物理学賞は、理論物理学への貢献、特に光電効果の法則の発見に対してであり、相対性理論や原子爆弾の開発功績によるものではありません。アインシュタインは原子爆弾の開発には直接関与しておらず、書簡を送ったものの後に後悔しています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "不正確"
+
+
+def test_high_risk_napoleon_final_place_mixed_claim_stays_inaccurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=62,
+        confidence_score=63,
+        labels=["反証情報あり", "反証根拠あり"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "ナポレオンはフランス皇帝として有名だが、最後は南米のブラジルへ亡命して生涯を終えた",
+                    "verdict": "反証あり",
+                    "reason": "ナポレオン・ボナパルトは、南大西洋のイギリス領セントヘレナ島に流刑され、1821年5月5日に同地で死去した。ブラジルへ亡命したという事実は確認できない。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "不正確"
+
+
 def test_single_numeric_attribute_without_supported_core_can_stay_inaccurate() -> None:
     verdict = derive_public_verdict(
         risk_score=54,
@@ -1965,6 +2289,33 @@ def test_false_claim_mode_vaccine_cancer_counterevidence_escalates_to_false() ->
     assert verdict == "誤り"
 
 
+def test_false_claim_mode_vaccine_cancer_authoritative_denial_without_named_agency_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=48,
+        confidence_score=79,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "新型コロナワクチンを接種すると大腸がんになる。",
+                    "verdict": "反証あり",
+                    "reason": "複数のファクトチェック機関や製薬会社、大規模な疫学研究により、新型コロナワクチンと大腸がんの因果関係は否定されており、そのような科学的根拠は確認されていません。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
 def test_false_claim_mode_birther_counterevidence_escalates_to_false() -> None:
     verdict = derive_public_verdict(
         risk_score=16,
@@ -2011,6 +2362,33 @@ def test_false_claim_mode_mmr_autism_counterevidence_escalates_to_false() -> Non
                     "claim": "MMRワクチンで自閉症になる。",
                     "verdict": "反証あり",
                     "reason": "MMRワクチンと自閉症の関連性を示唆した1998年の論文は、データ不正により撤回され、著者の医師免許も剥奪されました。その後の大規模な疫学研究でも、MMRワクチンと自閉症の関連性は確認されていません。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_mmr_autism_authoritative_denial_without_medical_license_detail_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=50,
+        confidence_score=78,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "MMRワクチンで自閉症になる。",
+                    "verdict": "反証あり",
+                    "reason": "MMRワクチンと自閉症の関連性については、大規模な疫学研究や主要な保健機関によるレビューで繰り返し否定されており、関連性を示す科学的根拠はありません。この主張は、不正が発覚し撤回されたアンドリュー・ウェイクフィールド医師の論文に端を発しています。",
                 }
             ],
         },
@@ -2640,6 +3018,33 @@ def test_false_claim_mode_japan_northernmost_claim_is_wrong_wording_variation_es
     assert verdict == "誤り"
 
 
+def test_false_claim_mode_geographic_extreme_with_shiretoko_and_corrected_places_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=38,
+        confidence_score=77,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "日本の最北端は知床岬である。",
+                    "verdict": "反証あり",
+                    "reason": "日本の最北端は、北方領土を含めると択捉島のカモイワッカ岬であり、日本が実効支配する範囲では宗谷岬の北西約1kmにある無人島の弁天島です。一般人が訪れることができる本土最北端は宗谷岬です。知床岬は知床半島の先端に位置しますが、日本の最北端ではありません。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
 def test_false_claim_mode_trump_current_mideast_quote_wording_escalates_to_false() -> None:
     verdict = derive_public_verdict(
         risk_score=54,
@@ -3126,6 +3531,103 @@ def test_claim_mode_disputed_historical_identity_or_role_naotora_holds() -> None
     assert verdict == "判断保留"
 
 
+def test_claim_mode_disputed_historical_person_gender_naotora_female_holds() -> None:
+    verdict = derive_public_verdict(
+        risk_score=31,
+        confidence_score=63,
+        labels=["一次ソースと整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "概ね整合",
+            "claim_reviews": [
+                {
+                    "claim": "井伊直虎は女性であった。",
+                    "verdict": "概ね整合",
+                    "reason": "井伊直虎は井伊家第22代当主・井伊直盛の一人娘であり、井伊家存続のために女領主として家督を継いだとされる。NHK大河ドラマの題材にもなるなど、女性であったという認識が広く定着している。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "判断保留"
+
+
+def test_claim_mode_disputed_historical_person_gender_naotora_male_holds() -> None:
+    verdict = derive_public_verdict(
+        risk_score=54,
+        confidence_score=67,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "井伊直虎は男性であった。",
+                    "verdict": "反証あり",
+                    "reason": "井伊直虎の性別や次郎法師との同一性については史料が少なく、男性説や別人説も含めて議論があるため断定できない。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "判断保留"
+
+
+def test_claim_mode_disputed_historical_location_yamatai_kyushu_holds() -> None:
+    verdict = derive_public_verdict(
+        risk_score=55,
+        confidence_score=60,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "邪馬台国は九州にあった。",
+                    "verdict": "反証あり",
+                    "reason": "邪馬台国の所在地は九州説と畿内説が有力な学説として長年論争されており、定説は確立されていないため、九州にあったと断定することはできません。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "判断保留"
+
+
+def test_gpt_primary_prompt_mentions_unsettled_historical_location_disputes() -> None:
+    page = make_page()
+    page.analysis_mode = "claim"
+    prompt = build_gpt_primary_prompt(
+        page,
+        {
+            "domain": "一般",
+            "labels": [],
+            "reasons": [],
+            "source_snapshot": page,
+        },
+    )
+
+    assert "歴史論争・所在地論争・歴史人物の性別や同一性の論争" in prompt
+
+
 def test_false_claim_mode_nonexistent_law_sonzai_sezu_wording_escalates_to_false() -> None:
     verdict = derive_public_verdict(
         risk_score=18,
@@ -3307,6 +3809,443 @@ def test_false_claim_mode_saigo_seinan_victory_claim_escalates_to_false() -> Non
                     "claim": "西郷隆盛は西南戦争で勝利した。",
                     "verdict": "反証あり",
                     "reason": "西南戦争は明治政府軍の勝利で終結し、西郷隆盛は敗北し自刃しました。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_claim_mode_disputed_historical_existence_arthur_consensus_wording_holds() -> None:
+    verdict = derive_public_verdict(
+        risk_score=61,
+        confidence_score=69,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "アーサー王は実在した王である。",
+                    "verdict": "反証あり",
+                    "reason": "アーサー王は伝説上の人物であり、現在の歴史家の学術的コンセンサスでは実在の王とは考えられていません。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "判断保留"
+
+
+def test_claim_mode_counterevidence_name_correction_with_quoted_typo_stays_mostly_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=61,
+        confidence_score=69,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "20世紀末に活躍した三大テノールとは、ルチアーノ・パヴァロッティ、プラシド・ドミンゴ、ホセ・カレーライスの3名である。",
+                    "verdict": "反証あり",
+                    "reason": "20世紀末に活躍した三大テノールは、ルチアーノ・パヴァロッティ、プラシド・ドミンゴ、ホセ・カレーラスの3名であり、主張中の「ホセ・カレーライス」は誤記であるため「反証あり」と判定します。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "ほぼ正確"
+
+
+def test_claim_mode_minor_numeric_correction_with_false_wording_stays_mostly_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=61,
+        confidence_score=69,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "イチローは28年のプロ野球選手生活の中でシーズン200安打以上を11回記録した。日本より試合数の多いメージャーリーグであったからこそ、11回もそれをメジャーリーグで記録することができたと考えられる。",
+                    "verdict": "反証あり",
+                    "reason": "イチローのプロ野球選手生活は28年ですが、シーズン200安打以上をメジャーリーグで記録したのは10回であり、主張の「11回」は誤りです。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "ほぼ正確"
+
+
+def test_false_claim_mode_historical_poison_rumor_public_agency_wording_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=61,
+        confidence_score=69,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "関東大震災で朝鮮人が井戸に毒を入れた。",
+                    "verdict": "反証あり",
+                    "reason": "関東大震災時に「朝鮮人が井戸に毒を入れた」という主張は、当時の混乱の中で広まった根拠のないデマであり、多くの朝鮮人虐殺につながったことが複数の公的機関や報道機関、ファクトチェック記事で確認されています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_recontextualized_quote_non_polite_wording_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=61,
+        confidence_score=69,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "トランプ氏が、現在の中東情勢を受けて「私は核兵器を使う最後の人間になるだろう」と発言した。",
+                    "verdict": "反証あり",
+                    "reason": "トランプ氏が「私は核兵器を使う最後の人間になるだろう」と発言したのは2016年であり、現在の中東情勢を受けてのものではない。ただし、最近の情勢下でも核兵器使用を否定する発言をしている。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_artificial_earthquake_public_agency_denial_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=40,
+        confidence_score=77,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "2025年12月8日に青森県東方沖で起きた地震は人工地震である",
+                    "verdict": "反証あり",
+                    "reason": "気象庁をはじめとする複数の公的機関や報道機関は、青森県東方沖で発生した地震を自然地震として報告しており、人工地震であるとする科学的根拠や報告は確認できませんでした。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_geocentrism_modern_science_wording_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=44,
+        confidence_score=77,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "地球は宇宙の中心にあり、地球の回りを太陽やその他の星々が回っている",
+                    "verdict": "反証あり",
+                    "reason": "現代の科学的知見では、地球は宇宙の中心ではなく、太陽系の惑星の一つとして太陽の周りを公転しています。宇宙全体には中心がないとされています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_geocentrism_modern_astronomy_wording_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=44,
+        confidence_score=78,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "地球は宇宙の中心にあり、地球の回りを太陽やその他の星々が回っている",
+                    "verdict": "反証あり",
+                    "reason": "現代の天文学では、地球は太陽系の中心ではなく、太陽の周りを公転していることが確立されています。宇宙に中心はないとされています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_missing_public_quote_record_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=61,
+        confidence_score=77,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "世田谷区で韓国籍女性が殺害された事件について、韓国の李在明大統領が「日本は謝罪と賠償をするべきだ」と発言した",
+                    "verdict": "反証あり",
+                    "reason": "李大統領がこの事件に関して日本に謝罪と賠償を求めたという報道や公的発言の記録は確認できません。李大統領の日本への謝罪・賠償要求は、主に植民地支配などの歴史問題に関するものです。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_identity_negation_official_setting_wording_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=61,
+        confidence_score=77,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "工藤新一と江戸川コナンは同一人物でない",
+                    "verdict": "反証あり",
+                    "reason": "漫画『名探偵コナン』の公式設定および作者の発言により、江戸川コナンは毒薬で体が縮んだ工藤新一であることが明確に示されています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_saigo_seinan_new_government_wording_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=46,
+        confidence_score=77,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "西郷隆盛は西南戦争で勝利した",
+                    "verdict": "反証あり",
+                    "reason": "西南戦争は最終的には明治政府（新政府軍）が勝利し、西郷隆盛は敗北して城山で自刃しました。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_claim_mode_split_ichiro_supported_context_and_count_correction_stays_mostly_accurate() -> None:
+    verdict = derive_public_verdict(
+        risk_score=51,
+        confidence_score=61,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "イチローは28年のプロ野球選手生活の中でシーズン200安打以上を11回記録した。",
+                    "verdict": "概ね整合",
+                    "reason": "シーズン200安打以上は日本プロ野球で1回、メジャーリーグで10回記録しており、合計11回となります。",
+                },
+                {
+                    "claim": "日本より試合数の多いメージャーリーグであったからこそ、11回もそれをメジャーリーグで記録することができたと考えられる。",
+                    "verdict": "反証あり",
+                    "reason": "メジャーリーグで記録したシーズン200安打は10回であり、11回ではありません。ただし、メジャーリーグの試合数が日本プロ野球よりも多いことは、200安打達成の可能性を高める要因の一つとされています。",
+                },
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "ほぼ正確"
+
+
+def test_false_claim_mode_current_quote_exact_wording_unconfirmed_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=40,
+        confidence_score=60,
+        labels=["大筋で整合"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "概ね整合",
+            "claim_reviews": [
+                {
+                    "claim": "トランプ氏が、現在の中東情勢を受けて「私は核兵器を使う最後の人間になるだろう」と発言した",
+                    "verdict": "概ね整合",
+                    "reason": "トランプ氏は現在の中東情勢に関して核兵器を使用しない意向を表明している。主張の引用句と完全に一致する発言は確認できないが、核兵器使用に強い否定的な姿勢を示したという主張の趣旨は整合する。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_mmr_autism_many_scientific_studies_wording_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=52,
+        confidence_score=74,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "MMRワクチンで自閉症になる",
+                    "verdict": "反証あり",
+                    "reason": "1998年の論文が不正と判明し撤回され、その後の多数の科学的研究でMMRワクチンと自閉症の関連性は否定されているため。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_official_statement_absence_and_factcheck_denial_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=56,
+        confidence_score=58,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "世田谷区で韓国籍女性が殺害された事件について、韓国の李在明大統領が「日本は謝罪と賠償をするべきだ」と発言した。",
+                    "verdict": "反証あり",
+                    "reason": "この事件に関して李大統領が発言したという信頼できる報道や公式発表は確認できません。日本ファクトチェックセンターは、この主張が誤りであると明確に否定しています。",
+                }
+            ],
+        },
+        claim_mode=True,
+    )
+    assert verdict == "誤り"
+
+
+def test_false_claim_mode_saigo_seinan_suicide_wording_escalates_to_false() -> None:
+    verdict = derive_public_verdict(
+        risk_score=46,
+        confidence_score=74,
+        labels=["反証情報あり", "文脈不足に注意"],
+        source_profile={
+            "official_source": False,
+            "fact_check_source": False,
+            "trusted_source": False,
+            "correction_article": False,
+            "claim_mode": True,
+        },
+        evidence_overview={
+            "assessment_status": "反証あり",
+            "claim_reviews": [
+                {
+                    "claim": "西郷隆盛は西南戦争で勝利した",
+                    "verdict": "反証あり",
+                    "reason": "西南戦争は明治政府（新政府軍）の勝利に終わり、西郷隆盛は敗北し自決しました。",
                 }
             ],
         },

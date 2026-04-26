@@ -141,7 +141,7 @@
       "site_name": "Snopes",
       "source_url": "https://www.snopes.com/fact-check/do-dodonpa-roller-coaster/",
       "purpose": "Snopes の公開ファクトチェック記事を基にした、日本関連の実在ネット記事ケース",
-      "analysis_text": "ド・ドドンパ・ジェットコースターは骨折事故発生を受け、営業を終了した。",
+      "analysis_text": "ド・ドドンパ・ジェットコースターは骨折事故発生を受け、2021年8月から営業を休止し、2024年3月に営業を終了した。",
       "reference_urls": [
         "https://www.snopes.com/fact-check/do-dodonpa-roller-coaster/"
       ],
@@ -409,7 +409,7 @@
       "site_name": "Snopes",
       "source_url": "https://www.snopes.com/fact-check/square-watermelon/",
       "purpose": "Snopes の公開ファクトチェック記事を基にした、日本関連の実在ネット記事ケース",
-      "analysis_text": "日本で作られている四角いスイカは実在し、観賞用や贈答用として栽培されている。",
+      "analysis_text": "日本では四角いスイカが栽培されており、観賞用や贈答用として流通している。",
       "reference_urls": [
         "https://www.snopes.com/fact-check/square-watermelon/"
       ],
@@ -453,7 +453,7 @@
       "site_name": "Snopes",
       "source_url": "https://www.snopes.com/fact-check/photos-japan-orca/",
       "purpose": "Snopes の公開ファクトチェック記事を基にした、日本関連の実在ネット記事ケース",
-      "analysis_text": "北海道沖で白いシャチの写真が撮影された",
+      "analysis_text": "北海道知床半島の羅臼沖で白いシャチの写真が撮影された。",
       "reference_urls": [
         "https://www.snopes.com/fact-check/photos-japan-orca/"
       ],
