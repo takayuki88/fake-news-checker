@@ -1,3 +1,5 @@
+"""URLまたは貼り付け本文を、判定しやすい `ResolvedPage` に変換する。"""
+
 import re
 import time
 from urllib.parse import quote_plus, urljoin, urlparse
@@ -23,6 +25,7 @@ PRIMARY_SELECTORS = [
     ".news-body",
     ".story-body",
 ]
+# まず記事本文らしいタグを探し、見つからない場合だけ広い候補へ広げる。
 SECONDARY_SELECTORS = [
     ".content",
     ".content-body",
@@ -31,6 +34,7 @@ SECONDARY_SELECTORS = [
     ".story",
     ".post",
 ]
+# ナビ・フッター・SNS共有などは本文に混ざると判定がぶれるため除外する。
 NOISE_SELECTORS = [
     "script",
     "style",
@@ -196,6 +200,7 @@ COMMON_SECOND_LEVEL_SUFFIXES = {
 
 
 def elapsed_ms(started_at: float) -> int:
+    """処理時間をミリ秒で返す。画面の処理時間表示に使う。"""
     return max(int(round((time.perf_counter() - started_at) * 1000)), 0)
 
 
@@ -704,6 +709,7 @@ def score_candidate(text: str, paragraph_count: int, heading_count: int, referen
 
 
 def build_candidate(node: Tag, label: str, selector_weight: int) -> dict | None:
+    """HTMLノード1つを本文候補として採点できる形にする。"""
     chunks, paragraph_count, heading_count = extract_text_chunks(node)
     if not chunks:
         return None
@@ -725,6 +731,7 @@ def build_candidate(node: Tag, label: str, selector_weight: int) -> dict | None:
 
 
 def collect_candidates(soup: BeautifulSoup) -> list[dict]:
+    """HTML全体から本文候補を集める。候補はあとで点数順に選ばれる。"""
     candidates: list[dict] = []
 
     for selector in PRIMARY_SELECTORS:
@@ -864,6 +871,7 @@ async def is_url_fetch_allowed(
     url: str,
     settings: Settings,
 ) -> tuple[bool, str | None, str | None, str | None, str | None, list[str]]:
+    """URLを自動取得してよいか、ドメイン制限・robots.txt・規約候補から判断する。"""
     hostname = normalize_hostname(url)
     if not hostname:
         return False, "URLを正しく解釈できませんでした。ページ本文を貼り付けて判定してください。", None, None, None, []
@@ -937,6 +945,7 @@ async def is_url_fetch_allowed(
 
 
 async def fetch_page_html(url: str, settings: Settings) -> tuple[str, str]:
+    """URLからHTMLを取得し、最終URLと本文HTMLを返す。"""
     headers = {
         "User-Agent": settings.request_user_agent,
         "Accept": "text/html,application/xhtml+xml",
@@ -963,6 +972,7 @@ def parse_html_to_page(
     policy_check_url: str | None = None,
     policy_checked_urls: list[str] | None = None,
 ) -> ResolvedPage:
+    """取得したHTMLを解析し、タイトル・本文・著者・日時などを `ResolvedPage` に詰める。"""
     soup = BeautifulSoup(html, "html.parser")
     timestamp_fields = build_analysis_timestamp_fields(settings)
     title = infer_title(soup) or "タイトル未取得"
@@ -1089,12 +1099,21 @@ def estimate_manual_paragraph_count(text: str) -> int:
     return max(1, sentence_count(text) // 2)
 
 
+def detect_analysis_mode_for_manual_text(text: str, source_url: str | None) -> str:
+    if source_url:
+        return "article"
+    if len(text.strip()) <= 280 and manual_reference_link_count(text) == 0 and estimate_manual_paragraph_count(text) <= 2:
+        return "claim"
+    return "article"
+
+
 async def resolve_page_input(
     page_text: str | None,
     page_url: str | None,
     settings: Settings,
     skip_policy_check: bool = False,
 ) -> tuple[ResolvedPage | None, str | None]:
+    """フォーム/API入力を、判定処理が使えるページ情報へ変換する入口。"""
     overall_started_at = time.perf_counter()
     cleaned_text = (page_text or "").strip()
     cleaned_url = (page_url or "").strip() or None
@@ -1120,6 +1139,7 @@ async def resolve_page_input(
                 site_name=urlparse(cleaned_url).netloc.replace("www.", "") if cleaned_url else "manual",
                 source_url=cleaned_url,
                 input_source="manual_text",
+                analysis_mode=detect_analysis_mode_for_manual_text(cleaned_text, cleaned_url),
                 extraction_note=note,
                 analysis_date=timestamp_fields["analysis_date"],
                 analysis_datetime=timestamp_fields["analysis_datetime"],

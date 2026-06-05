@@ -3,6 +3,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+VERSION_LABEL = "Ver2"
+
 
 def load_report(path: Path) -> dict[str, Any]:
     with path.open("r", encoding="utf-8") as handle:
@@ -87,7 +89,7 @@ def save_confusion_matrix(report: dict[str, Any], output_path: Path, plt: Any, s
         cbar=True,
         ax=ax,
     )
-    ax.set_title("Confusion Matrix")
+    ax.set_title(f"{VERSION_LABEL} Confusion Matrix")
     ax.set_xlabel("Predicted")
     ax.set_ylabel("Truth")
     place_confusion_matrix_labels_on_top(ax)
@@ -117,7 +119,7 @@ def save_per_class_metrics(report: dict[str, Any], output_path: Path, plt: Any) 
     ax.set_xticklabels(labels, rotation=15)
     ax.set_ylim(0, 1.05)
     ax.set_ylabel("Score")
-    ax.set_title("Per-class Metrics")
+    ax.set_title(f"{VERSION_LABEL} Per-class Metrics")
     ax.legend()
     ax.grid(axis="y", alpha=0.25)
     fig.tight_layout()
@@ -150,7 +152,7 @@ def save_summary_metrics(report: dict[str, Any], output_path: Path, plt: Any) ->
     fig, ax = plt.subplots(figsize=(9, 6))
     ax.bar(summary_labels, summary_values, color=colors)
     ax.set_ylim(0, 1.05)
-    ax.set_title("Summary Metrics")
+    ax.set_title(f"{VERSION_LABEL} Summary Metrics")
     ax.tick_params(axis="x", rotation=20)
     annotate_bars(ax, summary_values)
     fig.tight_layout()
@@ -164,7 +166,7 @@ def save_evaluation_overview(report: dict[str, Any], output_path: Path, plt: Any
     binary = report["binary_fake_positive"]
 
     overview_lines = [
-        "Evaluation Overview",
+        f"{VERSION_LABEL} Evaluation Overview",
         f"sample_count: {meta['sample_count']}",
         f"skipped_count: {meta['skipped_count']}",
         f"mismatches: {len(report.get('mismatches', []))}",
@@ -240,14 +242,14 @@ def save_summary_dashboard(report: dict[str, Any], output_path: Path, plt: Any, 
         cbar=True,
         ax=axes[0, 0],
     )
-    axes[0, 0].set_title("Confusion Matrix")
+    axes[0, 0].set_title(f"{VERSION_LABEL} Confusion Matrix")
     axes[0, 0].set_xlabel("Predicted")
     axes[0, 0].set_ylabel("Truth")
     place_confusion_matrix_labels_on_top(axes[0, 0])
 
     axes[0, 1].bar(summary_labels, summary_values, color=["#4C78A8", "#72B7B2", "#54A24B", "#F58518", "#E45756", "#B279A2"])
     axes[0, 1].set_ylim(0, 1.05)
-    axes[0, 1].set_title("Summary Metrics")
+    axes[0, 1].set_title(f"{VERSION_LABEL} Summary Metrics")
     axes[0, 1].tick_params(axis="x", rotation=20)
     annotate_bars(axes[0, 1], summary_values)
 
@@ -258,12 +260,12 @@ def save_summary_dashboard(report: dict[str, Any], output_path: Path, plt: Any, 
     axes[1, 0].set_xticklabels(labels, rotation=15)
     axes[1, 0].set_ylim(0, 1.05)
     axes[1, 0].set_ylabel("Score")
-    axes[1, 0].set_title("Per-class Metrics")
+    axes[1, 0].set_title(f"{VERSION_LABEL} Per-class Metrics")
     axes[1, 0].legend()
 
     axes[1, 1].axis("off")
     overview_lines = [
-        "Evaluation Overview",
+        f"{VERSION_LABEL} Evaluation Overview",
         f"sample_count: {meta['sample_count']}",
         f"skipped_count: {meta['skipped_count']}",
         f"mismatches: {len(report.get('mismatches', []))}",
@@ -289,7 +291,7 @@ def save_summary_dashboard(report: dict[str, Any], output_path: Path, plt: Any, 
         fontsize=11,
     )
 
-    fig.suptitle("Fake News Checker Evaluation Dashboard", fontsize=16)
+    fig.suptitle(f"{VERSION_LABEL} Fake News Checker Evaluation Dashboard", fontsize=16)
     fig.tight_layout()
     fig.savefig(output_path, dpi=180, bbox_inches="tight")
     plt.close(fig)

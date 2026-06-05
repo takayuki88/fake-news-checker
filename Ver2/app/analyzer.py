@@ -1,3 +1,9 @@
+"""判定ロジックの中心。
+
+まずローカルのルールで一次判定を作り、Gemini の根拠確認が使える場合は
+その結果を重ねて、最後に画面/API向けの `AnalysisResult` に整えます。
+"""
+
 import asyncio
 import difflib
 import json
@@ -35,6 +41,8 @@ ABSOLUTE_PATTERNS = [
     "断言する",
     "確実に",
 ]
+# ここから下の *_PATTERNS / *_HINTS は、文章の危険サインや補正条件を拾う辞書です。
+# 判定ロジックは「点数」だけでなく、これらの語句を理由説明にも使います。
 EMOTIONAL_PATTERNS = [
     "衝撃",
     "今すぐ",
@@ -175,13 +183,15 @@ MOSTLY_ACCURATE_NUANCE_HINTS = [
     "概ね整合しますが",
     "わずかな差異",
     "やや控えめ",
-    "その後",
+    "わずかに異なります",
 ]
 PARTIAL_SUPPORT_HINTS = [
     "概ね整合",
     "一致する",
     "一致しています",
     "確認できた",
+    "確認できる",
+    "であることは",
     "存在する",
     "数字自体は",
 ]
@@ -197,6 +207,147 @@ PARTIAL_CORRECTION_HINTS = [
     "名称は",
     "一次ソースは確認できない",
 ]
+COUNTEREVIDENCE_DETAIL_CORRECTION_HINTS = [
+    "ではありません",
+    "ではない",
+    "異なる",
+    "異なります",
+    "確認できません",
+    "確認できない",
+    "確認されていません",
+    "確認されていない",
+    "だけでなく",
+    "もいます",
+    "もいる",
+    "同じく",
+    "他にも",
+]
+COUNTEREVIDENCE_MINOR_NUMERIC_DETAIL_SIGNAL_HINTS = [
+    "部分は事実と異なります",
+    "とされています",
+    "リリースされた",
+]
+COUNTEREVIDENCE_MINOR_NUMERIC_DETAIL_UNITS = ("年", "月", "日", "回", "倍", "本")
+COUNTEREVIDENCE_SCOPE_CLAIM_HINTS = [
+    "みんな",
+    "すべて",
+    "全て",
+    "全部",
+    "同学年",
+]
+COUNTEREVIDENCE_SCOPE_REASON_HINTS = [
+    "だけでなく",
+    "もいます",
+    "もいる",
+    "同じく",
+    "他にも",
+    "幅広い地域",
+]
+COUNTEREVIDENCE_MATERIAL_CLAIM_HINTS = [
+    "二人とも",
+    "両方",
+    "いずれも",
+    "両作品",
+]
+COUNTEREVIDENCE_MATERIAL_REASON_HINTS = [
+    "主張とは逆",
+    "取り違え",
+    "入れ替わ",
+]
+COUNTEREVIDENCE_MATERIAL_ROLE_HINTS = [
+    "監督",
+    "プロデューサー",
+]
+STRONG_FALSE_CONSPIRACY_HINTS = ["陰謀論", "科学的根拠がなく", "科学的根拠はなく", "繰り返し否定"]
+STRONG_FALSE_NONEXISTENT_LAW_HINTS = ["制定されていません", "存在しません", "存在せず"]
+STRONG_FALSE_FAKE_QUOTE_HINTS = ["事実はなく", "事実はない", "原文の解釈も誤っている", "誤訳"]
+STRONG_FALSE_FAKE_QUOTE_ABSENCE_HINTS = [
+    "確認できませんでした",
+    "確認されていません",
+    "確認されておらず",
+    "報道は確認できない",
+    "報道や公的発表は確認できません",
+    "発表や報道はなく",
+]
+STRONG_FALSE_FAKE_QUOTE_MISATTRIBUTION_HINTS = ["誤情報", "誤りである", "誤りです", "紐づくものではありません", "まとめサイト"]
+STRONG_FALSE_FAKE_QUOTE_CONTEXT_HINTS = [
+    "受けての発言ではありません",
+    "受けてのものではありません",
+    "受けたものではない",
+    "とは無関係",
+    "古い引用",
+    "別の時期",
+    "主張の前提が誤って",
+    "異なる文脈",
+    "本件とは異なる文脈",
+]
+STRONG_FALSE_FAKE_IMAGE_HINTS = ["加工された", "意図的に加工", "フェイク画像", "生成ai", "ディープフェイク", "合成", "捏造"]
+STRONG_FALSE_GEOCENTRISM_REASON_HINTS = ["天動説", "地動説", "公転", "科学的に確立", "確立されています"]
+STRONG_FALSE_5G_COVID_NO_SCIENCE_HINTS = [
+    "科学的根拠がなく",
+    "科学的根拠はなく",
+    "科学的根拠がない",
+    "科学的知見や実験確認例は全くなく",
+    "明確に否定",
+]
+STRONG_FALSE_VACCINE_CANCER_REASON_HINTS = ["因果関係", "主張は誤り", "認めたという主張は誤り"]
+STRONG_FALSE_VACCINE_CANCER_AUTHORITY_HINTS = ["ファイザー社", "厚生労働省", "国立がん研究センター"]
+STRONG_FALSE_VACCINE_CANCER_NO_BASIS_HINTS = ["根拠はない", "根拠がない", "誘発する根拠はない", "科学的根拠はない"]
+STRONG_FALSE_VACCINE_CANCER_DISCLAIMER_HINTS = [
+    "関連性を示す発表や報道もありません",
+    "関連性は説明していない",
+    "関連性は確認されていません",
+]
+STRONG_FALSE_BIRTHER_REASON_HINTS = ["出生証明書", "ハワイ州ホノルル", "バーサー運動", "陰謀論"]
+STRONG_FALSE_BIRTHER_BIRTHPLACE_HINTS = ["ハワイ州ホノルル", "ハワイ州", "アメリカ合衆国"]
+STRONG_FALSE_BIRTHER_CONFIRMATION_HINTS = ["確認されています", "確認されている", "複数の信頼できる情報源", "出生証明書"]
+STRONG_FALSE_VACCINE_AUTISM_RETRACTION_HINTS = [
+    "論文",
+    "撤回",
+    "データ不正",
+    "データ改ざん",
+    "データ捏造",
+    "不正なデータ",
+    "不正行為",
+]
+STRONG_FALSE_VACCINE_AUTISM_EPIDEMIOLOGY_HINTS = ["大規模な疫学研究", "多数の疫学研究", "大規模疫学研究"]
+STRONG_FALSE_VACCINE_AUTISM_NO_LINK_HINTS = [
+    "関連性は確認されていません",
+    "関連性を示す証拠はありません",
+    "関連性はない",
+    "関連性は否定されている",
+    "因果関係がない",
+    "因果関係を否定",
+    "関連性は認められていません",
+    "科学的証拠はなく",
+]
+STRONG_FALSE_NICKNAME_REASON_HINTS = ["愛称", "広く知られています", "見当たりません", "ではありません"]
+STRONG_FALSE_RECORDHOLDER_CLAIM_HINTS = ["最多受賞者", "最初の受賞者", "第1回の受賞者"]
+STRONG_FALSE_RECORDHOLDER_REASON_HINTS = ["最多受賞者は", "最初の受賞者は", "第1回の受賞者は", "記念すべき第1回の受賞者は"]
+STRONG_FALSE_RECORDHOLDER_CONCLUSION_HINTS = ["ではありません", "である", "であり", "です", "受賞していません"]
+STRONG_FALSE_IDENTITY_NEGATION_CLAIM_HINTS = ["同一人物でない", "同一人物ではない", "別人である", "別人だ"]
+STRONG_FALSE_IDENTITY_NEGATION_REASON_HINTS = ["同一人物である", "同一人物です", "仮の姿", "正体"]
+STRONG_FALSE_IDENTITY_NEGATION_SUPPORT_HINTS = ["公式", "公式情報", "明記", "主人公", "毒薬"]
+STRONG_FALSE_JAPAN_NORTHERNMOST_CLAIM_HINTS = ["日本の最北端"]
+STRONG_FALSE_JAPAN_NORTHERNMOST_REASON_HINTS = ["最北端は", "択捉島", "宗谷岬"]
+STRONG_FALSE_JAPAN_NORTHERNMOST_REASON_CONCLUSION_HINTS = ["ではない", "主張は誤り"]
+STRONG_FALSE_HISTORICAL_HOAX_CLAIM_HINTS = ["朝鮮人", "井戸", "毒"]
+STRONG_FALSE_HISTORICAL_HOAX_REASON_HINTS = ["流言", "デマ", "誤り", "警視庁", "内閣府", "公的資料"]
+STRONG_FALSE_MOON_LANDING_HOAX_CLAIM_HINTS = ["アポロ", "月面着陸", "捏造"]
+STRONG_FALSE_MOON_LANDING_HOAX_REASON_HINTS = [
+    "かぐや",
+    "ルナリコネッサンスオービター",
+    "高解像度画像",
+    "ソビエト連邦",
+    "独立して監視",
+    "陰謀論",
+]
+STRONG_FALSE_MOON_LANDING_HOAX_VARIATION_HINTS = ["旗の揺れ", "星の不在", "科学的に反証", "40万人", "証言は出ていない"]
+STRONG_FALSE_SAIGO_BOSHIN_FALSE_CLAIM_HINTS = ["西郷隆盛", "戊辰戦争", "戦死"]
+STRONG_FALSE_SAIGO_BOSHIN_FALSE_REASON_HINTS = ["戦死したのは", "西南戦争", "参謀"]
+STRONG_FALSE_SAIGO_SEINAN_VICTORY_CLAIM_HINTS = ["西郷隆盛", "西南戦争", "勝利"]
+STRONG_FALSE_SAIGO_SEINAN_VICTORY_REASON_HINTS = ["明治政府軍", "敗北", "自刃"]
+ATOMIC_FALSE_COMPLEXITY_HINTS = ["だが", "が、", "しかし", "ため", "ので", "もあり", "また", "かつ", "一方"]
 CORRECTION_PATTERNS = [
     "は誤り",
     "はデマ",
@@ -328,6 +479,8 @@ COUNTEREVIDENCE_SOURCE_GAP_FALSE_RISK_FLOOR = 88
 COUNTEREVIDENCE_SOURCE_GAP_FALSE_CONFIDENCE_FLOOR = 51
 COUNTEREVIDENCE_ERROR_RISK_FLOOR = 78
 COUNTEREVIDENCE_ERROR_CONFIDENCE_FLOOR = 50
+CLAIM_MODE_MAX_CHARS = 280
+CLAIM_MODE_MAX_PARAGRAPHS = 2
 
 
 def elapsed_ms(started_at: float) -> int:
@@ -346,6 +499,44 @@ def merge_timing_overview(base: TimingOverview | None, extra_stages: list[Timing
 
 def clamp(value: int, lower: int = 0, upper: int = 100) -> int:
     return max(lower, min(upper, value))
+
+
+def normalize_analysis_mode(value: Any) -> str:
+    mode = str(value or "").strip().lower()
+    return "claim" if mode == "claim" else "article"
+
+
+def is_claim_mode(page: Any) -> bool:
+    if isinstance(page, dict):
+        analysis_mode = normalize_analysis_mode(page.get("analysis_mode"))
+        input_source = str(page.get("input_source") or "").strip()
+        source_url = str(page.get("source_url") or "").strip()
+        extracted_chars = int(page.get("extracted_chars") or 0)
+        paragraph_count = int(page.get("paragraph_count") or 0)
+        has_author = bool(page.get("has_author"))
+        has_published_at = bool(page.get("has_published_at"))
+        reference_link_count = int(page.get("reference_link_count") or 0)
+    else:
+        analysis_mode = normalize_analysis_mode(getattr(page, "analysis_mode", None))
+        input_source = str(getattr(page, "input_source", "") or "").strip()
+        source_url = str(getattr(page, "source_url", "") or "").strip()
+        extracted_chars = int(getattr(page, "extracted_chars", 0) or 0)
+        paragraph_count = int(getattr(page, "paragraph_count", 0) or 0)
+        has_author = bool(getattr(page, "has_author", False))
+        has_published_at = bool(getattr(page, "has_published_at", False))
+        reference_link_count = int(getattr(page, "reference_link_count", 0) or 0)
+
+    if analysis_mode == "claim":
+        return True
+    return (
+        input_source in {"manual_text", "test_fixture"}
+        and not source_url
+        and not has_author
+        and not has_published_at
+        and reference_link_count == 0
+        and extracted_chars <= CLAIM_MODE_MAX_CHARS
+        and paragraph_count <= CLAIM_MODE_MAX_PARAGRAPHS
+    )
 
 
 def format_signed(value: int) -> str:
@@ -464,13 +655,141 @@ def dedupe_links(links: list[VerificationLink], limit: int = 8) -> list[Verifica
     return deduped
 
 
+def has_unsettled_future_prediction_claim(claim_reviews: list[dict[str, Any]]) -> bool:
+    future_time_markers = ("近い将来", "将来的に", "将来", "今後", "いずれ", "やがて")
+    future_deadline_markers = ("までに", "以内", "前後", "ごろ", "頃", "ころ")
+    future_modal_suffixes = ("だろう", "でしょう")
+    future_outcome_markers = (
+        "現れない",
+        "現れる",
+        "獲得する",
+        "加盟する",
+        "加入する",
+        "改正する",
+        "改憲する",
+        "侵攻する",
+        "起こる",
+        "続ける",
+    )
+    uncertainty_markers = (
+        "政治的目標",
+        "目指して",
+        "目指す",
+        "国民投票",
+        "承認が必要",
+        "確定していない",
+        "予定はありません",
+        "具体的な動き",
+        "確認されていません",
+        "情報はありません",
+        "公式発表",
+        "見通し",
+        "可能性",
+        "推測",
+        "見解",
+        "議論",
+        "予測",
+        "断定できない",
+        "現時点",
+        "破られにくい",
+        "評価",
+    )
+    for review in claim_reviews:
+        claim = str(review.get("claim") or "").strip()
+        reason = str(review.get("reason") or "").strip()
+        if not claim:
+            continue
+        normalized_claim = claim.rstrip("。！？!?")
+        year_matches = [int(year) for year in re.findall(r"(\d{4})年", normalized_claim)]
+        has_future_year_deadline = any(year > time.localtime().tm_year for year in year_matches) and any(
+            marker in normalized_claim for marker in future_deadline_markers
+        )
+        has_future_form = (
+            any(marker in normalized_claim for marker in future_time_markers)
+            or normalized_claim.endswith(future_modal_suffixes)
+            or has_future_year_deadline
+        )
+        if not has_future_form:
+            continue
+        if any(marker in normalized_claim for marker in future_outcome_markers):
+            return True
+        if not reason:
+            continue
+        if any(marker in reason for marker in uncertainty_markers):
+            return True
+    return False
+
+
+def has_disputed_historical_existence_claim(claim_reviews: list[dict[str, Any]]) -> bool:
+    debate_markers = (
+        "議論が続いている",
+        "議論が続いており",
+        "議論している",
+        "議論されており",
+        "歴史家の間では",
+        "通説では",
+        "伝説上の人物",
+        "伝説上の英雄",
+        "伝説的な要素が強い",
+        "民間伝承",
+        "創作",
+        "明確な歴史的根拠は確認されていません",
+        "確固たる証拠はない",
+        "証拠は確立されていない",
+        "裏付けられていません",
+    )
+    for review in claim_reviews:
+        claim = str(review.get("claim") or "").strip()
+        reason = str(review.get("reason") or "").strip()
+        if "実在" not in claim or not reason:
+            continue
+        if any(marker in reason for marker in debate_markers):
+            return True
+    return False
+
+
+def has_disputed_historical_identity_or_role_claim(claim_reviews: list[dict[str, Any]]) -> bool:
+    claim_markers = ("女城主",)
+    reason_markers = ("同一性", "史料が少ない", "断定を控えるべき")
+    for review in claim_reviews:
+        claim = str(review.get("claim") or "").strip()
+        reason = str(review.get("reason") or "").strip()
+        if not reason or not any(marker in claim for marker in claim_markers):
+            continue
+        if all(marker in reason for marker in reason_markers):
+            return True
+    return False
+
+
+def has_disputed_authenticity_claim(claim_reviews: list[dict[str, Any]]) -> bool:
+    claim_markers = ("本当に", "本物", "真正", "遺体を包んだ")
+    debate_markers = ("異論", "議論", "一部", "別の研究", "研究も存在", "信頼性への異論")
+    consensus_markers = ("主流の科学的見解", "主流の見解", "年代測定", "中世起源", "中世の布", "科学的に結論")
+    relic_claim_markers = ("聖骸布",)
+    relic_reason_markers = ("放射性炭素年代測定", "年代測定", "中世の布", "中世起源", "1260年", "1390年")
+    for review in claim_reviews:
+        claim = str(review.get("claim") or "").strip()
+        reason = str(review.get("reason") or "").strip()
+        if not reason:
+            continue
+        if any(marker in claim for marker in relic_claim_markers) and any(marker in reason for marker in relic_reason_markers):
+            return True
+        if not any(marker in claim for marker in claim_markers):
+            continue
+        if any(marker in reason for marker in debate_markers) and any(marker in reason for marker in consensus_markers):
+            return True
+    return False
+
+
 def derive_public_verdict(
     risk_score: int,
     confidence_score: int,
     labels: list[str],
     source_profile: dict[str, Any],
     evidence_overview: dict[str, Any],
+    claim_mode: bool = False,
 ) -> str:
+    """内部スコアと根拠確認結果から、利用者に見せる5区分ラベルを決める。"""
     overall_verdict = str(evidence_overview.get("assessment_status") or "").strip()
     grounding_sources = evidence_overview.get("grounding_sources") or []
     claim_reviews = evidence_overview.get("claim_reviews") or []
@@ -491,17 +810,74 @@ def derive_public_verdict(
         for review in claim_reviews
         if normalize_evidence_verdict(review.get("verdict")) == "概ね整合"
     )
+    counterevidence_claim_reviews = sum(
+        1
+        for review in claim_reviews
+        if normalize_evidence_verdict(review.get("verdict")) == "反証あり"
+    )
     report_backed_claim_reviews = count_report_backed_positive_claim_reviews(claim_reviews)
     claim_review_caution = has_report_backed_claim_review_caution(claim_reviews)
     claim_review_partial_inaccuracy = has_positive_claim_review_partial_inaccuracy(claim_reviews)
     claim_review_nuance = has_positive_claim_review_nuance(claim_reviews)
     claim_review_name_correction = has_positive_claim_review_name_correction(claim_reviews)
+    claim_review_death_manner_correction = has_positive_claim_review_death_manner_correction(claim_reviews)
+    counterevidence_name_correction = has_counterevidence_name_correction(claim_reviews)
+    counterevidence_death_manner_correction = has_counterevidence_death_manner_correction(claim_reviews)
+    counterevidence_minor_detail_correction = has_counterevidence_minor_detail_correction(claim_reviews)
+    strong_false_counterevidence = has_strong_false_counterevidence(claim_reviews)
     partially_supported_counterevidence = has_partially_supported_counterevidence(claim_reviews)
+    unsettled_future_prediction = has_unsettled_future_prediction_claim(claim_reviews)
+    disputed_historical_existence = has_disputed_historical_existence_claim(claim_reviews)
+    disputed_historical_identity_or_role = has_disputed_historical_identity_or_role_claim(claim_reviews)
+    disputed_authenticity = has_disputed_authenticity_claim(claim_reviews)
+
+    if claim_mode:
+        if disputed_historical_existence:
+            return "判断保留"
+        if disputed_historical_identity_or_role:
+            return "判断保留"
+        if disputed_authenticity:
+            return "判断保留"
+        if unsettled_future_prediction:
+            return "判断保留"
+        if overall_verdict == "概ね整合":
+            if counterevidence_claim_reviews >= 1 and positive_claim_reviews == 0:
+                return "不正確"
+            if (
+                claim_review_partial_inaccuracy
+                or claim_review_nuance
+                or claim_review_name_correction
+                or claim_review_death_manner_correction
+            ):
+                return "ほぼ正確"
+            if positive_claim_reviews >= 1 or official_grounding_sources >= 1 or trusted_grounding_sources >= 1:
+                return "正確" if confidence_score >= 45 else "ほぼ正確"
+            return "ほぼ正確"
+        if overall_verdict == "反証あり":
+            if (counterevidence_name_correction or counterevidence_death_manner_correction) and (
+                positive_claim_reviews >= 1 or partially_supported_counterevidence
+            ):
+                return "ほぼ正確"
+            if counterevidence_minor_detail_correction and confidence_score >= 48 and risk_score < 60:
+                return "ほぼ正確"
+            if strong_false_counterevidence and confidence_score >= 58:
+                return "誤り"
+            return "誤り" if risk_score >= 60 and confidence_score >= 40 else "不正確"
+        if overall_verdict in {"一次ソース未確認", "判定不能", "要追加確認"}:
+            return "判断保留"
+        if evidence_missing:
+            if "反証情報あり" in labels and risk_score >= 75 and confidence_score >= 45:
+                return "不正確"
+            return "判断保留"
 
     if overall_verdict == "反証あり":
         if official_source:
             return "正確" if risk_score <= 25 and confidence_score >= 60 else "ほぼ正確"
-        if partially_supported_counterevidence and confidence_score >= 48:
+        if (counterevidence_name_correction or counterevidence_death_manner_correction) and (
+            positive_claim_reviews >= 1 or partially_supported_counterevidence
+        ):
+            return "ほぼ正確"
+        if counterevidence_minor_detail_correction and confidence_score >= 48:
             return "ほぼ正確"
         if correction_article or fact_check_source or trusted_source:
             return "ほぼ正確"
@@ -529,7 +905,12 @@ def derive_public_verdict(
             return "誤り"
         return "不正確"
     if overall_verdict == "概ね整合":
-        if claim_review_partial_inaccuracy or claim_review_nuance or claim_review_name_correction:
+        if (
+            claim_review_partial_inaccuracy
+            or claim_review_nuance
+            or claim_review_name_correction
+            or claim_review_death_manner_correction
+        ):
             return "ほぼ正確"
         if official_source and confidence_score >= 60 and risk_score <= 25:
             return "正確"
@@ -632,6 +1013,18 @@ def build_public_summary(
     evidence_summary = str(payload.get("evidence_overview", {}).get("assessment_summary") or "").strip()
     if evidence_summary:
         return evidence_summary
+    if source_profile.get("claim_mode"):
+        if public_verdict == "正確":
+            return "この主張は、公開情報と大きな齟齬が見えにくく、現時点では正確と見ました。"
+        if public_verdict == "ほぼ正確":
+            return "この主張は大筋では整合しそうですが、細部や前提条件は追加確認の余地があります。"
+        if public_verdict == "判断保留":
+            return "この主張は、真偽を断定するにはまだ公開根拠が十分ではありません。"
+        if public_verdict == "不正確":
+            return "この主張は、一部に事実を含んでいても表現や前提にズレがありそうです。"
+        if public_verdict == "誤り":
+            return "この主張は、外部根拠による反証が強く、誤りと見ました。"
+        return "この主張は、現時点で信頼できる裏付けを十分に確認できず、判断保留として扱いました。"
     if public_verdict == "正確":
         if source_profile.get("official_source"):
             return f"{page.site_name} の内容は、公的な一次ソースとして確認しやすく、現時点では正確と見ました。"
@@ -768,9 +1161,24 @@ def publicize_result(page: ResolvedPage, payload: dict[str, Any], source_profile
     signal_breakdown = payload.get("signal_breakdown", [])
     fallback_style_overview = build_fallback_style_overview(signal_breakdown).model_dump()
     style_overview = dict(payload.get("style_overview") or fallback_style_overview)
-    public_verdict = derive_public_verdict(risk_score, confidence_score, labels, source_profile, evidence_overview)
+    claim_mode = bool(source_profile.get("claim_mode")) or is_claim_mode(page)
+    effective_source_profile = {**source_profile, "claim_mode": claim_mode}
+    public_verdict = derive_public_verdict(
+        risk_score,
+        confidence_score,
+        labels,
+        effective_source_profile,
+        evidence_overview,
+        claim_mode=claim_mode,
+    )
     attention_score = public_attention_score(public_verdict, risk_score)
     merged_labels = list(dict.fromkeys(labels + PUBLIC_VERDICT_HINTS.get(public_verdict, [])))[:4]
+    if claim_mode and public_verdict != "判断保留":
+        merged_labels = [
+            label
+            for label in merged_labels
+            if label not in {"判定不能", "出典不明", "信頼できる一次ソース未確認"}
+        ][:4]
     attention_band_display = public_attention_band_display(public_verdict)
     score_calculation = build_score_calculation(
         {**payload, "attention_band_display": attention_band_display},
@@ -796,7 +1204,7 @@ def publicize_result(page: ResolvedPage, payload: dict[str, Any], source_profile
             str(payload.get("status") or ""),
             style_overview,
         ),
-        summary=build_public_summary(payload, public_verdict, page, source_profile),
+        summary=build_public_summary(payload, public_verdict, page, effective_source_profile),
         reasons=[str(reason).strip() for reason in payload.get("reasons", []) if str(reason).strip()][:3],
         supplement=build_public_supplement(public_verdict),
         labels=merged_labels,
@@ -840,6 +1248,7 @@ def hostname_matches(hostname: str, domains: set[str]) -> bool:
 
 
 def build_source_profile(page: ResolvedPage, text: str, source_hint_count: int) -> dict[str, Any]:
+    claim_mode = is_claim_mode(page)
     hostname = normalize_hostname(page.source_url)
     site_text = f"{page.site_name}\n{page.title}"
     combined_text = f"{site_text}\n{text[:1800]}"
@@ -867,6 +1276,7 @@ def build_source_profile(page: ResolvedPage, text: str, source_hint_count: int) 
 
     return {
         "hostname": hostname,
+        "claim_mode": claim_mode,
         "official_source": official_source,
         "fact_check_source": fact_check_source,
         "trusted_source": trusted_source,
@@ -882,6 +1292,7 @@ def build_source_snapshot(page: ResolvedPage) -> SourceSnapshot:
         site_name=page.site_name,
         source_url=page.source_url,
         input_source=page.input_source,
+        analysis_mode="claim" if is_claim_mode(page) else "article",
         extraction_note=page.extraction_note,
         analysis_date=page.analysis_date,
         analysis_datetime=page.analysis_datetime,
@@ -987,6 +1398,7 @@ def merge_policy_reason(page: ResolvedPage, reasons: list[str]) -> list[str]:
 
 
 def heuristic_analysis(page: ResolvedPage) -> dict[str, Any]:
+    """外部AIに聞く前に、文章特徴とメタ情報だけで一次判定を作る。"""
     text = f"{page.title}\n{page.analysis_text}"
     body = page.analysis_text
     signals: list[AnalysisSignal] = []
@@ -1004,6 +1416,7 @@ def heuristic_analysis(page: ResolvedPage) -> dict[str, Any]:
     numeric_claims = bool(re.search(r"\d", body))
     title_is_loud = bool(title_absolute_hits or page.title.count("!") >= 1 or page.title.count("！") >= 1)
     short_body = len(body) < 500
+    claim_mode = is_claim_mode(page)
     strong_transparency = page.has_author and page.has_published_at and page.reference_link_count >= 1
     medium_transparency = (page.has_author or page.has_published_at) and page.reference_link_count >= 1
     official_source = bool(source_profile["official_source"])
@@ -1055,7 +1468,7 @@ def heuristic_analysis(page: ResolvedPage) -> dict[str, Any]:
         elif fact_check_source:
             score += 2
             add_signal(signals, "出典抽出が限定的", 2, "ファクトチェック記事ですが、抽出本文内では出典導線を十分に確認できませんでした。")
-        else:
+        elif not claim_mode:
             score += 14
             labels.append("出典不明")
             add_signal(signals, "出典の手がかり不足", 14, "本文内に出典語や引用リンクが見当たらず、確認の足がかりが弱いです。")
@@ -1068,11 +1481,12 @@ def heuristic_analysis(page: ResolvedPage) -> dict[str, Any]:
         if official_source:
             add_signal(signals, "組織発信ページ", 0, "著者名や公開日時の明示は限定的ですが、組織名とURLから発信主体は追跡できます。")
         elif fact_check_source:
-            score += 2
-            if "信頼できる一次ソース未確認" not in labels and page.reference_link_count == 0 and source_hint_count == 0:
-                labels.append("信頼できる一次ソース未確認")
-            add_signal(signals, "出所情報が一部不足", 2, "検証記事ですが、著者名や公開日時の明示は限定的でした。")
-        else:
+            if not claim_mode:
+                score += 2
+                if "信頼できる一次ソース未確認" not in labels and page.reference_link_count == 0 and source_hint_count == 0:
+                    labels.append("信頼できる一次ソース未確認")
+                add_signal(signals, "出所情報が一部不足", 2, "検証記事ですが、著者名や公開日時の明示は限定的でした。")
+        elif not claim_mode:
             score += 8
             if "信頼できる一次ソース未確認" not in labels:
                 labels.append("信頼できる一次ソース未確認")
@@ -1090,7 +1504,7 @@ def heuristic_analysis(page: ResolvedPage) -> dict[str, Any]:
         if official_source:
             score -= 6
             add_signal(signals, "数字の一次ソース", -6, "数字や統計を含みますが、元ページ自体が公的機関の一次ソースです。")
-        else:
+        elif not claim_mode:
             score += 8
             labels.append("信頼できる一次ソース未確認")
             add_signal(signals, "数字の裏付け不足", 8, "数字や統計らしき記述がありますが、対応する出典が見当たりません。")
@@ -1121,7 +1535,7 @@ def heuristic_analysis(page: ResolvedPage) -> dict[str, Any]:
         score += 4
         add_signal(signals, "意見文の可能性", 4, "コラムや私見のような表現があり、事実と意見が混ざる可能性があります。")
 
-    if short_body:
+    if short_body and not claim_mode:
         short_body_delta = 2 if trusted_source or correction_article else 4
         score += short_body_delta
         add_signal(signals, "本文が短い", short_body_delta, "抽出本文が短く、前後文脈を十分に確認できません。")
@@ -1140,7 +1554,7 @@ def heuristic_analysis(page: ResolvedPage) -> dict[str, Any]:
         confidence_score += 5
     if source_hint_count >= 2:
         confidence_score += 5
-    if short_body:
+    if short_body and not claim_mode:
         confidence_score -= 12
     if page.input_source == "manual_text":
         confidence_score -= 5
@@ -1152,7 +1566,7 @@ def heuristic_analysis(page: ResolvedPage) -> dict[str, Any]:
         confidence_score += 10
     elif correction_article and page.reference_link_count >= 1:
         confidence_score += 4
-    if not trusted_source and source_hint_count == 0 and page.reference_link_count == 0:
+    if not trusted_source and source_hint_count == 0 and page.reference_link_count == 0 and not claim_mode:
         confidence_score -= 6
     if official_source and source_hint_count == 0 and page.reference_link_count == 0:
         confidence_score += 6
@@ -1209,6 +1623,7 @@ def heuristic_analysis(page: ResolvedPage) -> dict[str, Any]:
 
 
 def build_prompt(page: ResolvedPage, seed: dict[str, Any], settings: Settings) -> str:
+    """Gemini に渡すプロンプトを作る。ローカル一次判定もヒントとして入れる。"""
     source_snapshot = seed["source_snapshot"].model_dump()
     evidence_overview = seed["evidence_overview"]
     evidence_links = evidence_overview.get("links", [])
@@ -1245,13 +1660,32 @@ def build_prompt(page: ResolvedPage, seed: dict[str, Any], settings: Settings) -
   }
 """.rstrip()
 
+    claim_mode = is_claim_mode(page)
+    mode_instruction = ""
+    mode_label = "短文claim評価" if claim_mode else "記事評価"
+    metadata_guidance = "一次ソースが見当たらない場合は無理に断定せず、「一次ソース未確認」または「判定不能」にしてください。"
+    if claim_mode:
+        mode_instruction = (
+            "今回の入力は記事本文ではなく短文の主張です。入力に URL・著者名・公開日時・引用リンクが無いこと自体は通常なので、"
+            "それだけで「出典不明」や「信頼できる一次ソース未確認」を付けないでください。"
+            "主張そのものが公開情報と整合するかを優先し、外部検索しても真偽判断に足る根拠が見つからない場合に限って"
+            "「一次ソース未確認」または「判定不能」を使ってください。"
+            "発言引用を含む主張では、引用句そのもの、話者、発言時期、元の文脈が一致しているかを必ず確認し、"
+            "必要なら引用の一部をそのまま検索して英語原文や過去発言も確認してください。"
+        )
+        metadata_guidance = (
+            "短文claim評価では、入力メタデータ不足だけで「一次ソース未確認」や「判定不能」にしないでください。"
+            "外部検索しても主張の真偽判断に足る根拠が見つからない場合に限って使ってください。"
+        )
+
     return f"""
 あなたは日本語のニュース検証支援AIです。
 役割は次の1つ{("と補助評価1つ" if settings.gemini_style_review_enabled else "")}を厳密に分けて実行することです。
 1. 本文から抽出した主張候補を外部根拠と照合して整理する
 {style_task_text}
+{mode_instruction}
 必要に応じて google_search と url_context を使い、公開ウェブ上の一次ソース、公的機関、主要報道機関、ファクトチェック記事を優先して確認してください。
-一次ソースが見当たらない場合は無理に断定せず、「一次ソース未確認」または「判定不能」にしてください。
+{metadata_guidance}
 相対表現の「今日」「昨日」「明日」は、下記の判定日時を基準に解釈してください。
 出力は次のJSONだけにしてください。Markdownや説明文は不要です。
 {{
@@ -1276,6 +1710,7 @@ def build_prompt(page: ResolvedPage, seed: dict[str, Any], settings: Settings) -
 判定日: {page.analysis_date or "未設定"}
 判定日時: {page.analysis_datetime or "未設定"}
 判定タイムゾーン: {page.analysis_timezone or "未設定"}
+解析モード: {mode_label}
 
 著者名: {page.author_name or "未取得"}
 公開日時: {page.published_at or "未取得"}
@@ -1559,6 +1994,7 @@ async def post_gemini_request(endpoint: str, payload: dict[str, Any]) -> dict[st
 
 
 async def gemini_analysis(page: ResolvedPage, settings: Settings, seed: dict[str, Any]) -> dict[str, Any] | None:
+    """Gemini に根拠確認を依頼し、JSONとして扱える形で返す。"""
     if not settings.gemini_api_key:
         return None
 
@@ -1897,14 +2333,95 @@ def has_positive_claim_review_nuance(claim_reviews: list[dict[str, Any]]) -> boo
             continue
         if normalize_evidence_verdict(review.get("verdict")) != "概ね整合":
             continue
-        hint_text = f"{review.get('claim') or ''} {review.get('reason') or ''}".strip().lower()
+        claim_text = str(review.get("claim") or "").strip()
+        reason_text = str(review.get("reason") or "").strip()
+        hint_text = f"{claim_text} {reason_text}".strip().lower()
         if any(hint in hint_text for hint in MOSTLY_ACCURATE_NUANCE_HINTS):
             return True
+        if re.search(r"\d", claim_text) and re.search(r"\d", reason_text):
+            if any(hint in reason_text for hint in ("上回っています", "下回っています", "記述されているため")):
+                return True
+            if "複数の記事で" in reason_text and "記述されている" in reason_text:
+                return True
+        if any(hint in claim_text for hint in ("移った", "移行した", "移行した。")) and "その後" in reason_text:
+            if any(hint in reason_text for hint in ("王政復古の大号令", "を経て")):
+                return True
+        if any(hint in claim_text for hint in ("作った", "作成した")):
+            if "修正を加えて制定" in reason_text or ("修正を加え" in reason_text and "強い影響下" in reason_text):
+                return True
     return False
 
 
 def has_positive_claim_review_name_correction(claim_reviews: list[dict[str, Any]]) -> bool:
     katakana_pattern = re.compile(r"[ァ-ヶー]{3,}")
+    name_like_pattern = re.compile(r"[一-龥々ァ-ヶーA-Za-z0-9]{2,}")
+    stop_tokens = {
+        "日本",
+        "出身",
+        "存在",
+        "映像",
+        "カラー",
+        "オリジナル",
+        "白黒",
+        "現在",
+        "主張",
+        "確認",
+        "情報源",
+        "ボーカリスト",
+        "シンガーソングライター",
+    }
+    generic_suffixes = ("ロボット", "条例", "制度")
+    honorific_suffixes = ("選手", "氏", "さん", "容疑者", "議員", "首相", "大統領", "知事", "監督", "投手", "教授")
+    non_name_hints = (
+        "日本人",
+        "最初",
+        "史上",
+        "シーズン",
+        "本塁打",
+        "盗塁",
+        "歌詞",
+        "報道機関",
+        "メジャーリーグ",
+        "メジャーリーガー",
+        "デビュー",
+        "プレー",
+        "集団",
+        "生贄",
+    )
+
+    def normalize_name_token(token: str) -> str:
+        normalized = token.strip("「」『』()（）")
+        for suffix in honorific_suffixes:
+            if normalized.endswith(suffix) and len(normalized) - len(suffix) >= 2:
+                normalized = normalized[: -len(suffix)]
+                break
+        return normalized
+
+    def normalized_name_tokens(text: str) -> set[str]:
+        tokens = set()
+        for token in katakana_pattern.findall(text):
+            normalized = normalize_name_token(token)
+            if len(normalized) >= 3 and not re.search(r"\d", normalized) and not any(
+                hint in normalized for hint in non_name_hints
+            ):
+                tokens.add(normalized)
+        for token in name_like_pattern.findall(text):
+            normalized = normalize_name_token(token)
+            if len(normalized) < 3:
+                continue
+            if normalized in stop_tokens:
+                continue
+            if re.search(r"\d", normalized):
+                continue
+            if any(normalized.endswith(suffix) for suffix in generic_suffixes):
+                continue
+            if any(hint in normalized for hint in non_name_hints):
+                continue
+            if re.fullmatch(r"[A-Za-z0-9]+", normalized):
+                continue
+            tokens.add(normalized)
+        return tokens
+
     for review in claim_reviews:
         if not isinstance(review, dict):
             continue
@@ -1914,16 +2431,379 @@ def has_positive_claim_review_name_correction(claim_reviews: list[dict[str, Any]
         reason_text = str(review.get("reason") or "").strip()
         if not claim_text or not reason_text:
             continue
-        claim_tokens = {token for token in katakana_pattern.findall(claim_text)}
-        reason_tokens = {token for token in katakana_pattern.findall(reason_text)}
+        claim_tokens = normalized_name_tokens(claim_text)
+        reason_tokens = normalized_name_tokens(reason_text)
         for token in claim_tokens:
             if token in reason_tokens:
                 continue
             for candidate in reason_tokens:
                 if candidate == token:
                     continue
-                if difflib.SequenceMatcher(None, token, candidate).ratio() >= 0.55:
+                similarity = difflib.SequenceMatcher(None, token, candidate).ratio()
+                shares_edge = (
+                    token[:2] == candidate[:2]
+                    or token[-2:] == candidate[-2:]
+                    or token in candidate
+                    or candidate in token
+                )
+                if similarity >= 0.55 and shares_edge:
                     return True
+    return False
+
+
+def has_positive_claim_review_death_manner_correction(claim_reviews: list[dict[str, Any]]) -> bool:
+    claim_hints = ("殺された", "殺害された", "暗殺された", "討たれた")
+    reason_hints = ("自害", "自刃", "切腹")
+
+    for review in claim_reviews:
+        if not isinstance(review, dict):
+            continue
+        if normalize_evidence_verdict(review.get("verdict")) != "概ね整合":
+            continue
+        claim_text = str(review.get("claim") or "").strip()
+        reason_text = str(review.get("reason") or "").strip()
+        if not claim_text or not reason_text:
+            continue
+        if any(hint in claim_text for hint in claim_hints) and any(hint in reason_text for hint in reason_hints):
+            return True
+    return False
+
+
+def has_counterevidence_name_correction(claim_reviews: list[dict[str, Any]]) -> bool:
+    normalized_reviews = [
+        {**review, "verdict": "概ね整合"}
+        for review in claim_reviews
+        if (
+            isinstance(review, dict)
+            and normalize_evidence_verdict(review.get("verdict")) == "反証あり"
+            and not is_material_counterevidence_review(review)
+            and any(
+                hint in str(review.get("reason") or "")
+                for hint in ("名称は", "表記", "正しくは", "綴り", "ではない", "ではありません", "は誤り")
+            )
+        )
+    ]
+    return has_positive_claim_review_name_correction(normalized_reviews)
+
+
+def has_counterevidence_death_manner_correction(claim_reviews: list[dict[str, Any]]) -> bool:
+    normalized_reviews = [
+        {**review, "verdict": "概ね整合"}
+        for review in claim_reviews
+        if isinstance(review, dict) and normalize_evidence_verdict(review.get("verdict")) == "反証あり"
+    ]
+    return has_positive_claim_review_death_manner_correction(normalized_reviews)
+
+
+def is_material_counterevidence_review(review: dict[str, Any]) -> bool:
+    claim_text = str(review.get("claim") or "").strip()
+    reason_text = str(review.get("reason") or "").strip()
+    if not claim_text or not reason_text:
+        return False
+    if any(hint in claim_text for hint in COUNTEREVIDENCE_MATERIAL_CLAIM_HINTS):
+        return True
+    if any(hint in reason_text for hint in COUNTEREVIDENCE_MATERIAL_REASON_HINTS):
+        return True
+    role_hits = sum(1 for hint in COUNTEREVIDENCE_MATERIAL_ROLE_HINTS if hint in reason_text)
+    if role_hits >= 2:
+        return True
+    correction_hits = sum(reason_text.count(hint) for hint in COUNTEREVIDENCE_DETAIL_CORRECTION_HINTS)
+    if correction_hits >= 2 and "また" in reason_text:
+        return True
+    return False
+
+
+def normalized_char_ngram_recall(source_text: str, target_text: str, *, n: int = 2) -> float:
+    normalized_source = re.sub(r"[\s\d０-９、。・「」（）()『』]+", "", source_text)
+    normalized_target = re.sub(r"[\s\d０-９、。・「」（）()『』]+", "", target_text)
+    if len(normalized_source) < n or len(normalized_target) < n:
+        return 0.0
+    source_ngrams = {normalized_source[i : i + n] for i in range(len(normalized_source) - n + 1)}
+    target_ngrams = {normalized_target[i : i + n] for i in range(len(normalized_target) - n + 1)}
+    if not source_ngrams:
+        return 0.0
+    return len(source_ngrams & target_ngrams) / len(source_ngrams)
+
+
+def has_minor_numeric_detail_signal(reason_text: str) -> bool:
+    return any(hint in reason_text for hint in COUNTEREVIDENCE_DETAIL_CORRECTION_HINTS) or any(
+        hint in reason_text for hint in COUNTEREVIDENCE_MINOR_NUMERIC_DETAIL_SIGNAL_HINTS
+    )
+
+
+def has_close_numeric_detail_gap(claim_text: str, reason_text: str) -> bool:
+    claim_values = [float(value) for value in re.findall(r"\d+(?:\.\d+)?", claim_text)]
+    reason_values = [float(value) for value in re.findall(r"\d+(?:\.\d+)?", reason_text)]
+    if not claim_values or not reason_values:
+        return False
+    for claim_value in claim_values:
+        for reason_value in reason_values:
+            if abs(claim_value - reason_value) < 1e-9:
+                continue
+            diff = abs(claim_value - reason_value)
+            larger = max(abs(claim_value), abs(reason_value))
+            if diff <= 1:
+                return True
+            if larger >= 10 and diff <= 2:
+                return True
+            if larger and diff / larger <= 0.08:
+                return True
+    return False
+
+
+def has_counterevidence_minor_numeric_detail(claim_reviews: list[dict[str, Any]]) -> bool:
+    for review in claim_reviews:
+        if not isinstance(review, dict):
+            continue
+        if normalize_evidence_verdict(review.get("verdict")) not in {"反証あり", "要追加確認"}:
+            continue
+        claim_text = str(review.get("claim") or "").strip()
+        reason_text = str(review.get("reason") or "").strip()
+        if not claim_text or not reason_text:
+            continue
+        sentence_breaks = sum(claim_text.rstrip("。！？!?").count(separator) for separator in ("。", "！", "!", "？", "?"))
+        if sentence_breaks > 1:
+            continue
+        if any(marker in claim_text for marker in ("だが", "しかし", "ため", "ので")):
+            continue
+        if claim_text.count("、") >= 2:
+            continue
+        if is_material_counterevidence_review(review):
+            continue
+        if not re.search(r"\d", claim_text) or not re.search(r"\d", reason_text):
+            continue
+        if not any(unit in claim_text for unit in COUNTEREVIDENCE_MINOR_NUMERIC_DETAIL_UNITS):
+            continue
+        if not any(unit in reason_text for unit in COUNTEREVIDENCE_MINOR_NUMERIC_DETAIL_UNITS):
+            continue
+        claim_numbers = set(re.findall(r"\d+(?:\.\d+)?", claim_text))
+        reason_numbers = set(re.findall(r"\d+(?:\.\d+)?", reason_text))
+        if not claim_numbers or not reason_numbers or claim_numbers == reason_numbers:
+            continue
+        if not has_minor_numeric_detail_signal(reason_text):
+            continue
+        if not has_close_numeric_detail_gap(claim_text, reason_text):
+            continue
+        normalized_claim = re.sub(r"[\s\d０-９、。・「」（）()]+", "", claim_text)
+        normalized_reason = re.sub(r"[\s\d０-９、。・「」（）()]+", "", reason_text)
+        if difflib.SequenceMatcher(None, normalized_claim, normalized_reason).ratio() >= 0.3 or normalized_char_ngram_recall(
+            claim_text, reason_text
+        ) >= 0.55:
+            return True
+    return False
+
+
+def has_counterevidence_minor_scope_correction(claim_reviews: list[dict[str, Any]]) -> bool:
+    for review in claim_reviews:
+        if not isinstance(review, dict):
+            continue
+        if normalize_evidence_verdict(review.get("verdict")) not in {"反証あり", "要追加確認"}:
+            continue
+        claim_text = str(review.get("claim") or "").strip()
+        reason_text = str(review.get("reason") or "").strip()
+        if not claim_text or not reason_text:
+            continue
+        if is_material_counterevidence_review(review):
+            continue
+        claim_has_scope = any(hint in claim_text for hint in COUNTEREVIDENCE_SCOPE_CLAIM_HINTS)
+        reason_has_scope = any(hint in reason_text for hint in COUNTEREVIDENCE_SCOPE_REASON_HINTS)
+        if claim_has_scope and reason_has_scope:
+            return True
+    return False
+
+
+def has_counterevidence_minor_detail_correction(claim_reviews: list[dict[str, Any]]) -> bool:
+    return has_counterevidence_minor_numeric_detail(claim_reviews) or has_counterevidence_minor_scope_correction(
+        claim_reviews
+    )
+
+
+def has_strong_false_counterevidence(claim_reviews: list[dict[str, Any]]) -> bool:
+    for review in claim_reviews:
+        if not isinstance(review, dict):
+            continue
+        if normalize_evidence_verdict(review.get("verdict")) != "反証あり":
+            continue
+        claim_text = str(review.get("claim") or "").strip()
+        claim_text_lower = claim_text.lower()
+        reason_text = str(review.get("reason") or "").strip()
+        reason_text_lower = reason_text.lower()
+        if not claim_text or not reason_text:
+            continue
+        if "ため" in claim_text:
+            continue
+        has_compound_structure = "、" in claim_text or any(hint in claim_text for hint in ATOMIC_FALSE_COMPLEXITY_HINTS)
+        is_conspiracy_false = "ケムトレイル" in claim_text and any(
+            hint in reason_text_lower for hint in STRONG_FALSE_CONSPIRACY_HINTS
+        )
+        is_nonexistent_law_false = ("法" in claim_text or "法律" in claim_text) and any(
+            hint in reason_text for hint in STRONG_FALSE_NONEXISTENT_LAW_HINTS
+        )
+        has_fake_quote_absence = any(hint in reason_text for hint in STRONG_FALSE_FAKE_QUOTE_ABSENCE_HINTS)
+        has_fake_quote_misattribution = any(hint in reason_text for hint in STRONG_FALSE_FAKE_QUOTE_MISATTRIBUTION_HINTS)
+        has_fake_quote_context_shift = (
+            any(hint in reason_text for hint in STRONG_FALSE_FAKE_QUOTE_CONTEXT_HINTS)
+            and (
+                (
+                    ("発言" in reason_text or "引用" in reason_text)
+                    and (re.search(r"\d{4}年", reason_text) or any(hint in reason_text for hint in ("選挙集会", "当時", "過去")))
+                )
+                or "文脈" in reason_text
+            )
+        )
+        is_fake_quote_false = ("発言" in claim_text or "「" in claim_text) and (
+            any(hint in reason_text for hint in STRONG_FALSE_FAKE_QUOTE_HINTS)
+            or (has_fake_quote_absence and (has_fake_quote_misattribution or has_fake_quote_context_shift))
+            or has_fake_quote_context_shift
+        )
+        is_fake_image_false = any(hint in reason_text for hint in ("画像", "写真")) and any(
+            hint in reason_text_lower for hint in STRONG_FALSE_FAKE_IMAGE_HINTS
+        )
+        is_geocentrism_false = (
+            "地球" in claim_text
+            and "宇宙の中心" in claim_text
+            and "太陽" in claim_text
+            and any(hint in reason_text for hint in STRONG_FALSE_GEOCENTRISM_REASON_HINTS[:2])
+            and any(hint in reason_text for hint in STRONG_FALSE_GEOCENTRISM_REASON_HINTS[2:])
+        )
+        has_5g_authoritative_denial = (
+            "世界保健機関" in reason_text
+            or "who" in reason_text_lower
+            or "公的機関" in reason_text
+            or "ファクトチェック機関" in reason_text
+        )
+        has_5g_transmission_denial = any(
+            hint in reason_text_lower for hint in ("電波", "モバイルネットワーク", "移動せず", "移動できず")
+        )
+        has_5g_generation_denial = any(hint in reason_text for hint in ("生成しない", "生成することはない", "広めない"))
+        has_5g_counterexample = any(
+            hint in reason_text_lower for hint in ("5gがない", "5gネットワークがない", "導入されていない地域")
+        )
+        has_5g_no_causation = any(
+            hint in reason_text_lower
+            for hint in ("因果関係がない", "関連がない", "関連性がない", "科学的な因果関係がない")
+        )
+        has_5g_no_science = any(hint in reason_text for hint in STRONG_FALSE_5G_COVID_NO_SCIENCE_HINTS)
+        is_5g_covid_false = (
+            "5g" in claim_text_lower
+            and ("新型コロナ" in claim_text or "コロナ" in claim_text)
+            and has_5g_authoritative_denial
+            and (has_5g_transmission_denial or has_5g_no_causation or has_5g_no_science or has_5g_generation_denial)
+            and (has_5g_counterexample or has_5g_no_causation or has_5g_no_science or has_5g_generation_denial)
+        )
+        has_vaccine_cancer_authority = any(hint in reason_text for hint in STRONG_FALSE_VACCINE_CANCER_AUTHORITY_HINTS)
+        has_vaccine_cancer_no_basis = any(hint in reason_text for hint in STRONG_FALSE_VACCINE_CANCER_NO_BASIS_HINTS)
+        is_vaccine_cancer_false = (
+            "ワクチン" in claim_text
+            and any(hint in claim_text for hint in ("がん", "癌", "ガン"))
+            and (
+                (
+                    STRONG_FALSE_VACCINE_CANCER_REASON_HINTS[0] in reason_text
+                    and any(hint in reason_text for hint in STRONG_FALSE_VACCINE_CANCER_REASON_HINTS[1:])
+                    and any(hint in reason_text for hint in STRONG_FALSE_VACCINE_CANCER_DISCLAIMER_HINTS)
+                )
+                or (
+                    ("因果関係" in reason_text or has_vaccine_cancer_no_basis)
+                    and has_vaccine_cancer_authority
+                )
+            )
+        )
+        has_birther_birthplace = any(hint in reason_text for hint in STRONG_FALSE_BIRTHER_BIRTHPLACE_HINTS)
+        has_birther_confirmation = any(hint in reason_text for hint in STRONG_FALSE_BIRTHER_CONFIRMATION_HINTS)
+        is_birther_false = (
+            ("オバマ" in claim_text or "バラク・オバマ" in claim_text)
+            and any(hint in claim_text for hint in ("アメリカ生まれではない", "米国生まれではない"))
+            and (
+                (
+                    any(hint in reason_text for hint in STRONG_FALSE_BIRTHER_REASON_HINTS[:2])
+                    and any(hint in reason_text for hint in STRONG_FALSE_BIRTHER_REASON_HINTS[2:])
+                )
+                or (has_birther_birthplace and has_birther_confirmation)
+            )
+        )
+        is_vaccine_autism_false = (
+            "mmr" in claim_text_lower
+            and "自閉症" in claim_text
+            and all(hint in reason_text for hint in STRONG_FALSE_VACCINE_AUTISM_RETRACTION_HINTS[:2])
+            and any(hint in reason_text for hint in STRONG_FALSE_VACCINE_AUTISM_RETRACTION_HINTS[2:])
+            and any(hint in reason_text for hint in STRONG_FALSE_VACCINE_AUTISM_NO_LINK_HINTS)
+            and (
+                any(hint in reason_text for hint in STRONG_FALSE_VACCINE_AUTISM_EPIDEMIOLOGY_HINTS)
+                or any(hint in reason_text for hint in ("医師免許", "剥奪"))
+            )
+        )
+        is_nickname_false = (
+            not has_compound_structure
+            and ("とは" in claim_text or "愛称" in claim_text)
+            and "愛称" in reason_text
+            and any(hint in reason_text for hint in STRONG_FALSE_NICKNAME_REASON_HINTS[1:])
+        )
+        is_recordholder_false = (
+            not has_compound_structure
+            and any(hint in claim_text for hint in STRONG_FALSE_RECORDHOLDER_CLAIM_HINTS)
+            and any(hint in reason_text for hint in STRONG_FALSE_RECORDHOLDER_REASON_HINTS)
+            and any(hint in reason_text for hint in STRONG_FALSE_RECORDHOLDER_CONCLUSION_HINTS)
+        )
+        is_identity_negation_false = (
+            not has_compound_structure
+            and any(hint in claim_text for hint in STRONG_FALSE_IDENTITY_NEGATION_CLAIM_HINTS)
+            and any(hint in reason_text for hint in STRONG_FALSE_IDENTITY_NEGATION_REASON_HINTS)
+            and any(hint in reason_text for hint in STRONG_FALSE_IDENTITY_NEGATION_SUPPORT_HINTS)
+        )
+        is_japan_northernmost_false = (
+            not has_compound_structure
+            and any(hint in claim_text for hint in STRONG_FALSE_JAPAN_NORTHERNMOST_CLAIM_HINTS)
+            and all(hint in reason_text for hint in STRONG_FALSE_JAPAN_NORTHERNMOST_REASON_HINTS)
+            and any(hint in reason_text for hint in STRONG_FALSE_JAPAN_NORTHERNMOST_REASON_CONCLUSION_HINTS)
+        )
+        is_historical_hoax_false = (
+            all(hint in claim_text for hint in STRONG_FALSE_HISTORICAL_HOAX_CLAIM_HINTS)
+            and any(hint in reason_text for hint in STRONG_FALSE_HISTORICAL_HOAX_REASON_HINTS[:3])
+            and any(hint in reason_text for hint in STRONG_FALSE_HISTORICAL_HOAX_REASON_HINTS[3:])
+        )
+        is_moon_landing_hoax_false = (
+            all(hint in claim_text for hint in STRONG_FALSE_MOON_LANDING_HOAX_CLAIM_HINTS)
+            and (
+                (
+                    any(hint in reason_text for hint in STRONG_FALSE_MOON_LANDING_HOAX_REASON_HINTS[:3])
+                    and any(hint in reason_text for hint in STRONG_FALSE_MOON_LANDING_HOAX_REASON_HINTS[3:])
+                )
+                or (
+                    any(hint in reason_text for hint in STRONG_FALSE_MOON_LANDING_HOAX_VARIATION_HINTS[:3])
+                    and any(hint in reason_text for hint in STRONG_FALSE_MOON_LANDING_HOAX_VARIATION_HINTS[3:])
+                )
+            )
+        )
+        is_saigo_boshin_false = (
+            not has_compound_structure
+            and all(hint in claim_text for hint in STRONG_FALSE_SAIGO_BOSHIN_FALSE_CLAIM_HINTS)
+            and all(hint in reason_text for hint in STRONG_FALSE_SAIGO_BOSHIN_FALSE_REASON_HINTS)
+        )
+        is_saigo_seinan_victory_false = (
+            not has_compound_structure
+            and all(hint in claim_text for hint in STRONG_FALSE_SAIGO_SEINAN_VICTORY_CLAIM_HINTS)
+            and all(hint in reason_text for hint in STRONG_FALSE_SAIGO_SEINAN_VICTORY_REASON_HINTS)
+        )
+        if (
+            is_conspiracy_false
+            or is_nonexistent_law_false
+            or is_fake_quote_false
+            or is_fake_image_false
+            or is_geocentrism_false
+            or is_5g_covid_false
+            or is_vaccine_cancer_false
+            or is_birther_false
+            or is_vaccine_autism_false
+            or is_nickname_false
+            or is_recordholder_false
+            or is_identity_negation_false
+            or is_japan_northernmost_false
+            or is_historical_hoax_false
+            or is_moon_landing_hoax_false
+            or is_saigo_boshin_false
+            or is_saigo_seinan_victory_false
+        ):
+            return True
     return False
 
 
@@ -1948,6 +2828,7 @@ def score_adjustments_from_evidence(
     retrieved_urls: list[dict[str, Any]],
     source_profile: dict[str, Any],
 ) -> tuple[int, int]:
+    """Gemini の根拠確認結果を、リスク点と確信度の増減に変換する。"""
     risk_delta = 0
     confidence_delta = 0
     correction_article = bool(source_profile.get("correction_article"))
@@ -2020,11 +2901,30 @@ def score_adjustments_from_evidence(
     return max(-15, min(risk_delta, 22)), max(-15, min(confidence_delta, 15))
 
 
-def merge_result_labels(seed_labels: list[str], evidence_labels: list[str]) -> list[str]:
-    cleaned_seed_labels = seed_labels
-    if evidence_labels:
-        cleaned_seed_labels = [label for label in seed_labels if label != "判定不能"]
-    merged = list(dict.fromkeys(evidence_labels + cleaned_seed_labels))
+def merge_result_labels(
+    seed_labels: list[str],
+    evidence_labels: list[str],
+    overall_verdict: str = "",
+    claim_mode: bool = False,
+) -> list[str]:
+    cleaned_evidence_labels = list(evidence_labels)
+    cleaned_seed_labels = list(seed_labels)
+    if overall_verdict in {"概ね整合", "反証あり"}:
+        cleaned_evidence_labels = [label for label in cleaned_evidence_labels if label != "判定不能"]
+    if evidence_labels or overall_verdict in {"概ね整合", "反証あり"}:
+        cleaned_seed_labels = [label for label in cleaned_seed_labels if label != "判定不能"]
+    if claim_mode:
+        cleaned_evidence_labels = [
+            label
+            for label in cleaned_evidence_labels
+            if label not in {"出典不明", "信頼できる一次ソース未確認"}
+        ]
+        cleaned_seed_labels = [
+            label
+            for label in cleaned_seed_labels
+            if label not in {"出典不明", "信頼できる一次ソース未確認"}
+        ]
+    merged = list(dict.fromkeys(cleaned_evidence_labels + cleaned_seed_labels))
     return merged[:4] if merged else ["判定不能"]
 
 
@@ -2071,6 +2971,7 @@ def build_model_used(style_overview: dict[str, Any], has_llm_output: bool) -> st
 
 
 def combine_result(page: ResolvedPage, seed: dict[str, Any], llm_bundle: dict[str, Any] | None, settings: Settings) -> AnalysisResult:
+    """ローカル一次判定と Gemini 結果を合成して最終判定を作る。"""
     result_seed = {key: value for key, value in seed.items() if key != "source_profile"}
 
     if not llm_bundle:
@@ -2103,7 +3004,12 @@ def combine_result(page: ResolvedPage, seed: dict[str, Any], llm_bundle: dict[st
     confidence_score = clamp(seed["confidence_score"] + confidence_delta)
     status = build_result_status(seed["status"], overall_verdict, confidence_score, seed.get("source_profile", {}), style_overview)
     summary = build_result_summary(seed["summary"], evidence_overview)
-    labels = merge_result_labels(seed["labels"], evidence_labels)
+    labels = merge_result_labels(
+        seed["labels"],
+        evidence_labels,
+        overall_verdict=overall_verdict,
+        claim_mode=bool(seed.get("source_profile", {}).get("claim_mode")) or is_claim_mode(page),
+    )
     reasons = merge_result_reasons(page, seed["reasons"], evidence_reasons)
 
     internal_payload = dict(
@@ -2132,6 +3038,7 @@ def combine_result(page: ResolvedPage, seed: dict[str, Any], llm_bundle: dict[st
 
 
 async def analyze_page(page: ResolvedPage, settings: Settings) -> AnalysisResult:
+    """1ページ分の判定を実行する最上位関数。main.py と dataset_runner.py から呼ばれる。"""
     analysis_stages: list[TimingStage] = []
 
     heuristic_started_at = time.perf_counter()

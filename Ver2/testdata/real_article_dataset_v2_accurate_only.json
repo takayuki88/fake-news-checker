@@ -4,140 +4,253 @@
     "version": 1,
     "curated_on": "2026-04-08",
     "language": "ja",
-    "description": "real_article_dataset_v2.json から expected_verdict=正確 の20件のみ抽出した評価用データセットです。",
-    "source_excel": "エクセル/real_article_dataset_v2.xlsx",
+    "description": "real_article_dataset_v2.json から expected_verdict=正確 の20件のみ抽出した評価用データセットです。 短文claim評価用の補助列を追加しています。",
+    "source_excel": "legacy Excel workbook removed from repo; canonical dataset now lives under testdata/shared",
     "schema_fields": [
       "id",
       "expected_verdict",
       "analysis_text",
-      "expected_domain"
+      "expected_domain",
+      "analysis_mode",
+      "claim_text",
+      "review_focus",
+      "human_note",
+      "contested_span"
     ],
     "case_count": 20,
     "verdict_distribution": {
       "正確": 20
     },
-    "source_dataset": "c:\\Users\\oneuk\\OneDrive\\Desktop\\datamix\\講義\\05_インテグレーションステップ\\fake-news-checker\\Ver3\\testdata\\real_article_dataset_v2.json"
+    "source_dataset": "c:\\Users\\oneuk\\OneDrive\\Desktop\\datamix\\01 講義\\05_インテグレーションステップ\\fake-news-checker\\testdata\\shared\\real_article_dataset_v2.json",
+    "analysis_mode": "claim",
+    "helper_fields": [
+      "analysis_mode",
+      "claim_text",
+      "review_focus",
+      "human_note",
+      "contested_span"
+    ]
   },
   "cases": [
     {
       "id": "positive-accurate-01-nhk-broadcasts-200-human-sacrifices",
       "expected_verdict": "正確",
       "analysis_text": "NHKが「集団生贄200人」という歌詞の歌を放映した",
-      "expected_domain": "一般"
+      "expected_domain": "一般",
+      "analysis_mode": "claim",
+      "claim_text": "NHKが「集団生贄200人」という歌詞の歌を放映した",
+      "review_focus": "主張全体が公開情報と素直に整合するかを確認する。",
+      "human_note": "短文claim評価用に、確認したい主張の要点だけを残したケースです。",
+      "contested_span": "NHKが「集団生贄200人」という歌詞の歌を放映した"
     },
     {
       "id": "positive-accurate-02-why-not-in-the-news-shizuoka-flood-images-are-real",
       "expected_verdict": "正確",
       "analysis_text": "日本人最初のメジャーリーガーは野茂英雄ではない。",
-      "expected_domain": "一般"
+      "expected_domain": "一般",
+      "analysis_mode": "claim",
+      "claim_text": "日本人最初のメジャーリーガーは野茂英雄ではない。",
+      "review_focus": "主張全体が公開情報と素直に整合するかを確認する。",
+      "human_note": "短文claim評価用に、確認したい主張の要点だけを残したケースです。",
+      "contested_span": "日本人最初のメジャーリーガーは野茂英雄ではない。"
     },
     {
       "id": "positive-accurate-03-aaa-com-article-accurate-koizumi-warns-typhoon",
       "expected_verdict": "正確",
       "analysis_text": "世界最古の企業は日本にある。",
-      "expected_domain": "一般"
+      "expected_domain": "一般",
+      "analysis_mode": "claim",
+      "claim_text": "世界最古の企業は日本にある。",
+      "review_focus": "主張全体が公開情報と素直に整合するかを確認する。",
+      "human_note": "短文claim評価用に、確認したい主張の要点だけを残したケースです。",
+      "contested_span": "世界最古の企業は日本にある。"
     },
     {
       "id": "positive-accurate-04-wasegg210726-2",
       "expected_verdict": "正確",
       "analysis_text": "日本の研究者らが、歯を再生させる可能性のある薬剤を開発した。",
-      "expected_domain": "医療"
+      "expected_domain": "医療",
+      "analysis_mode": "claim",
+      "claim_text": "日本の研究者らが、歯を再生させる可能性のある薬剤を開発した。",
+      "review_focus": "主張全体が公開情報と素直に整合するかを確認する。",
+      "human_note": "短文claim評価用に、確認したい主張の要点だけを残したケースです。",
+      "contested_span": "日本の研究者らが、歯を再生させる可能性のある薬剤を開発した。"
     },
     {
       "id": "positive-accurate-05-jid211030-2",
       "expected_verdict": "正確",
       "analysis_text": "アベノマスクには全部で500億円ほどの税金が使われた。",
-      "expected_domain": "医療"
+      "expected_domain": "医療",
+      "analysis_mode": "claim",
+      "claim_text": "アベノマスクには全部で500億円ほどの税金が使われた。",
+      "review_focus": "主張全体が公開情報と素直に整合するかを確認する。",
+      "human_note": "短文claim評価用に、確認したい主張の要点だけを残したケースです。",
+      "contested_span": "アベノマスクには全部で500億円ほどの税金が使われた。"
     },
     {
       "id": "positive-accurate-06-wasegg220314-8",
       "expected_verdict": "正確",
-      "analysis_text": "ドドドンパ・ジェットコースター、骨折事故発生を受け運行停止",
-      "expected_domain": "一般"
+      "analysis_text": "ド・ドドンパ・ジェットコースターは骨折事故発生を受け、2021年8月から営業を休止し、2024年3月に営業を終了した。",
+      "expected_domain": "一般",
+      "analysis_mode": "claim",
+      "claim_text": "ド・ドドンパ・ジェットコースターは骨折事故発生を受け、2021年8月から営業を休止し、2024年3月に営業を終了した。",
+      "review_focus": "主張全体が公開情報と素直に整合するかを確認する。",
+      "human_note": "短文claim評価用に、確認したい主張の要点だけを残したケースです。",
+      "contested_span": "ド・ドドンパ・ジェットコースターは骨折事故発生を受け、2021年8月から営業を休止し、2024年3月に営業を終了した。"
     },
     {
       "id": "positive-accurate-07-infact220706",
       "expected_verdict": "正確",
       "analysis_text": "十三代目市川團十郎は初代市川團十郎の男系子孫ではない。",
-      "expected_domain": "一般"
+      "expected_domain": "一般",
+      "analysis_mode": "claim",
+      "claim_text": "十三代目市川團十郎は初代市川團十郎の男系子孫ではない。",
+      "review_focus": "主張全体が公開情報と素直に整合するかを確認する。",
+      "human_note": "短文claim評価用に、確認したい主張の要点だけを残したケースです。",
+      "contested_span": "十三代目市川團十郎は初代市川團十郎の男系子孫ではない。"
     },
     {
       "id": "positive-accurate-08-jid220707",
       "expected_verdict": "正確",
       "analysis_text": "G7が日本円で81兆円に相当する6千億ドルを、途上国のインフラ投資に回す",
-      "expected_domain": "金融"
+      "expected_domain": "金融",
+      "analysis_mode": "claim",
+      "claim_text": "G7が日本円で81兆円に相当する6千億ドルを、途上国のインフラ投資に回す",
+      "review_focus": "主張全体が公開情報と素直に整合するかを確認する。",
+      "human_note": "短文claim評価用に、確認したい主張の要点だけを残したケースです。",
+      "contested_span": "G7が日本円で81兆円に相当する6千億ドルを、途上国のインフラ投資に回す"
     },
     {
       "id": "positive-accurate-09-infact220821",
       "expected_verdict": "正確",
       "analysis_text": "クリーブランド・インディアンスは、クリーブランド・ガーディアンズに名称変更した。",
-      "expected_domain": "一般"
+      "expected_domain": "一般",
+      "analysis_mode": "claim",
+      "claim_text": "クリーブランド・インディアンスは、クリーブランド・ガーディアンズに名称変更した。",
+      "review_focus": "主張全体が公開情報と素直に整合するかを確認する。",
+      "human_note": "短文claim評価用に、確認したい主張の要点だけを残したケースです。",
+      "contested_span": "クリーブランド・インディアンスは、クリーブランド・ガーディアンズに名称変更した。"
     },
     {
       "id": "positive-accurate-10-wasegg220709-2",
       "expected_verdict": "正確",
       "analysis_text": "パラオはアメリカを追放される不法移民を最大75人受け入れることに合意した。",
-      "expected_domain": "政治"
+      "expected_domain": "政治",
+      "analysis_mode": "claim",
+      "claim_text": "パラオはアメリカを追放される不法移民を最大75人受け入れることに合意した。",
+      "review_focus": "主張全体が公開情報と素直に整合するかを確認する。",
+      "human_note": "短文claim評価用に、確認したい主張の要点だけを残したケースです。",
+      "contested_span": "パラオはアメリカを追放される不法移民を最大75人受け入れることに合意した。"
     },
     {
       "id": "positive-accurate-11-litmus221003",
       "expected_verdict": "正確",
       "analysis_text": "金星では「1日」が「1年」より長い。",
-      "expected_domain": "一般"
+      "expected_domain": "一般",
+      "analysis_mode": "claim",
+      "claim_text": "金星では「1日」が「1年」より長い。",
+      "review_focus": "主張全体が公開情報と素直に整合するかを確認する。",
+      "human_note": "短文claim評価用に、確認したい主張の要点だけを残したケースです。",
+      "contested_span": "金星では「1日」が「1年」より長い。"
     },
     {
       "id": "positive-accurate-12-mainichi230505",
       "expected_verdict": "正確",
       "analysis_text": "日本では子供は減っているが、大学は増えている。",
-      "expected_domain": "政治"
+      "expected_domain": "政治",
+      "analysis_mode": "claim",
+      "claim_text": "日本では子供は減っているが、大学は増えている。",
+      "review_focus": "主張全体が公開情報と素直に整合するかを確認する。",
+      "human_note": "短文claim評価用に、確認したい主張の要点だけを残したケースです。",
+      "contested_span": "日本では子供は減っているが、大学は増えている。"
     },
     {
       "id": "positive-accurate-13-litmus230706",
       "expected_verdict": "正確",
       "analysis_text": "住民税非課税世帯の４分の３は高齢者である。",
-      "expected_domain": "政治"
+      "expected_domain": "政治",
+      "analysis_mode": "claim",
+      "claim_text": "住民税非課税世帯の４分の３は高齢者である。",
+      "review_focus": "主張全体が公開情報と素直に整合するかを確認する。",
+      "human_note": "短文claim評価用に、確認したい主張の要点だけを残したケースです。",
+      "contested_span": "住民税非課税世帯の４分の３は高齢者である。"
     },
     {
       "id": "positive-accurate-14-post-23899",
       "expected_verdict": "正確",
       "analysis_text": "大谷翔平は、メジャーリーグ史上初めてシーズン50本塁打50盗塁を達成した。",
-      "expected_domain": "一般"
+      "expected_domain": "一般",
+      "analysis_mode": "claim",
+      "claim_text": "大谷翔平は、メジャーリーグ史上初めてシーズン50本塁打50盗塁を達成した。",
+      "review_focus": "主張全体が公開情報と素直に整合するかを確認する。",
+      "human_note": "短文claim評価用に、確認したい主張の要点だけを残したケースです。",
+      "contested_span": "大谷翔平は、メジャーリーグ史上初めてシーズン50本塁打50盗塁を達成した。"
     },
     {
       "id": "positive-accurate-15-japan-experimental-forestry",
       "expected_verdict": "正確",
       "analysis_text": "日本には円形の実験林が存在する",
-      "expected_domain": "一般"
+      "expected_domain": "一般",
+      "analysis_mode": "claim",
+      "claim_text": "日本には円形の実験林が存在する",
+      "review_focus": "主張全体が公開情報と素直に整合するかを確認する。",
+      "human_note": "短文claim評価用に、確認したい主張の要点だけを残したケースです。",
+      "contested_span": "日本には円形の実験林が存在する"
     },
     {
       "id": "positive-accurate-16-japanese-robotic-monster-wolves",
       "expected_verdict": "正確",
-      "analysis_text": "日本のある町では、住民からクマとの遭遇や目撃情報が増加しているとの報告を受け、オオカミに偽装したロボット2体を使ってクマを地域から追い払った。",
-      "expected_domain": "一般"
+      "analysis_text": "日本のある町では、オオカミに偽装したロボットを使って野生動物を農地から追い払った。",
+      "expected_domain": "一般",
+      "analysis_mode": "claim",
+      "claim_text": "日本のある町では、オオカミに偽装したロボットを使って野生動物を農地から追い払った。",
+      "review_focus": "主張全体が公開情報と素直に整合するかを確認する。",
+      "human_note": "短文claim評価用に、確認したい主張の要点だけを残したケースです。",
+      "contested_span": "日本のある町では、オオカミに偽装したロボットを使って野生動物を農地から追い払った。"
     },
     {
       "id": "positive-accurate-17-toyota-city-japan-name",
       "expected_verdict": "正確",
       "analysis_text": "日本の豊田市は、自動車メーカーであるトヨタ自動車にちなんで名付けられた。",
-      "expected_domain": "一般"
+      "expected_domain": "一般",
+      "analysis_mode": "claim",
+      "claim_text": "日本の豊田市は、自動車メーカーであるトヨタ自動車にちなんで名付けられた。",
+      "review_focus": "主張全体が公開情報と素直に整合するかを確認する。",
+      "human_note": "短文claim評価用に、確認したい主張の要点だけを残したケースです。",
+      "contested_span": "日本の豊田市は、自動車メーカーであるトヨタ自動車にちなんで名付けられた。"
     },
     {
       "id": "positive-accurate-18-square-watermelon",
       "expected_verdict": "正確",
-      "analysis_text": "日本で作られている四角いスイカは実在し、観賞用や贈答用として栽培されている。",
-      "expected_domain": "一般"
+      "analysis_text": "日本では四角いスイカが栽培されており、観賞用や贈答用として流通している。",
+      "expected_domain": "一般",
+      "analysis_mode": "claim",
+      "claim_text": "日本では四角いスイカが栽培されており、観賞用や贈答用として流通している。",
+      "review_focus": "主張全体が公開情報と素直に整合するかを確認する。",
+      "human_note": "短文claim評価用に、確認したい主張の要点だけを残したケースです。",
+      "contested_span": "日本では四角いスイカが栽培されており、観賞用や贈答用として流通している。"
     },
     {
       "id": "positive-accurate-19-ronald-mcdonald-name-japan",
       "expected_verdict": "正確",
       "analysis_text": "ファストフードチェーン・マクドナルドのマスコットキャラクターは日本ではドナルド・マクドナルドの名前で呼ばれているが、英語の原名はロナルド・マクドナルドである。",
-      "expected_domain": "一般"
+      "expected_domain": "一般",
+      "analysis_mode": "claim",
+      "claim_text": "ファストフードチェーン・マクドナルドのマスコットキャラクターは日本ではドナルド・マクドナルドの名前で呼ばれているが、英語の原名はロナルド・マクドナルドである。",
+      "review_focus": "主張全体が公開情報と素直に整合するかを確認する。",
+      "human_note": "短文claim評価用に、確認したい主張の要点だけを残したケースです。",
+      "contested_span": "ファストフードチェーン・マクドナルドのマスコットキャラクターは日本ではドナルド・マクドナルドの名前で呼ばれているが、英語の原名はロナルド・マクドナルドである。"
     },
     {
       "id": "positive-accurate-20-photos-japan-orca",
       "expected_verdict": "正確",
-      "analysis_text": "北海道沖で白いシャチの写真が撮影された",
-      "expected_domain": "一般"
+      "analysis_text": "北海道知床半島の羅臼沖で白いシャチの写真が撮影された。",
+      "expected_domain": "一般",
+      "analysis_mode": "claim",
+      "claim_text": "北海道知床半島の羅臼沖で白いシャチの写真が撮影された。",
+      "review_focus": "主張全体が公開情報と素直に整合するかを確認する。",
+      "human_note": "短文claim評価用に、確認したい主張の要点だけを残したケースです。",
+      "contested_span": "北海道知床半島の羅臼沖で白いシャチの写真が撮影された。"
     }
   ]
 }

@@ -1,4 +1,5 @@
 import asyncio
+import csv
 import json
 from pathlib import Path
 
@@ -8,6 +9,8 @@ from app.dataset_runner import (
     GeminiPreflightError,
     analyze_case_with_retry,
     build_prediction_record,
+    create_evaluation_output_paths,
+    export_prediction_csv,
     format_gemini_preflight_error,
     load_dataset,
     run_dataset,
@@ -214,5 +217,68 @@ def test_load_dataset_normalizes_simplified_schema() -> None:
         assert case["expected"] == {"verdict": "誤り", "domain": "一般"}
         assert case["source_verdict_label"] == "誤り"
         assert case["reference_urls"] == []
+        assert case["analysis_mode"] == "claim"
     finally:
         dataset_path.unlink(missing_ok=True)
+
+
+def test_create_evaluation_output_paths_uses_timestamp_and_expected_names() -> None:
+    settings = Settings(app_timezone="Asia/Tokyo", gemini_api_key="")
+    output_paths = create_evaluation_output_paths(
+        dataset_path=Path("real_article_dataset_v2.json"),
+        settings=settings,
+        use_gemini=True,
+        case_filter=None,
+        output_stem="real_v3_use_gemini",
+        csv_base_name="Ver3_real_article_dataset_v2_with_predicted_verdict_attention_score",
+    )
+
+    assert output_paths["output_dir"].parent.name == "evaluation_outputs"
+    assert output_paths["output_dir"].name
+    assert output_paths["predictions_json"].name == "predictions_real_v3_use_gemini.json"
+    assert output_paths["evaluation_json"].name == "eval_real_v3_use_gemini.json"
+    assert output_paths["csv"].name == "Ver3_real_article_dataset_v2_with_predicted_verdict_attention_score.csv"
+    assert output_paths["plots_dir"].name == "plots"
+
+
+def test_export_prediction_csv_writes_expected_columns() -> None:
+    base_dir = Path(__file__).resolve().parent
+    dataset_path = base_dir / "_tmp_export_dataset.json"
+    csv_path = base_dir / "_tmp_export_dataset.csv"
+    try:
+        dataset_path.write_text(
+            json.dumps(
+                {
+                    "cases": [
+                        {
+                            "id": "case-1",
+                            "expected_verdict": "正確",
+                            "analysis_text": "本文A",
+                            "expected_domain": "一般",
+                        }
+                    ]
+                },
+                ensure_ascii=False,
+            ),
+            encoding="utf-8",
+        )
+        prediction_bundle = {
+            "records": [
+                {
+                    "id": "case-1",
+                    "predicted": {
+                        "verdict": "正確",
+                        "attention_score": 42,
+                    },
+                }
+            ]
+        }
+
+        export_prediction_csv(prediction_bundle, dataset_path, csv_path)
+
+        csv_text = csv_path.read_text(encoding="utf-8-sig")
+        assert "id,expected_verdict,analysis_text,expected_domain,predicted_verdict,attention_score" in csv_text
+        assert "case-1,正確,本文A,一般,正確,42" in csv_text
+    finally:
+        dataset_path.unlink(missing_ok=True)
+        csv_path.unlink(missing_ok=True)

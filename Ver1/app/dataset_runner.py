@@ -1,3 +1,5 @@
+"""データセットをまとめて判定するための補助コード。"""
+
 import json
 import re
 from pathlib import Path
@@ -29,6 +31,7 @@ def is_gemini_quota_skip(result: AnalysisResult, use_gemini: bool) -> bool:
 
 
 def load_dataset(path: Path) -> dict[str, Any]:
+    """データセットJSONを読み込む。"""
     with path.open("r", encoding="utf-8") as handle:
         return json.load(handle)
 
@@ -39,6 +42,7 @@ def select_cases(dataset: dict[str, Any], case_filter: str | None = None) -> lis
 
 
 def build_settings(use_gemini: bool) -> Settings:
+    """Geminiを使う/使わない設定を作る。"""
     return Settings() if use_gemini else Settings(gemini_api_key="")
 
 
@@ -56,6 +60,7 @@ def estimate_paragraph_count(text: str) -> int:
 
 
 def build_fixture_page(case: dict[str, Any], settings: Settings) -> ResolvedPage:
+    """データセット1行を、通常のURL/本文入力と同じ `ResolvedPage` 形式にする。"""
     overrides = case.get("snapshot_overrides", {})
     text = str(case["analysis_text"]).strip()
     timestamp_fields = build_analysis_timestamp_fields(settings)
@@ -107,6 +112,7 @@ async def analyze_case(
     case: dict[str, Any],
     settings: Settings,
 ) -> tuple[AnalysisResult | None, list[str], bool, str | None]:
+    """データセット1件を解析し、期待値との簡易チェック結果も返す。"""
     page, error = await resolve_case_page(case, settings)
     if error or not page:
         return None, [error or "ページを解決できませんでした。"], False, error
@@ -118,6 +124,7 @@ async def analyze_case(
 
 
 def evaluate_result(case: dict[str, Any], result: AnalysisResult, use_gemini: bool) -> list[str]:
+    """1件分の判定結果が期待値に合っているかを確認する。"""
     expected = case.get("expected", {})
     failures: list[str] = []
 

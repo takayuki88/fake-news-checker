@@ -1,9 +1,13 @@
+"""確認すべき主張を抜き出し、検索用リンクを作る補助モジュール。"""
+
 import re
 from urllib.parse import quote_plus
 
 from .models import EvidenceOverview, ResolvedPage, VerificationLink
 
 CLAIM_SPLIT_PATTERN = re.compile(r"(?<=[。.!?！？])\s+|\n+")
+SLUG_LIKE_TITLE_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+){3,}$")
+QUOTE_SNIPPET_PATTERN = re.compile(r"[「\"]([^」\"]{6,90})[」\"]")
 NOISE_PHRASES = [
     "ログイン",
     "会員登録",
@@ -66,6 +70,7 @@ MAX_LINKS = 8
 
 
 def normalize_whitespace(value: str) -> str:
+    """全角スペースや連続空白を、検索しやすい形にそろえる。"""
     return " ".join(value.replace("\u3000", " ").split())
 
 
@@ -75,21 +80,26 @@ def trim_claim(value: str, max_chars: int = 90) -> str:
 
 
 def split_sentences(text: str) -> list[str]:
+    """本文を文単位に分け、短すぎる空文字を取り除く。"""
     raw_parts = CLAIM_SPLIT_PATTERN.split(text)
     sentences = [trim_claim(part) for part in raw_parts]
     return [sentence for sentence in sentences if sentence]
 
 
 def looks_like_noise(text: str) -> bool:
+    """ログイン文言やURLなど、検証対象にしにくい文を除外する。"""
     if len(text) < 18:
         return True
     lowered = text.lower()
     if lowered.startswith("http://") or lowered.startswith("https://"):
         return True
+    if " " not in text and SLUG_LIKE_TITLE_PATTERN.fullmatch(lowered):
+        return True
     return any(phrase in text for phrase in NOISE_PHRASES)
 
 
 def score_claim(text: str, domain: str) -> int:
+    """主張らしさを簡易採点する。点が高い文ほど確認リンクの候補になる。"""
     keywords = DOMAIN_KEYWORDS.get(domain, DOMAIN_KEYWORDS["一般"])
     score = 0
     if any(keyword in text for keyword in keywords):
@@ -120,6 +130,7 @@ def dedupe_claims(claims: list[str]) -> list[str]:
 
 
 def extract_claim_candidates(page: ResolvedPage, domain: str) -> list[str]:
+    """タイトルと本文から、外部確認すべき主張を最大3件選ぶ。"""
     candidates: list[tuple[int, str]] = []
     title_claim = trim_claim(page.title)
     if title_claim and not looks_like_noise(title_claim):
@@ -152,6 +163,38 @@ def build_google_fact_search_url(claim: str) -> str:
     return f"https://www.google.com/search?q={quote_plus(query)}"
 
 
+def extract_quote_snippet(claim: str) -> str | None:
+    match = QUOTE_SNIPPET_PATTERN.search(claim)
+    if not match:
+        return None
+    snippet = trim_claim(match.group(1), max_chars=70)
+    return snippet or None
+
+
+def extract_quote_speaker(claim: str) -> str | None:
+    if "が" not in claim or not any(hint in claim for hint in ("発言", "述べ", "語", "話")):
+        return None
+    speaker = normalize_whitespace(claim.split("が", 1)[0]).strip("「」\" ")
+    if 2 <= len(speaker) <= 24:
+        return speaker
+    return None
+
+
+def build_google_exact_quote_search_url(quote: str, speaker: str | None = None) -> str:
+    query = f"\"{quote}\""
+    if speaker:
+        query = f"{speaker} {query}"
+    return f"https://www.google.com/search?q={quote_plus(query)}"
+
+
+def build_google_quote_context_search_url(claim: str, quote: str, speaker: str | None = None) -> str:
+    topic = "発言 時期 文脈"
+    if any(hint in claim for hint in ("中東", "現在", "情勢")):
+        topic = "発言 時期 文脈 英語"
+    query = f"{speaker or ''} \"{quote}\" {topic}".strip()
+    return f"https://www.google.com/search?q={quote_plus(query)}"
+
+
 def shorten_for_label(claim: str, max_chars: int = 34) -> str:
     if len(claim) <= max_chars:
         return claim
@@ -159,11 +202,33 @@ def shorten_for_label(claim: str, max_chars: int = 34) -> str:
 
 
 def build_evidence_links(claims: list[str], domain: str) -> list[VerificationLink]:
+    """主張ごとに、公的機関・報道・ファクトチェック検索へのリンクを作る。"""
     source_catalog = EVIDENCE_SOURCE_CATALOG.get(domain, EVIDENCE_SOURCE_CATALOG["一般"])
     links: list[VerificationLink] = []
 
     for claim in claims:
         claim_label = shorten_for_label(claim)
+        quote_snippet = extract_quote_snippet(claim)
+        quote_speaker = extract_quote_speaker(claim)
+        if quote_snippet:
+            links.append(
+                VerificationLink(
+                    title=f"引用句で確認: {shorten_for_label(quote_snippet)}",
+                    url=build_google_exact_quote_search_url(quote_snippet, quote_speaker),
+                    kind="外部根拠探索/引用検索",
+                )
+            )
+            if len(links) >= MAX_LINKS:
+                return links
+            links.append(
+                VerificationLink(
+                    title=f"引用の時期と文脈を確認: {shorten_for_label(quote_snippet)}",
+                    url=build_google_quote_context_search_url(claim, quote_snippet, quote_speaker),
+                    kind="外部根拠探索/引用文脈",
+                )
+            )
+            if len(links) >= MAX_LINKS:
+                return links
         for kind, source_name, site_scope in source_catalog:
             title = f"{source_name} で確認: {claim_label}"
             links.append(
@@ -200,6 +265,7 @@ def build_evidence_summary(claims: list[str], links: list[VerificationLink]) -> 
 
 
 def build_evidence_overview(page: ResolvedPage, domain: str) -> EvidenceOverview:
+    """画面に表示する「確認候補リンク」全体を組み立てる。"""
     claims = extract_claim_candidates(page, domain)
     links = build_evidence_links(claims, domain)
     status = "探索リンク生成済み" if links else "探索リンク限定"

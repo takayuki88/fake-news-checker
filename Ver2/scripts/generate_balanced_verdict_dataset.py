@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parent.parent
-REAL_DATASET_PATH = ROOT / "testdata" / "real_article_dataset.json"
+REAL_DATASET_PATH = ROOT.parent / "testdata" / "shared" / "real_article_dataset.json"
 
 VERDICTS = [
     "正確",

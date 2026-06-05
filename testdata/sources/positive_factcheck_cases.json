@@ -1,0 +1,941 @@
+{
+  "meta": {
+    "sources": {
+      "jfc_direct_cases": 6,
+      "fij_positive_entries": 21,
+      "infact_direct_cases": 4,
+      "kobe_curated_cases": 1,
+      "snopes_japan_related_cases": 8
+    },
+    "selection_strategy": "JFC の直取り、FactCheck Navi が集約した日本系ファクトチェック記事、InFact の追加正例、神戸新聞の選挙ファクト検証、Snopes の日本関連 True/Mostly True で positive 40 件を構成",
+    "case_count": 40,
+    "distribution": {
+      "正確": 20,
+      "ほぼ正確": 20
+    },
+    "site_distribution": {
+      "日本ファクトチェックセンター": 6,
+      "Wasegg": 3,
+      "Japan In-depth": 4,
+      "InFact": 13,
+      "リトマス": 2,
+      "毎日新聞": 1,
+      "Snopes": 8,
+      "朝日新聞": 1,
+      "BuzzFeed Japan": 1,
+      "神戸新聞NEXT": 1
+    },
+    "analysis_text_guidelines": [
+      "analysis_text は記事本文の中心命題のうち、expected.verdict を直接決める判定対象文だけを書く",
+      "正確です / 誤りです / ほぼ正確です / 根拠不明です などの判定文を入れない",
+      "Snopes は True と判定 / JFC が誤りと判断 / 〜とされた などの評価メタ文を入れない",
+      "主語・時点・数量・地域・比較対象など、真偽が変わる条件は落とさない",
+      "1〜2文を目安に、読んだだけで expected.verdict に照らして判定できる形にする"
+    ],
+    "analysis_text_warning_count": 0,
+    "analysis_text_warning_examples": {}
+  },
+  "cases": [
+    {
+      "id": "positive-accurate-01-nhk-broadcasts-200-human-sacrifices",
+      "title": "（動画）NHKが「集団生贄200人」という歌詞の歌を放映した？",
+      "site_name": "日本ファクトチェックセンター",
+      "source_url": "https://www.factcheckcenter.jp/fact-check/culture/nhk-broadcasts-200-human-sacrifices/",
+      "purpose": "日本ファクトチェックセンターの公開ファクトチェック記事を基にした実在ネット記事ケース",
+      "analysis_text": "映像に含まれる「しゅうだんいけにえ200人！」という歌詞は、2023年7月18日に放映されたNHKの「まやまやぽん！」の体操の一部である。",
+      "reference_urls": [
+        "https://www.factcheckcenter.jp/fact-check/culture/nhk-broadcasts-200-human-sacrifices/"
+      ],
+      "expected": {
+        "verdict": "正確",
+        "domain": "一般"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 82
+      },
+      "source_verdict_label": "正確"
+    },
+    {
+      "id": "positive-accurate-02-why-not-in-the-news-shizuoka-flood-images-are-real",
+      "title": "なぜニュースにならないの？ 静岡県内の水害画像は本物",
+      "site_name": "日本ファクトチェックセンター",
+      "source_url": "https://www.factcheckcenter.jp/fact-check/disasters/why-not-in-the-news-shizuoka-flood-images-are-real/",
+      "purpose": "日本ファクトチェックセンターの公開ファクトチェック記事を基にした実在ネット記事ケース",
+      "analysis_text": "9月25日に「なぜニュースにならないの？」という文とともに投稿された3枚の画像は、静岡市南部・巴川の氾濫による被害を写した本物の写真である。",
+      "reference_urls": [
+        "https://www.factcheckcenter.jp/fact-check/disasters/why-not-in-the-news-shizuoka-flood-images-are-real/"
+      ],
+      "expected": {
+        "verdict": "正確",
+        "domain": "災害"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 82
+      },
+      "source_verdict_label": "正確"
+    },
+    {
+      "id": "positive-accurate-03-aaa-com-article-accurate-koizumi-warns-typhoon",
+      "title": "小泉進次郎氏が台風10号の注意喚起をする動画はAI加工？ 公式が投稿",
+      "site_name": "日本ファクトチェックセンター",
+      "source_url": "https://www.factcheckcenter.jp/fact-check/politics/aaa-com-article-accurate-koizumi-warns-typhoon/",
+      "purpose": "日本ファクトチェックセンターの公開ファクトチェック記事を基にした実在ネット記事ケース",
+      "analysis_text": "自民党の小泉進次郎氏が台風10号への注意を呼びかける動画は、公式アカウントで配信された本人の発言である。",
+      "reference_urls": [
+        "https://www.factcheckcenter.jp/fact-check/politics/aaa-com-article-accurate-koizumi-warns-typhoon/"
+      ],
+      "expected": {
+        "verdict": "正確",
+        "domain": "災害"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 82
+      },
+      "source_verdict_label": "正確"
+    },
+    {
+      "id": "positive-accurate-04-wasegg210726-2",
+      "title": "事実上14日間の隔離はない",
+      "site_name": "Wasegg",
+      "source_url": "https://wasegg.com/archives/3930",
+      "purpose": "FactCheck Navi が集約した Wasegg の公開ファクトチェック記事を基にした実在ネット記事ケース",
+      "analysis_text": "入国者に一定の規制はあるものの、当時の14日間の自宅等待機は個々人の判断や裁量に委ねられていた。",
+      "reference_urls": [
+        "https://wasegg.com/archives/3930",
+        "https://navi.fij.info/factcheck_navi/wasegg210726-2/"
+      ],
+      "expected": {
+        "verdict": "正確",
+        "domain": "一般"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 2,
+        "extraction_score": 80
+      },
+      "source_verdict_label": "正確"
+    },
+    {
+      "id": "positive-accurate-05-jid211030-2",
+      "title": "社民党福島みずほ党首の発言「（アベノマスクに）500億円ほど税金を使っている」は“正確”",
+      "site_name": "Japan In-depth",
+      "source_url": "https://japan-indepth.jp/?p=62738",
+      "purpose": "FactCheck Navi が集約した Japan In-depth の公開ファクトチェック記事を基にした実在ネット記事ケース",
+      "analysis_text": "菅義偉官房長官（当時）は記者会見で、当初、契約額の総額が約260億円になると明らかにしていたが、その後、追加発注分の費用は計247億円になると発表していた。",
+      "reference_urls": [
+        "https://japan-indepth.jp/?p=62738",
+        "https://navi.fij.info/factcheck_navi/jid211030-2/"
+      ],
+      "expected": {
+        "verdict": "正確",
+        "domain": "医療"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 2,
+        "extraction_score": 80
+      },
+      "source_verdict_label": "正確"
+    },
+    {
+      "id": "positive-accurate-06-wasegg220314-8",
+      "title": "「中国から日本へ2週間隔離なしで入国させている」は正確。Dappiが拡散【Wasegg】 （2022.3.14）",
+      "site_name": "Wasegg",
+      "source_url": "http://wasegg.com/archives/5273",
+      "purpose": "FactCheck Navi が集約した Wasegg の公開ファクトチェック記事を基にした実在ネット記事ケース",
+      "analysis_text": "2020年11月27日および12月25日時点の外務省ホームページに、中国は、「行動範囲を限定した形でビジネス活動が可能となる」ビジネストラックの対象となっていることが明記されている",
+      "reference_urls": [
+        "http://wasegg.com/archives/5273",
+        "https://navi.fij.info/factcheck_navi/wasegg220314-8/"
+      ],
+      "expected": {
+        "verdict": "正確",
+        "domain": "一般"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 2,
+        "extraction_score": 80
+      },
+      "source_verdict_label": "正確"
+    },
+    {
+      "id": "positive-accurate-07-infact220706",
+      "title": "志位和夫委員長「今度の参議院選挙でも、一人区の大体半分で野党候補ひとりになってます」は「正確」【InFact】 （2022.7.6）",
+      "site_name": "InFact",
+      "source_url": "https://infact.press/2022/07/post-20327/",
+      "purpose": "FactCheck Navi が集約した InFact の公開ファクトチェック記事を基にした実在ネット記事ケース",
+      "analysis_text": "志位委員長の発言は、昨年の衆院選の野党共闘の評価に関する質問に答えるものであり、昨年の衆院選で連携した5野党の枠組みで考えると、（全部で32ある一人区うち）14選挙区で「野党候補ひとり」となる。",
+      "reference_urls": [
+        "https://infact.press/2022/07/post-20327/",
+        "https://navi.fij.info/factcheck_navi/infact220706/"
+      ],
+      "expected": {
+        "verdict": "正確",
+        "domain": "一般"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 2,
+        "extraction_score": 80
+      },
+      "source_verdict_label": "正確"
+    },
+    {
+      "id": "positive-accurate-08-jid220707",
+      "title": "共同通信「G7、インフラ投資81兆円」→正確【Japan In-depth】 （2022.7.7）",
+      "site_name": "Japan In-depth",
+      "source_url": "https://japan-indepth.jp/?p=67793",
+      "purpose": "FactCheck Navi が集約した Japan In-depth の公開ファクトチェック記事を基にした実在ネット記事ケース",
+      "analysis_text": "G7が日本円で81兆円に相当する6千億ドルを、途上国のインフラ投資に回すことは事実。主語はあくまでG7であり、見出しの拠出額が日本円表記だからといって、日本が全額負担するかのような印象を与えるとまではいえない。",
+      "reference_urls": [
+        "https://japan-indepth.jp/?p=67793",
+        "https://navi.fij.info/factcheck_navi/jid220707/"
+      ],
+      "expected": {
+        "verdict": "正確",
+        "domain": "金融"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 2,
+        "extraction_score": 80
+      },
+      "source_verdict_label": "正確"
+    },
+    {
+      "id": "positive-accurate-09-infact220821",
+      "title": "小麦価格の即時引き下げは可能なのか？立憲民主党の泉代表の発言を検証【InFact】 （2022.8.21）",
+      "site_name": "InFact",
+      "source_url": "https://infact.press/2022/08/post-20507/",
+      "purpose": "FactCheck Navi が集約した InFact の公開ファクトチェック記事を基にした実在ネット記事ケース",
+      "analysis_text": "価格改定の法的根拠となる「主要食料の需給及び価格の安定に関する法律」42条は、価格の上限は定めているものの、改定時期を限定していない。",
+      "reference_urls": [
+        "https://infact.press/2022/08/post-20507/",
+        "https://navi.fij.info/factcheck_navi/infact220821/"
+      ],
+      "expected": {
+        "verdict": "正確",
+        "domain": "金融"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 2,
+        "extraction_score": 80
+      },
+      "source_verdict_label": "正確"
+    },
+    {
+      "id": "positive-accurate-10-wasegg220709-2",
+      "title": "日本の物価上昇率は他国より抑えられている",
+      "site_name": "Wasegg",
+      "source_url": "https://wasegg.com/archives/5544",
+      "purpose": "FactCheck Navi が集約した Wasegg の公開ファクトチェック記事を基にした実在ネット記事ケース",
+      "analysis_text": "当時の主要国比較では、日本の物価上昇率は2.5%前後で、他国より抑えられていた。",
+      "reference_urls": [
+        "https://wasegg.com/archives/5544",
+        "https://navi.fij.info/factcheck_navi/wasegg220709-2/"
+      ],
+      "expected": {
+        "verdict": "正確",
+        "domain": "金融"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 2,
+        "extraction_score": 80
+      },
+      "source_verdict_label": "正確"
+    },
+    {
+      "id": "positive-accurate-11-litmus221003",
+      "title": "「高額医療費負担廃止検討」は正確だが誤解に注意 利用者へ返金の「高額療養費制度」とは別制度【リトマス】 （2022.10.3）",
+      "site_name": "リトマス",
+      "source_url": "https://litmus-factcheck.jp/2022/10/977/",
+      "purpose": "FactCheck Navi が集約した リトマス の公開ファクトチェック記事を基にした実在ネット記事ケース",
+      "analysis_text": "財務省は、国民健康保険の「高額医療費負担」を廃止し、都道府県の負担とすることを検討している。",
+      "reference_urls": [
+        "https://litmus-factcheck.jp/2022/10/977/",
+        "https://navi.fij.info/factcheck_navi/litmus221003/"
+      ],
+      "expected": {
+        "verdict": "正確",
+        "domain": "医療"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 2,
+        "extraction_score": 80
+      },
+      "source_verdict_label": "正確"
+    },
+    {
+      "id": "positive-accurate-12-mainichi230505",
+      "title": "震度6強発生から23分後に投稿 倒壊家屋の写真は「正しい」【毎日新聞】 （2023.5.5）",
+      "site_name": "毎日新聞",
+      "source_url": "https://mainichi.jp/articles/20230505/k00/00m/040/177000c",
+      "purpose": "FactCheck Navi が集約した 毎日新聞 の公開ファクトチェック記事を基にした実在ネット記事ケース",
+      "analysis_text": "投稿された家屋の写真は、毎日新聞記者が同じ家屋の前で現地確認した実際の写真である。",
+      "reference_urls": [
+        "https://mainichi.jp/articles/20230505/k00/00m/040/177000c",
+        "https://navi.fij.info/factcheck_navi/mainichi230505/"
+      ],
+      "expected": {
+        "verdict": "正確",
+        "domain": "一般"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 2,
+        "extraction_score": 80
+      },
+      "source_verdict_label": "正確"
+    },
+    {
+      "id": "positive-accurate-13-litmus230706",
+      "title": "のり弁当の添加物表示ラベル画像は正確 偽造疑う指摘拡散も…【リトマス】 （2023.7.6）",
+      "site_name": "リトマス",
+      "source_url": "https://litmus-factcheck.jp/2023/07/2160/",
+      "purpose": "FactCheck Navi が集約した リトマス の公開ファクトチェック記事を基にした実在ネット記事ケース",
+      "analysis_text": "この弁当を製造・販売する企業はリトマスの取材に対し、ラベルの記載内容や貼り付け位置などがこの商品と相違しないことを認めている。",
+      "reference_urls": [
+        "https://litmus-factcheck.jp/2023/07/2160/",
+        "https://navi.fij.info/factcheck_navi/litmus230706/"
+      ],
+      "expected": {
+        "verdict": "正確",
+        "domain": "一般"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 2,
+        "extraction_score": 80
+      },
+      "source_verdict_label": "正確"
+    },
+    {
+      "id": "positive-accurate-14-post-23899",
+      "title": "河野太郎元ワクチン接種推進大臣「『アメリカでは２億回ワクチンを接種して亡くなった人はいない』とCDCが発表」は本当か？",
+      "site_name": "InFact",
+      "source_url": "https://infact.press/2024/12/post-23899/",
+      "purpose": "InFact の公開ファクトチェック記事を基にした実在ネット記事ケース",
+      "analysis_text": "河野太郎氏は、当時のCDC発表に基づき「アメリカでは2億回ワクチンを接種して亡くなった人はいない」と述べた。CDCへの確認でも、その時点でワクチン接種による死亡が確認されたとはされていなかった。",
+      "reference_urls": [
+        "https://infact.press/2024/12/post-23899/"
+      ],
+      "expected": {
+        "verdict": "正確",
+        "domain": "医療"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 82
+      },
+      "source_verdict_label": "正確"
+    },
+    {
+      "id": "positive-accurate-15-japan-experimental-forestry",
+      "title": "日本の円形林は実在する実験林",
+      "site_name": "Snopes",
+      "source_url": "https://www.snopes.com/fact-check/japan-experimental-forestry/",
+      "purpose": "Snopes の公開ファクトチェック記事を基にした、日本関連の実在ネット記事ケース",
+      "analysis_text": "日本で山を円形に区切った実験林の写真が拡散した。これは樹木の密度が成長に与える影響を測るため実際に整備された試験区画である。",
+      "reference_urls": [
+        "https://www.snopes.com/fact-check/japan-experimental-forestry/"
+      ],
+      "expected": {
+        "verdict": "正確",
+        "domain": "一般"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 82
+      },
+      "source_verdict_label": "True"
+    },
+    {
+      "id": "positive-accurate-16-japanese-robotic-monster-wolves",
+      "title": "日本の町でクマよけにロボットのオオカミが使われた",
+      "site_name": "Snopes",
+      "source_url": "https://www.snopes.com/fact-check/japanese-robotic-monster-wolves/",
+      "purpose": "Snopes の公開ファクトチェック記事を基にした、日本関連の実在ネット記事ケース",
+      "analysis_text": "日本のある町では、オオカミに偽装したロボットを使って野生動物を農地から追い払った。",
+      "reference_urls": [
+        "https://www.snopes.com/fact-check/japanese-robotic-monster-wolves/"
+      ],
+      "expected": {
+        "verdict": "正確",
+        "domain": "一般"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 82
+      },
+      "source_verdict_label": "True"
+    },
+    {
+      "id": "positive-accurate-17-toyota-city-japan-name",
+      "title": "トヨタ市は自動車会社トヨタにちなんで改称された",
+      "site_name": "Snopes",
+      "source_url": "https://www.snopes.com/fact-check/toyota-city-japan-name/",
+      "purpose": "Snopes の公開ファクトチェック記事を基にした、日本関連の実在ネット記事ケース",
+      "analysis_text": "愛知県の豊田市は、自動車メーカーの発展に合わせて旧挙母市から改称した。",
+      "reference_urls": [
+        "https://www.snopes.com/fact-check/toyota-city-japan-name/"
+      ],
+      "expected": {
+        "verdict": "正確",
+        "domain": "一般"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 82
+      },
+      "source_verdict_label": "True"
+    },
+    {
+      "id": "positive-accurate-18-square-watermelon",
+      "title": "四角いスイカは本物",
+      "site_name": "Snopes",
+      "source_url": "https://www.snopes.com/fact-check/square-watermelon/",
+      "purpose": "Snopes の公開ファクトチェック記事を基にした、日本関連の実在ネット記事ケース",
+      "analysis_text": "日本で作られている四角いスイカは実在し、観賞用や贈答用として栽培されている。",
+      "reference_urls": [
+        "https://www.snopes.com/fact-check/square-watermelon/"
+      ],
+      "expected": {
+        "verdict": "正確",
+        "domain": "一般"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 82
+      },
+      "source_verdict_label": "True"
+    },
+    {
+      "id": "positive-accurate-19-ronald-mcdonald-name-japan",
+      "title": "日本ではロナルド・マクドナルドをドナルド・マクドナルドと呼ぶ",
+      "site_name": "Snopes",
+      "source_url": "https://www.snopes.com/fact-check/ronald-mcdonald-name-japan/",
+      "purpose": "Snopes の公開ファクトチェック記事を基にした、日本関連の実在ネット記事ケース",
+      "analysis_text": "日本では Ronald McDonald を「ドナルド・マクドナルド」と呼ぶのが一般的で、発音上の理由から Ronald ではなく Donald 表記が定着している。",
+      "reference_urls": [
+        "https://www.snopes.com/fact-check/ronald-mcdonald-name-japan/"
+      ],
+      "expected": {
+        "verdict": "正確",
+        "domain": "一般"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 82
+      },
+      "source_verdict_label": "True"
+    },
+    {
+      "id": "positive-accurate-20-photos-japan-orca",
+      "title": "北海道沖で撮影された白いシャチの写真は本物",
+      "site_name": "Snopes",
+      "source_url": "https://www.snopes.com/fact-check/photos-japan-orca/",
+      "purpose": "Snopes の公開ファクトチェック記事を基にした、日本関連の実在ネット記事ケース",
+      "analysis_text": "北海道沖で撮影された白いシャチの写真は、撮影者の証言や投稿履歴から実際の個体を写した写真である。",
+      "reference_urls": [
+        "https://www.snopes.com/fact-check/photos-japan-orca/"
+      ],
+      "expected": {
+        "verdict": "正確",
+        "domain": "一般"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 82
+      },
+      "source_verdict_label": "True"
+    },
+    {
+      "id": "positive-mostly-accurate-01-ainu-dance-filmed-1919",
+      "title": "（動画）アイヌの踊りが1919年に撮影された？",
+      "site_name": "日本ファクトチェックセンター",
+      "source_url": "https://www.factcheckcenter.jp/fact-check/history/ainu-dance-filmed-1919/",
+      "purpose": "日本ファクトチェックセンターの公開ファクトチェック記事を基にした実在ネット記事ケース",
+      "analysis_text": "カラー化された「1919年に撮影されたアイヌの踊り」の動画は、アーカイブ保管資料に基づく実写映像である。ただし、オリジナル版は白黒で、拡散版の色は後から付けられている。",
+      "reference_urls": [
+        "https://www.factcheckcenter.jp/fact-check/history/ainu-dance-filmed-1919/"
+      ],
+      "expected": {
+        "verdict": "ほぼ正確",
+        "domain": "一般"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 82
+      },
+      "source_verdict_label": "ほぼ正確"
+    },
+    {
+      "id": "positive-mostly-accurate-02-real-image-of-jovial-swedish-people-despite-train-station-flooding-caused-by-typhoon",
+      "title": "台風で駅が浸水しても陽気なスウェーデンの人々の画像？",
+      "site_name": "日本ファクトチェックセンター",
+      "source_url": "https://www.factcheckcenter.jp/fact-check/disasters/real-image-of-jovial-swedish-people-despite-train-station-flooding-caused-by-typhoon/",
+      "purpose": "日本ファクトチェックセンターの公開ファクトチェック記事を基にした実在ネット記事ケース",
+      "analysis_text": "「台風で駅が浸水しても陽気なスウェーデンの人々」という画像は、浸水した駅で撮影された本物の画像である。ただし、拡散時の説明には補足が要る。",
+      "reference_urls": [
+        "https://www.factcheckcenter.jp/fact-check/disasters/real-image-of-jovial-swedish-people-despite-train-station-flooding-caused-by-typhoon/"
+      ],
+      "expected": {
+        "verdict": "ほぼ正確",
+        "domain": "災害"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 82
+      },
+      "source_verdict_label": "ほぼ正確"
+    },
+    {
+      "id": "positive-mostly-accurate-03-almost-accurate-claim-iaea-not-verifying-filtration-performance-of-contaminated-water",
+      "title": "IAEA、汚染水のろ過性能を検証していない？",
+      "site_name": "日本ファクトチェックセンター",
+      "source_url": "https://www.factcheckcenter.jp/fact-check/nuclear/almost-accurate-claim-iaea-not-verifying-filtration-performance-of-contaminated-water/",
+      "purpose": "日本ファクトチェックセンターの公開ファクトチェック記事を基にした実在ネット記事ケース",
+      "analysis_text": "IAEAはALPSそのものを直接検証したわけではない。ただし、福島第一原発の処理水放出の安全性や環境影響については調査している。",
+      "reference_urls": [
+        "https://www.factcheckcenter.jp/fact-check/nuclear/almost-accurate-claim-iaea-not-verifying-filtration-performance-of-contaminated-water/"
+      ],
+      "expected": {
+        "verdict": "ほぼ正確",
+        "domain": "一般"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 82
+      },
+      "source_verdict_label": "ほぼ正確"
+    },
+    {
+      "id": "positive-mostly-accurate-04-infact200912",
+      "title": "大村知事リコール運動 ｢署名者の個人情報が公開される｣は本当か？【InFact】 （2020.9.12）",
+      "site_name": "InFact",
+      "source_url": "https://infact.press/2020/09/post-8286/",
+      "purpose": "FactCheck Navi が集約した InFact の公開ファクトチェック記事を基にした実在ネット記事ケース",
+      "analysis_text": "リコール署名では、請求代表者は県公報で公開され、必要数に達して提出された署名簿にある受任者や署名者の氏名・住所は同じ市町村の有権者が閲覧できる。ただし、県公報で公開されるのは請求代表者に限られる。",
+      "reference_urls": [
+        "https://infact.press/2020/09/post-8286/",
+        "https://navi.fij.info/factcheck_navi/infact200912/"
+      ],
+      "expected": {
+        "verdict": "ほぼ正確",
+        "domain": "一般"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 2,
+        "extraction_score": 80
+      },
+      "source_verdict_label": "ほぼ正確"
+    },
+    {
+      "id": "positive-mostly-accurate-05-infact211023-3",
+      "title": "岸田首相が誇った日米地位協定をめぐる成果についてファクトチェックした",
+      "site_name": "InFact",
+      "source_url": "https://infact.press/2021/10/post-14214/",
+      "purpose": "FactCheck Navi が集約した InFact の公開ファクトチェック記事を基にした実在ネット記事ケース",
+      "analysis_text": "環境補足協定は、外務省ホームページに「日米地位協定締結から初めての取組である」、軍属補足協定に対しては「環境補足協定に続いて2例目」と記している。「迅速な対応を可能としてきた」かどうかは、日米双方の不断の取り組みにかかっており明確には言えない。",
+      "reference_urls": [
+        "https://infact.press/2021/10/post-14214/",
+        "https://navi.fij.info/factcheck_navi/infact211023-3/"
+      ],
+      "expected": {
+        "verdict": "ほぼ正確",
+        "domain": "一般"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 2,
+        "extraction_score": 80
+      },
+      "source_verdict_label": "ほぼ正確"
+    },
+    {
+      "id": "positive-mostly-accurate-06-jid211024-1",
+      "title": "自民党岸田文雄総裁「現在法人税最高税率は23.2%、財源としては10.8兆円ほどあります」は“ほぼ正確”",
+      "site_name": "Japan In-depth",
+      "source_url": "https://japan-indepth.jp/?p=62589",
+      "purpose": "FactCheck Navi が集約した Japan In-depth の公開ファクトチェック記事を基にした実在ネット記事ケース",
+      "analysis_text": "岸田氏の発言時には令和2年度の決算概要が出ており、令和2年度決算の約11.2兆円を使うのが適切。令和元年度決算額である10.8兆円は最新のデータではない。",
+      "reference_urls": [
+        "https://japan-indepth.jp/?p=62589",
+        "https://navi.fij.info/factcheck_navi/jid211024-1/"
+      ],
+      "expected": {
+        "verdict": "ほぼ正確",
+        "domain": "金融"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 2,
+        "extraction_score": 80
+      },
+      "source_verdict_label": "ほぼ正確"
+    },
+    {
+      "id": "positive-mostly-accurate-07-jid211029-01",
+      "title": "自民党麻生太郎氏の発言「年金増えたのは、運用を株でやったおかげでしょうが」は“ほぼ正確”",
+      "site_name": "Japan In-depth",
+      "source_url": "https://japan-indepth.jp/?p=62679",
+      "purpose": "FactCheck Navi が集約した Japan In-depth の公開ファクトチェック記事を基にした実在ネット記事ケース",
+      "analysis_text": "2012年から株価はおよそ2万円上がり、年金積立金はおよそ83兆円増えた一方、年金受給額は増えていない。国内株式と外国株式のポートフォリオを倍増させた2014年以降、両株式からの収益が増加している。",
+      "reference_urls": [
+        "https://japan-indepth.jp/?p=62679",
+        "https://navi.fij.info/factcheck_navi/jid211029-01/"
+      ],
+      "expected": {
+        "verdict": "ほぼ正確",
+        "domain": "金融"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 2,
+        "extraction_score": 80
+      },
+      "source_verdict_label": "ほぼ正確"
+    },
+    {
+      "id": "positive-mostly-accurate-08-asahi211116-2",
+      "title": "甘利氏「スマホも3Dプリンターも日本の発明」 発言の真偽を検証 ー 3Dプリンターについては「ほぼ正確」",
+      "site_name": "朝日新聞",
+      "source_url": "https://digital.asahi.com/articles/ASPCH513WPBLULFA022.html",
+      "purpose": "FactCheck Navi が集約した 朝日新聞 の公開ファクトチェック記事を基にした実在ネット記事ケース",
+      "analysis_text": "日本人の小玉さんがアメリカ人のハルさんと共に、3Dプリンターの基礎技術を考案した人物として95年、英国の民間財団から賞を受けている。",
+      "reference_urls": [
+        "https://digital.asahi.com/articles/ASPCH513WPBLULFA022.html",
+        "https://navi.fij.info/factcheck_navi/asahi211116-2/"
+      ],
+      "expected": {
+        "verdict": "ほぼ正確",
+        "domain": "一般"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 2,
+        "extraction_score": 80
+      },
+      "source_verdict_label": "ほぼ正確"
+    },
+    {
+      "id": "positive-mostly-accurate-09-infact211217-1",
+      "title": "コロナワクチン接種後の心筋炎が昨年の『260倍以上』を検証",
+      "site_name": "InFact",
+      "source_url": "https://infact.press/2021/12/post-14886/",
+      "purpose": "FactCheck Navi が集約した InFact の公開ファクトチェック記事を基にした実在ネット記事ケース",
+      "analysis_text": "米国の予防接種安全性監視システムでは、2021年に12,789件の心筋炎・心膜炎が報告されている（12月16日現在）。2020年の報告数は58件であり、2021年の報告数は昨年の「220倍」だ。",
+      "reference_urls": [
+        "https://infact.press/2021/12/post-14886/",
+        "https://navi.fij.info/factcheck_navi/infact211217-1/"
+      ],
+      "expected": {
+        "verdict": "ほぼ正確",
+        "domain": "医療"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 2,
+        "extraction_score": 80
+      },
+      "source_verdict_label": "ほぼ正確"
+    },
+    {
+      "id": "positive-mostly-accurate-10-infact220704",
+      "title": "岸田首相の発言「今年の春闘の賃上げ率2.08%は、過去20年で2番目に高い」は、ほぼ正確【InFact】 （2022.7.4）",
+      "site_name": "InFact",
+      "source_url": "https://infact.press/2022/07/post-20275/",
+      "purpose": "FactCheck Navi が集約した InFact の公開ファクトチェック記事を基にした実在ネット記事ケース",
+      "analysis_text": "岸田首相が言及した賃上げ率「2.08％」は、連合が発表した賃上げ率「2.09％」を間違えたものと考えられる。連合の資料によれば、賃上げ率「2.09％」は過去20年で２番目に高い数字であった。",
+      "reference_urls": [
+        "https://infact.press/2022/07/post-20275/",
+        "https://navi.fij.info/factcheck_navi/infact220704/"
+      ],
+      "expected": {
+        "verdict": "ほぼ正確",
+        "domain": "金融"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 2,
+        "extraction_score": 80
+      },
+      "source_verdict_label": "ほぼ正確"
+    },
+    {
+      "id": "positive-mostly-accurate-11-infact220706-2",
+      "title": "山本太郎代表「安倍さんが総理大臣時代に、消費税増税分の二割程度は社会保障に使ったけど、八割を借金返しに使ったと言った」は「ほぼ正確」【InFact】 （2022.7.6）",
+      "site_name": "InFact",
+      "source_url": "https://infact.press/2022/07/post-20376/",
+      "purpose": "FactCheck Navi が集約した InFact の公開ファクトチェック記事を基にした実在ネット記事ケース",
+      "analysis_text": "2019年1月の施政方針演説で安倍晋三首相（当時）は「増税分の5分の4を借金返しに充てていた」と言っている。",
+      "reference_urls": [
+        "https://infact.press/2022/07/post-20376/",
+        "https://navi.fij.info/factcheck_navi/infact220706-2/"
+      ],
+      "expected": {
+        "verdict": "ほぼ正確",
+        "domain": "金融"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 2,
+        "extraction_score": 80
+      },
+      "source_verdict_label": "ほぼ正確"
+    },
+    {
+      "id": "positive-mostly-accurate-12-infact220708",
+      "title": "公明党議員「公示前のタスキは、禁じられています」というツイートは「ほぼ正確」【InFact】 （2022.7.8）",
+      "site_name": "InFact",
+      "source_url": "https://infact.press/2022/07/post-20398/",
+      "purpose": "FactCheck Navi が集約した InFact の公開ファクトチェック記事を基にした実在ネット記事ケース",
+      "analysis_text": "公示前の選挙運動期間外に、名前入りのタスキを着用して政治活動を行うことは、公職選挙法に違反する可能性がある。",
+      "reference_urls": [
+        "https://infact.press/2022/07/post-20398/",
+        "https://navi.fij.info/factcheck_navi/infact220708/"
+      ],
+      "expected": {
+        "verdict": "ほぼ正確",
+        "domain": "一般"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 2,
+        "extraction_score": 80
+      },
+      "source_verdict_label": "ほぼ正確"
+    },
+    {
+      "id": "positive-mostly-accurate-13-infact220823",
+      "title": "志位和夫委員長「大学の入学金制度は『世界で日本にしかない』」は「ほぼ正確」【InFact】 （2022.8.23）",
+      "site_name": "InFact",
+      "source_url": "https://infact.press/2022/08/post-20690/",
+      "purpose": "FactCheck Navi が集約した InFact の公開ファクトチェック記事を基にした実在ネット記事ケース",
+      "analysis_text": "日本における「入学金」と同様の意味をもつ制度が確認できるのは、日本以外では韓国程度である。もっとも、韓国でも2023年から入学金制度の廃止が決まっていた。",
+      "reference_urls": [
+        "https://infact.press/2022/08/post-20690/",
+        "https://navi.fij.info/factcheck_navi/infact220823/"
+      ],
+      "expected": {
+        "verdict": "ほぼ正確",
+        "domain": "一般"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 2,
+        "extraction_score": 80
+      },
+      "source_verdict_label": "ほぼ正確"
+    },
+    {
+      "id": "positive-mostly-accurate-14-bfj230313",
+      "title": "WBC中継で「オーストラリアにはカンガルーが5000万頭いる」→ほぼ正確。人口比では､､､【BuzzFeed Japan】 （2023.3.13）",
+      "site_name": "BuzzFeed Japan",
+      "source_url": "https://www.buzzfeed.com/jp/keitaaimoto/kangaroo-fc",
+      "purpose": "FactCheck Navi が集約した BuzzFeed Japan の公開ファクトチェック記事を基にした実在ネット記事ケース",
+      "analysis_text": "オーストラリア政府観光局のホームページによると、国内には約5000万のカンガルーが生息しているとされ、愛情を込めて「ルー」と呼ばれている。",
+      "reference_urls": [
+        "https://www.buzzfeed.com/jp/keitaaimoto/kangaroo-fc",
+        "https://navi.fij.info/factcheck_navi/bfj230313/"
+      ],
+      "expected": {
+        "verdict": "ほぼ正確",
+        "domain": "金融"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 2,
+        "extraction_score": 80
+      },
+      "source_verdict_label": "ほぼ正確"
+    },
+    {
+      "id": "positive-mostly-accurate-15-post-22724",
+      "title": "ファウチ博士は、「社会的距離のルールは科学的根拠ゼロ」と発言したのか？",
+      "site_name": "InFact",
+      "source_url": "https://infact.press/2024/01/post-22724/",
+      "purpose": "InFact の公開ファクトチェック記事を基にした実在ネット記事ケース",
+      "analysis_text": "アンソニー・ファウチ氏は、6フィートの社会的距離ルールについて自ら明確な科学的根拠を示したわけではない。もっとも、「完全にでっち上げで科学的根拠はゼロだ」とまで認めたわけでもない。",
+      "reference_urls": [
+        "https://infact.press/2024/01/post-22724/"
+      ],
+      "expected": {
+        "verdict": "ほぼ正確",
+        "domain": "一般"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 82
+      },
+      "source_verdict_label": "ほぼ正確"
+    },
+    {
+      "id": "positive-mostly-accurate-16-post-22836",
+      "title": "WHO事務局長「強制していない」は「ほぼ正確」",
+      "site_name": "InFact",
+      "source_url": "https://infact.press/2024/03/post-22836/",
+      "purpose": "InFact の公開ファクトチェック記事を基にした実在ネット記事ケース",
+      "analysis_text": "WHO(世界保健機関)の事務局長として新型コロナウイルス対応を行っていたテドロス事務局長が、「WHOは新型コロナウイルスパンデミックの際、誰にも何も強制していない。」と発言した。",
+      "reference_urls": [
+        "https://infact.press/2024/03/post-22836/"
+      ],
+      "expected": {
+        "verdict": "ほぼ正確",
+        "domain": "医療"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 82
+      },
+      "source_verdict_label": "ほぼ正確"
+    },
+    {
+      "id": "positive-mostly-accurate-17-23435",
+      "title": "スイスの安楽死についてファクトチェック",
+      "site_name": "InFact",
+      "source_url": "https://infact.press/2024/06/23435/",
+      "purpose": "InFact の公開ファクトチェック記事を基にした実在ネット記事ケース",
+      "analysis_text": "スイスなどでは一定の条件のもとで自死幇助が認められている。ただし、海外で安楽死が誰にでも簡単に認められるわけではない。",
+      "reference_urls": [
+        "https://infact.press/2024/06/23435/"
+      ],
+      "expected": {
+        "verdict": "ほぼ正確",
+        "domain": "医療"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 82
+      },
+      "source_verdict_label": "ほぼ正確"
+    },
+    {
+      "id": "positive-mostly-accurate-18-kobe-pension-standardly-nontaxable",
+      "title": "年金受給者は標準的に非課税",
+      "site_name": "神戸新聞NEXT",
+      "source_url": "https://www.kobe-np.co.jp/news/society/202507/0019232569.shtml",
+      "purpose": "神戸新聞の選挙ファクト検証記事を基にした実在ネット記事ケース",
+      "analysis_text": "神戸市議のX投稿で、年金受給者は標準的に非課税だという言説が拡散した。神戸市内の年金受給者では非課税者が多数派だが、課税者も一定数おり、「標準的」という表現には条件差を包み込む曖昧さがある。",
+      "reference_urls": [
+        "https://www.kobe-np.co.jp/news/society/202507/0019232569.shtml"
+      ],
+      "expected": {
+        "verdict": "ほぼ正確",
+        "domain": "金融"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 78
+      },
+      "source_verdict_label": "ほぼ正確"
+    },
+    {
+      "id": "positive-mostly-accurate-19-japanese-electric-car-200km-single-charge",
+      "title": "1949年の日本製電気自動車は1回の充電で約200キロ走れた",
+      "site_name": "Snopes",
+      "source_url": "https://www.snopes.com/fact-check/japanese-electric-car-200km-single-charge/",
+      "purpose": "Snopes の公開ファクトチェック記事を基にした、日本関連の実在ネット記事ケース",
+      "analysis_text": "戦後の日本で開発された電気自動車「たま電気自動車」は、条件付きながら1回の充電でおよそ200キロ走行したとされる。",
+      "reference_urls": [
+        "https://www.snopes.com/fact-check/japanese-electric-car-200km-single-charge/"
+      ],
+      "expected": {
+        "verdict": "ほぼ正確",
+        "domain": "一般"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 82
+      },
+      "source_verdict_label": "Mostly True"
+    },
+    {
+      "id": "positive-mostly-accurate-20-blobfish-natural-environment",
+      "title": "ブロブフィッシュは自然環境では水揚げ後と別の見た目をしている",
+      "site_name": "Snopes",
+      "source_url": "https://www.snopes.com/fact-check/blobfish-natural-environment/",
+      "purpose": "Snopes の公開ファクトチェック記事を基にした、日本関連の実在ネット記事ケース",
+      "analysis_text": "深海にいるブロブフィッシュは、水圧の高い自然環境では水揚げ後とはかなり異なる姿に見える。",
+      "reference_urls": [
+        "https://www.snopes.com/fact-check/blobfish-natural-environment/"
+      ],
+      "expected": {
+        "verdict": "ほぼ正確",
+        "domain": "一般"
+      },
+      "snapshot_overrides": {
+        "has_author": true,
+        "has_published_at": true,
+        "reference_link_count": 1,
+        "extraction_score": 82
+      },
+      "source_verdict_label": "Mostly True"
+    }
+  ]
+}
