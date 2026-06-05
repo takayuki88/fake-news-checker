@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>フェイクニュースチェッカー Ver4</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}?v=submit-press-20260401">
+</head>
+<body>
+    <main class="page-shell">
+        <section class="hero">
+            <div class="hero-copy">
+                <p class="eyebrow">FastAPI / GPT + Gemini / Hybrid Review · 基準日 {{ today_date }}</p>
+                <h1>フェイクニュースチェッカー</h1>
+                <p class="lede">
+                    ニュース文、投稿文、主張文を入力すると、要注意度、判定、理由、根拠、補足を返します。
+                    Ver4 では、GPT で一次判定し、Gemini で外部根拠比較を行います。書き振り評価は補助情報として別表示します。
+                </p>
+                <div class="verdict-legend" aria-label="判定区分の凡例">
+                    <span class="legend-chip legend-water">0-20: 正確</span>
+                    <span class="legend-chip legend-green">21-40: ほぼ正確</span>
+                    <span class="legend-chip legend-yellow">41-60: 判断保留</span>
+                    <span class="legend-chip legend-orange">61-80: 不正確</span>
+                    <span class="legend-chip legend-red">81-100: 誤り</span>
+                </div>
+            </div>
+        </section>
+
+        {% if result %}
+        <section class="result-peek">
+            <div class="result-peek-grid">
+                <div class="metric-card metric-emphasis metric-{{ result.verdict_key }}">
+                    <span class="metric-label">要注意度</span>
+                    <strong class="metric-value">{{ result.attention_display }}</strong>
+                </div>
+                <div class="metric-card metric-emphasis metric-{{ result.verdict_key }}">
+                    <span class="metric-label">判定</span>
+                    <strong class="metric-value">{{ result.verdict_display }}</strong>
+                </div>
+            </div>
+        </section>
+        {% endif %}
+
+        <section class="panel">
+            <form method="post" action="/analyze" class="analysis-form" data-loading-form>
+                <label>
+                    <span>ページURL</span>
+                    <input
+                        type="url"
+                        name="page_url"
+                        placeholder="https://example.com/article"
+                        value="{{ form_data.page_url }}"
+                    >
+                </label>
+                <label>
+                    <span>ページ本文</span>
+                    <textarea
+                        name="page_text"
+                        rows="8"
+                        placeholder="ページ本文を直接貼り付けてください。URLと本文を両方入れた場合は本文を優先します。最低 {{ min_text_chars }} 文字です。"
+                    >{{ form_data.page_text }}</textarea>
+                </label>
+                <div class="form-tools">
+                    <label class="checkbox-row">
+                        <input
+                            type="checkbox"
+                            name="skip_policy_check"
+                            value="true"
+                            {% if form_data.skip_policy_check %}checked{% endif %}
+                        >
+                        <span>開発用: 規約確認をスキップする</span>
+                    </label>
+                    <button type="button" class="clear-button" data-clear-form>入力をクリア</button>
+                </div>
+                <p class="checkbox-note">
+                    URL入力時のみ有効です。既定では hard block と robots.txt を確認し、必要時だけ規約候補ページ探索を使います。
+                    このチェックを入れると、それらを飛ばして本文取得に進みます。
+                </p>
+                <button type="submit">真偽を判定する</button>
+            </form>
+
+            <aside class="note">
+                <h2>この Ver4 の返し方</h2>
+                <ul>
+                    <li>判定は 5分類で表示します</li>
+                    <li>要注意度は 0〜100% で表示します</li>
+                    <li>GPT が一次判定を行い、Gemini が外部根拠比較を行います</li>
+                    <li>真偽は根拠ベースで決め、書き振りは補助情報として別表示します</li>
+                    <li>書き振りが 80%以上のときだけ status を「人による確認推奨」寄りにします</li>
+                    <li>理由は短く 1〜3 点に絞ります</li>
+                    <li>可能な範囲で根拠ソースを表示します</li>
+                    <li>URL入力時は既定で hard block と robots.txt を確認し、必要時だけ規約候補ページ探索を使います</li>
+                </ul>
+                <p class="meta">Gemini API: {{ "有効" if gemini_enabled else "未設定" }}</p>
+            </aside>
+        </section>
+
+        {% if error %}
+        <section class="alert">
+            <p>{{ error }}</p>
+        </section>
+        {% endif %}
+
+        {% if result %}
+        <section class="result result-{{ result.verdict_key }}">
+            <div class="result-top">
+                <div>
+                    <p class="meta">判定モデル: {{ result.model_used }}</p>
+                    <p class="summary">{{ result.summary }}</p>
+                </div>
+            </div>
+
+            <div class="metrics metrics-four">
+                <div class="metric-card metric-emphasis metric-{{ result.verdict_key }}">
+                    <span class="metric-label">要注意度</span>
+                    <strong class="metric-value">{{ result.attention_display }}</strong>
+                </div>
+                <div class="metric-card metric-emphasis metric-{{ result.verdict_key }}">
+                    <span class="metric-label">判定</span>
+                    <strong class="metric-value">{{ result.verdict_display }}</strong>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-label">確信度</span>
+                    <strong class="metric-value">{{ result.confidence_score }}% / {{ result.confidence_label }}</strong>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-label">状態</span>
+                    <strong class="metric-value">{{ result.status }}</strong>
+                </div>
+            </div>
+
+            <article class="card score-card">
+                <h3>点数の内訳</h3>
+                <p class="source-note">要注意度がどの点数から出ているかをまとめて表示しています。</p>
+                <div class="score-grid">
+                    <div class="score-item">
+                        <span class="metric-label">表示中の要注意度</span>
+                        <strong class="metric-value">{{ result.attention_display }}</strong>
+                        <p class="source-note">画面に表示している最終値です。</p>
+                    </div>
+                    <div class="score-item">
+                        <span class="metric-label">内部リスク点</span>
+                        <strong class="metric-value">{{ result.risk_score if result.risk_score is not none else "?" }}%</strong>
+                        <p class="source-note">判定ロジック内部で使った基準点です。</p>
+                    </div>
+                    <div class="score-item">
+                        <span class="metric-label">確信度</span>
+                        <strong class="metric-value">{{ result.confidence_score }}%</strong>
+                        <p class="source-note">{{ result.confidence_label }}</p>
+                    </div>
+                    <div class="score-item">
+                        <span class="metric-label">書き振り要注意度</span>
+                        <strong class="metric-value">{{ result.style_overview.score_display }}</strong>
+                        <p class="source-note">補助情報として別表示している点数です。</p>
+                    </div>
+                    <div class="score-item">
+                        <span class="metric-label">抽出品質</span>
+                        <strong class="metric-value">{{ result.source_snapshot.extraction_score }}%</strong>
+                        <p class="source-note">本文抽出の安定度の目安です。</p>
+                    </div>
+                    <div class="score-item">
+                        <span class="metric-label">判定帯</span>
+                        <strong class="metric-value">{{ result.attention_band_display }}</strong>
+                        <p class="source-note">この帯に収まるよう要注意度を表示しています。</p>
+                    </div>
+                </div>
+                {% if result.signal_breakdown %}
+                <div class="evidence-block">
+                    <h4>要注意度に効いた点数</h4>
+                    <ul class="signals">
+                        {% for signal in result.signal_breakdown %}
+                        <li class="signal-row signal-{{ signal.tone }}">
+                            <div class="signal-score">
+                                {% if signal.score_delta > 0 %}+{% endif %}{{ signal.score_delta }}
+                            </div>
+                            <div>
+                                <strong>{{ signal.title }}</strong>
+                                <p class="signal-detail">{{ signal.detail }}</p>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+                {% if result.score_calculation and result.score_calculation.attention_steps %}
+                <div class="evidence-block">
+                    <h4>要注意度の計算過程</h4>
+                    <ol class="calculation-steps">
+                        {% for step in result.score_calculation.attention_steps %}
+                        <li class="calculation-step">
+                            <p class="calculation-label">{{ step.label }}</p>
+                            <p class="calculation-expression">{{ step.expression }} = <strong>{{ step.result }}</strong></p>
+                            {% if step.note %}
+                            <p class="source-note">{{ step.note }}</p>
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ol>
+                </div>
+                {% endif %}
+            </article>
+
+            <div class="grid">
+                <article class="card">
+                    <h3>理由</h3>
+                    <ul>
+                        {% for reason in result.reasons %}
+                        <li>{{ reason }}</li>
+                        {% endfor %}
+                    </ul>
+                </article>
+
+                <article class="card">
+                    <h3>書き振り評価（補助情報）</h3>
+                    <p class="source-note">状態: {{ result.style_overview.status }}</p>
+                    <div class="style-overview metric-card metric-emphasis metric-{{ result.style_overview.key }}">
+                        <span class="metric-label">書き振り要注意度</span>
+                        <strong class="metric-value">{{ result.style_overview.score_display }}</strong>
+                        <p class="style-label">{{ result.style_overview.label }}</p>
+                    </div>
+                    <p class="source-note">{{ result.style_overview.summary }}</p>
+                    <p class="style-policy-note">
+                        この書き振り評価は補助情報です。低いほど信頼性が高いわけではなく、高いだけでフェイク判定にはなりません。
+                        {% if result.style_overview.score is not none and result.style_overview.score >= 80 %}
+                        今回は 80% 以上のため、状態を「人による確認推奨」寄りにしています。
+                        {% endif %}
+                    </p>
+                    {% if result.style_overview.highlights %}
+                    <div class="tags">
+                        {% for highlight in result.style_overview.highlights %}
+                        <span class="tag">{{ highlight }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% if result.style_overview.signals %}
+                    <ul class="style-review-list">
+                        {% for signal in result.style_overview.signals %}
+                        <li>
+                            <strong>{{ signal.title }}</strong>
+                            <span class="style-severity">{{ signal.severity }}</span>
+                            <p class="source-note">{{ signal.detail }}</p>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                    {% if result.style_overview.note %}
+                    <div class="evidence-block">
+                        <h4>補足メモ</h4>
+                        <p class="source-note">{{ result.style_overview.note }}</p>
+                    </div>
+                    {% endif %}
+                </article>
+            </div>
+
+            {% if result.timing_overview %}
+            <article class="card">
+                <h3>実行時間（開発用）</h3>
+                <p class="source-note">簡易計測です。ネットワーク状況や Gemini の応答状況で前後します。</p>
+                <div class="timing-summary metric-card">
+                    <span class="metric-label">合計時間</span>
+                    <strong class="metric-value">{{ result.timing_overview.total_ms | duration_seconds }} 秒</strong>
+                </div>
+                <ul class="timing-list">
+                    {% for stage in result.timing_overview.stages %}
+                    <li>
+                        <div class="timing-row">
+                            <strong>{{ stage.label }}</strong>
+                            <span class="timing-duration">{{ stage.duration_ms | duration_seconds }} 秒</span>
+                        </div>
+                        {% if stage.note %}
+                        <p class="source-note">{{ stage.note }}</p>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </article>
+            {% endif %}
+
+            <article class="card">
+                    <h3>補助ラベル</h3>
+                    <div class="tags">
+                        {% for label in result.labels %}
+                        <span class="tag">{{ label }}</span>
+                        {% endfor %}
+                    </div>
+                    {% if result.supplement %}
+                    <div class="evidence-block">
+                        <h4>補足</h4>
+                        <p class="source-note">{{ result.supplement }}</p>
+                    </div>
+                    {% endif %}
+            </article>
+
+            <article class="card">
+                <h3>根拠</h3>
+                {% if result.evidence_sources %}
+                <ul class="links">
+                    {% for link in result.evidence_sources %}
+                    <li>
+                        <span class="link-kind">{{ link.kind }}</span>
+                        <a href="{{ link.url }}" target="_blank" rel="noopener noreferrer">{{ link.title }}</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="source-note">今回の判定で表示できる根拠ソースはまだ十分に取得できていません。</p>
+                {% endif %}
+            </article>
+
+            <article class="card">
+                <h3>主張ごとの確認</h3>
+                <p class="source-note">状態: {{ result.evidence_overview.status }}</p>
+                {% if result.evidence_overview.assessment_summary %}
+                <p class="source-note">{{ result.evidence_overview.assessment_summary }}</p>
+                {% endif %}
+                {% if result.evidence_overview.claim_reviews %}
+                <ul class="claim-reviews">
+                    {% for review in result.evidence_overview.claim_reviews %}
+                    <li>
+                        <strong>{{ review.verdict }}</strong>
+                        <span>{{ review.claim }}</span>
+                        <p class="source-note">{{ review.reason }}</p>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="source-note">主張単位の整理はまだ十分に返っていません。</p>
+                {% endif %}
+
+                {% if result.evidence_overview.grounding_queries %}
+                <div class="evidence-block">
+                    <h4>Gemini が使った検索語</h4>
+                    <ul class="query-list">
+                        {% for query in result.evidence_overview.grounding_queries %}
+                        <li>{{ query }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                {% if result.evidence_overview.retrieved_urls %}
+                <div class="evidence-block">
+                    <h4>URL取得状況</h4>
+                    <ul class="links">
+                        {% for item in result.evidence_overview.retrieved_urls %}
+                        <li>
+                            <span class="link-kind">{{ item.status }}</span>
+                            <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer">{{ item.url }}</a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                {% if result.source_snapshot.policy_check_note %}
+                <div class="evidence-block">
+                    <h4>規約確認結果</h4>
+                    <p class="source-note">
+                        状態: {{ result.source_snapshot.policy_check_status or "未実施" }}
+                        {% if result.source_snapshot.policy_check_url %}
+                        · <a href="{{ result.source_snapshot.policy_check_url }}" target="_blank" rel="noopener noreferrer">確認先</a>
+                        {% endif %}
+                    </p>
+                    <p class="source-note">{{ result.source_snapshot.policy_check_note }}</p>
+                    {% if result.source_snapshot.policy_checked_urls %}
+                    <ul class="links">
+                        {% for checked_url in result.source_snapshot.policy_checked_urls %}
+                        <li>
+                            <span class="link-kind">確認URL</span>
+                            <a href="{{ checked_url }}" target="_blank" rel="noopener noreferrer">{{ checked_url }}</a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {% if result.evidence_overview.assessment_note %}
+                <div class="evidence-block">
+                    <h4>実行メモ</h4>
+                    <p class="source-note">{{ result.evidence_overview.assessment_note }}</p>
+                </div>
+                {% endif %}
+            </article>
+
+            <article class="card">
+                <h3>確認導線</h3>
+                <p class="source-note">{{ result.evidence_overview.summary }}</p>
+                {% if result.evidence_overview.claims %}
+                <h4>確認対象の主張候補</h4>
+                <ul>
+                    {% for claim in result.evidence_overview.claims %}
+                    <li>{{ claim }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                <div class="evidence-block">
+                    <h4>追加で確認するリンク</h4>
+                    <ul class="links">
+                        {% for link in result.verification_links %}
+                        <li>
+                            <span class="link-kind">{{ link.kind }}</span>
+                            <a href="{{ link.url }}" target="_blank" rel="noopener noreferrer">{{ link.title }}</a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </article>
+
+            <article class="card source-card">
+                <h3>解析対象</h3>
+                <p class="source-title">{{ result.source_snapshot.title }}</p>
+                <p class="source-meta">
+                    {{ result.source_snapshot.site_name }}
+                    {% if result.source_snapshot.source_url %}
+                    · <a href="{{ result.source_snapshot.source_url }}" target="_blank" rel="noopener noreferrer">元ページ</a>
+                    {% endif %}
+                </p>
+                <p class="source-note">{{ result.source_snapshot.extraction_note }}</p>
+                <p class="source-note">
+                    判定日時: {{ result.source_snapshot.analysis_datetime or today_datetime }}
+                    {% if result.source_snapshot.analysis_timezone %}
+                    / タイムゾーン: {{ result.source_snapshot.analysis_timezone }}
+                    {% endif %}
+                </p>
+                <p class="source-note">
+                    抽出文字数: {{ result.source_snapshot.extracted_chars }}
+                    / 抽出品質: {{ result.source_snapshot.extraction_score }}%
+                    / 引用リンク数: {{ result.source_snapshot.reference_link_count }}
+                </p>
+                <p class="source-note">
+                    著者情報: {{ result.source_snapshot.author_name or "なし" }}
+                    / 公開日時: {{ result.source_snapshot.published_at or "なし" }}
+                </p>
+                <details>
+                    <summary>解析に使った本文プレビュー</summary>
+                    <p class="preview">{{ result.source_snapshot.text_preview }}</p>
+                </details>
+            </article>
+        </section>
+        {% endif %}
+    </main>
+    <div class="loading-overlay is-hidden" data-loading-indicator aria-live="polite" aria-hidden="true">
+        <div class="loading-modal">
+            <span class="spinner spinner-large" aria-hidden="true"></span>
+            <p class="loading-title">判定中です</p>
+            <p class="loading-copy">少しお待ちください...</p>
+        </div>
+    </div>
+    <script>
+        (() => {
+            const form = document.querySelector("[data-loading-form]");
+            if (!form) return;
+            const indicator = document.querySelector("[data-loading-indicator]");
+            const clearButton = document.querySelector("[data-clear-form]");
+            let latestRequestId = 0;
+
+            if (clearButton) {
+                clearButton.addEventListener("click", () => {
+                    form.querySelectorAll("input[type='url'], textarea").forEach((field) => {
+                        field.value = "";
+                    });
+                    form.querySelectorAll("input[type='checkbox']").forEach((field) => {
+                        field.checked = false;
+                    });
+                    const firstField = form.querySelector("input[type='url'], textarea");
+                    if (firstField) {
+                        firstField.focus();
+                    }
+                });
+            }
+
+            form.addEventListener("submit", async (event) => {
+                event.preventDefault();
+                const requestId = ++latestRequestId;
+                const formData = new FormData(form);
+
+                if (indicator) {
+                    indicator.classList.remove("is-hidden");
+                    indicator.setAttribute("aria-hidden", "false");
+                }
+
+                try {
+                    const response = await fetch(form.action, {
+                        method: "POST",
+                        body: formData,
+                        headers: { "X-Requested-With": "fetch" },
+                    });
+                    const html = await response.text();
+                    if (requestId !== latestRequestId) return;
+                    document.open();
+                    document.write(html);
+                    document.close();
+                } catch (error) {
+                    if (requestId !== latestRequestId) return;
+                    if (indicator) {
+                        indicator.classList.add("is-hidden");
+                        indicator.setAttribute("aria-hidden", "true");
+                    }
+                    window.alert("判定中に通信エラーが発生しました。時間をおいてもう一度お試しください。");
+                    console.error(error);
+                }
+            });
+        })();
+    </script>
+</body>
+</html>

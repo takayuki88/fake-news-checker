@@ -1,0 +1,158 @@
+{
+  "meta": {
+    "truth_key": "expected.verdict",
+    "pred_key": "predicted.verdict",
+    "id_key": "id",
+    "sample_count": 100,
+    "skipped_count": 0
+  },
+  "multiclass": {
+    "accuracy": 0.9,
+    "macro_avg": {
+      "precision": 0.9031,
+      "recall": 0.9,
+      "f1": 0.8989
+    },
+    "weighted_avg": {
+      "precision": 0.9031,
+      "recall": 0.9,
+      "f1": 0.8989
+    },
+    "per_class": {
+      "正確": {
+        "precision": 0.8333,
+        "recall": 1.0,
+        "f1": 0.9091,
+        "support": 20
+      },
+      "ほぼ正確": {
+        "precision": 0.8824,
+        "recall": 0.75,
+        "f1": 0.8108,
+        "support": 20
+      },
+      "判断保留": {
+        "precision": 1.0,
+        "recall": 0.95,
+        "f1": 0.9744,
+        "support": 20
+      },
+      "不正確": {
+        "precision": 0.85,
+        "recall": 0.85,
+        "f1": 0.85,
+        "support": 20
+      },
+      "誤り": {
+        "precision": 0.95,
+        "recall": 0.95,
+        "f1": 0.95,
+        "support": 20
+      }
+    },
+    "labels": [
+      "正確",
+      "ほぼ正確",
+      "判断保留",
+      "不正確",
+      "誤り"
+    ],
+    "confusion_matrix": [
+      [
+        20,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        4,
+        15,
+        0,
+        1,
+        0
+      ],
+      [
+        0,
+        0,
+        19,
+        1,
+        0
+      ],
+      [
+        0,
+        2,
+        0,
+        17,
+        1
+      ],
+      [
+        0,
+        0,
+        0,
+        1,
+        19
+      ]
+    ]
+  },
+  "binary_fake_positive": {
+    "positive_label": "誤り",
+    "precision": 0.95,
+    "recall": 0.95,
+    "f1": 0.95,
+    "support": 20
+  },
+  "mismatches": [
+    {
+      "id": "positive-mostly-accurate-06-jid211024-1",
+      "truth": "ほぼ正確",
+      "pred": "正確"
+    },
+    {
+      "id": "positive-mostly-accurate-10-infact220704",
+      "truth": "ほぼ正確",
+      "pred": "正確"
+    },
+    {
+      "id": "positive-mostly-accurate-13-infact220823",
+      "truth": "ほぼ正確",
+      "pred": "正確"
+    },
+    {
+      "id": "positive-mostly-accurate-19-japanese-electric-car-200km-single-charge",
+      "truth": "ほぼ正確",
+      "pred": "不正確"
+    },
+    {
+      "id": "positive-mostly-accurate-20-blobfish-natural-environment",
+      "truth": "ほぼ正確",
+      "pred": "正確"
+    },
+    {
+      "id": "jfc-hold-09-baseless-uniqlo-china-factory-exit",
+      "truth": "判断保留",
+      "pred": "不正確"
+    },
+    {
+      "id": "jfc-inaccurate-12-matsumoto-chief-cabinet-secretary-great-kanto-earthquake-korean-massacre-records-inaccurate",
+      "truth": "不正確",
+      "pred": "ほぼ正確"
+    },
+    {
+      "id": "jfc-inaccurate-13-ohio-train-derailment-disaster-hidden-reporter-arrested-false",
+      "truth": "不正確",
+      "pred": "ほぼ正確"
+    },
+    {
+      "id": "jfc-inaccurate-16-inaccuracies-in-keio-baseball-cheering",
+      "truth": "不正確",
+      "pred": "誤り"
+    },
+    {
+      "id": "jfc-false-10-false-lee-jaemyung-setagaya-comment",
+      "truth": "誤り",
+      "pred": "不正確"
+    }
+  ],
+  "skipped_records": []
+}
