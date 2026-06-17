@@ -122,34 +122,6 @@ portfolio/
 └─ .env.example
 ```
 
-## セットアップ
-
-```powershell
-cd portfolio
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-Copy-Item .env.example .env
-```
-
-`.env` にAPIキーを設定すると、GPT一次レビューとGemini外部根拠確認が有効になります。
-
-```dotenv
-OPENAI_API_KEY=sk-...
-GEMINI_API_KEY=AIza...
-```
-
-APIキーが未設定の場合、一部のLLM機能はスキップされ、ローカル判定中心で動作します。
-
-## 起動
-
-```powershell
-cd portfolio
-python -m uvicorn app.main:app --reload
-```
-
-ブラウザで `http://127.0.0.1:8000` を開きます。
-
 ## 評価結果の確認
 
 - [評価JSON](evaluation_outputs/20260613-0023/eval_real_article_dataset_v2_use_gemini.json)
