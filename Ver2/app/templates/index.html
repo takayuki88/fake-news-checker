@@ -61,21 +61,8 @@
                     >{{ form_data.page_text }}</textarea>
                 </label>
                 <div class="form-tools">
-                    <label class="checkbox-row">
-                        <input
-                            type="checkbox"
-                            name="skip_policy_check"
-                            value="true"
-                            {% if form_data.skip_policy_check %}checked{% endif %}
-                        >
-                        <span>開発用: 規約確認をスキップする</span>
-                    </label>
                     <button type="button" class="clear-button" data-clear-form>入力をクリア</button>
                 </div>
-                <p class="checkbox-note">
-                    URL入力時のみ有効です。既定では hard block と robots.txt を確認し、必要時だけ規約候補ページ探索を使います。
-                    このチェックを入れると、それらを飛ばして本文取得に進みます。
-                </p>
                 <button type="submit">真偽を判定する</button>
             </form>
 
@@ -89,7 +76,6 @@
                     <li>書き振りが 80%以上のときだけ status を「人による確認推奨」寄りにします</li>
                     <li>理由は短く 1〜3 点に絞ります</li>
                     <li>可能な範囲で根拠ソースを表示します</li>
-                    <li>URL入力時は既定で hard block と robots.txt を確認し、必要時だけ規約候補ページ探索を使います</li>
                 </ul>
                 <p class="meta">Gemini API: {{ "有効" if gemini_enabled else "未設定" }}</p>
             </aside>
