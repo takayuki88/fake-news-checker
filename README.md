@@ -1,12 +1,12 @@
 # fake-news-checker
 
 情報の真偽を判定する `FastAPI` ベースのフェイクニュースチェッカーです。
-このリポジトリには、段階的に改善してきた `Ver1` `Ver2` `Ver3` `Ver4` `Ver5` と、発表資料をまとめています。
+このリポジトリには、段階的に改善してきた `Ver1` `Ver2` `Ver3` `Ver4` と、発表資料をまとめています。
 
 ## 採用担当者向けポートフォリオ
 
 就職活動用に、主成果版である `Ver4` だけを抽出した [`portfolio/`](portfolio/) を用意しています。
-`Ver1` から `Ver5` は試行錯誤と比較検証の履歴であり、まずは `portfolio/README.md` を確認してください。
+`Ver1` から `Ver4` は試行錯誤と比較検証の履歴であり、まずは `portfolio/README.md` を確認してください。
 
 ## リポジトリ構成
 
@@ -20,8 +20,6 @@
   - 実データセットや収集スクリプトを多く含む
 - `Ver4`
   - OpenAI 一次レビューと Gemini 根拠確認の比較検証用バージョン
-- `Ver5`
-  - `Ver3` をベースに、Gemini 一次判定案をより強く取り入れる実験用バージョン
 - `presentation`
   - 発表資料と生成スクリプト
 
@@ -42,7 +40,7 @@
 
 ## セットアップ
 
-よく使うのは `Ver2` か `Ver3` です。Gemini 一次判定を強めた実験をしたい場合は `Ver5` を使います。例として `Ver2` のセットアップは次のとおりです。
+よく使うのは `Ver2` か `Ver3` です。GPT 一次レビューと Gemini 根拠確認を使う主成果版は `Ver4` です。例として `Ver2` のセットアップは次のとおりです。
 
 ```powershell
 cd "C:\Users\oneuk\OneDrive\Desktop\datamix\01 講義\05_インテグレーションステップ\fake-news-checker\Ver2"
@@ -65,7 +63,7 @@ python -m uvicorn app.main:app --reload
 
 ## 評価運用メモ
 
-`Ver2` `Ver3` `Ver5` には dataset 実行と評価可視化の仕組みがあります。
+`Ver2` `Ver3` `Ver4` には dataset 実行と評価可視化の仕組みがあります。
 
 - `dataset_runner.py` は簡略スキーマ dataset の直読みに対応
 - `plot_evaluation.py` は評価画像の出力に対応
@@ -94,4 +92,3 @@ python -m uvicorn app.main:app --reload
 - [`Ver2/README.md`](c:/Users/oneuk/OneDrive/Desktop/datamix/01 講義/05_インテグレーションステップ/fake-news-checker/Ver2/README.md)
 - [`Ver3/README.md`](c:/Users/oneuk/OneDrive/Desktop/datamix/01 講義/05_インテグレーションステップ/fake-news-checker/Ver3/README.md)
 - [`Ver4/README.md`](c:/Users/oneuk/OneDrive/Desktop/datamix/01 講義/05_インテグレーションステップ/fake-news-checker/Ver4/README.md)
-- [`Ver5/README.md`](c:/Users/oneuk/OneDrive/Desktop/datamix/01 講義/05_インテグレーションステップ/fake-news-checker/Ver5/README.md)

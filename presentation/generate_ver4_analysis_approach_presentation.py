@@ -19,7 +19,6 @@ VER4_EVAL_PATH = PROJECT_ROOT / "Ver4" / "evaluation_outputs" / "20260427-0304" 
 VER4_PLOTS_DIR = PROJECT_ROOT / "Ver4" / "evaluation_outputs" / "20260427-0304" / "plots"
 VER2_EVAL_PATH = PROJECT_ROOT / "Ver2" / "evaluation_outputs" / "20260411-0509" / "eval_real_article_dataset_v2_use_gemini.json"
 VER3_EVAL_PATH = PROJECT_ROOT / "Ver3" / "evaluation_outputs" / "20260421-2001" / "eval_real_article_dataset_v2_use_gemini.json"
-VER5_EVAL_PATH = PROJECT_ROOT / "Ver5" / "evaluation_outputs" / "20260422-1632" / "eval_real_article_dataset_v2_use_gemini.json"
 
 OUTPUT_PPTX = PRESENTATION_DIR / "fake_news_checker_ver4_final_presentation_20260429.pptx"
 OUTPUT_NOTES = PRESENTATION_DIR / "fake_news_checker_ver4_final_presentation_20260429_notes.md"
@@ -254,7 +253,6 @@ def build_presentation() -> None:
     ver4 = load_json(VER4_EVAL_PATH)
     ver2 = load_json(VER2_EVAL_PATH)
     ver3 = load_json(VER3_EVAL_PATH)
-    ver5 = load_json(VER5_EVAL_PATH)
     mismatch_patterns = Counter((item["truth"], item["pred"]) for item in ver4["mismatches"]).most_common()
 
     prs = Presentation()
@@ -516,7 +514,6 @@ def build_presentation() -> None:
         ("Ver2", ver2["multiclass"]["accuracy"], ver2["multiclass"]["macro_avg"]["f1"], BLUE_SOFT, NAVY),
         ("Ver3", ver3["multiclass"]["accuracy"], ver3["multiclass"]["macro_avg"]["f1"], MINT, TEAL),
         ("Ver4", ver4["multiclass"]["accuracy"], ver4["multiclass"]["macro_avg"]["f1"], GREEN_SOFT, GREEN),
-        ("Ver5", ver5["multiclass"]["accuracy"], ver5["multiclass"]["macro_avg"]["f1"], ORANGE_SOFT, ORANGE),
     ]
     for i, (name, acc, f1, fill, accent_color) in enumerate(versions):
         top = Inches(1.55 + i * 1.03)

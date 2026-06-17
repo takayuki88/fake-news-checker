@@ -39,4 +39,4 @@ Ver4の評価では、5ラベル各20件、合計100件のbalanced datasetを使
 
 - 既存100件はdevデータとして、改善による既存性能の変化を見る
 - 新規blind test 100件を作成し、未知データでの性能を見る
-- Ver2 / Ver3 / Ver4 / Ver5を同じblind setで比較する
+- Ver2 / Ver3 / Ver4を同じblind setで比較する
