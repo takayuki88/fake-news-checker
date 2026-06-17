@@ -7,46 +7,46 @@
     "skipped_count": 0
   },
   "multiclass": {
-    "accuracy": 0.9,
+    "accuracy": 0.87,
     "macro_avg": {
-      "precision": 0.9031,
-      "recall": 0.9,
-      "f1": 0.8989
+      "precision": 0.8716,
+      "recall": 0.87,
+      "f1": 0.8698
     },
     "weighted_avg": {
-      "precision": 0.9031,
-      "recall": 0.9,
-      "f1": 0.8989
+      "precision": 0.8716,
+      "recall": 0.87,
+      "f1": 0.8698
     },
     "per_class": {
       "正確": {
-        "precision": 0.8333,
-        "recall": 1.0,
-        "f1": 0.9091,
+        "precision": 0.8571,
+        "recall": 0.9,
+        "f1": 0.878,
         "support": 20
       },
       "ほぼ正確": {
-        "precision": 0.8824,
+        "precision": 0.8333,
         "recall": 0.75,
-        "f1": 0.8108,
+        "f1": 0.7895,
         "support": 20
       },
       "判断保留": {
         "precision": 1.0,
-        "recall": 0.95,
-        "f1": 0.9744,
+        "recall": 1.0,
+        "f1": 1.0,
         "support": 20
       },
       "不正確": {
-        "precision": 0.85,
+        "precision": 0.7727,
         "recall": 0.85,
-        "f1": 0.85,
+        "f1": 0.8095,
         "support": 20
       },
       "誤り": {
-        "precision": 0.95,
-        "recall": 0.95,
-        "f1": 0.95,
+        "precision": 0.8947,
+        "recall": 0.85,
+        "f1": 0.8718,
         "support": 20
       }
     },
@@ -59,62 +59,77 @@
     ],
     "confusion_matrix": [
       [
-        20,
-        0,
-        0,
-        0,
-        0
-      ],
-      [
-        4,
-        15,
-        0,
-        1,
-        0
-      ],
-      [
-        0,
-        0,
-        19,
-        1,
-        0
-      ],
-      [
-        0,
+        18,
         2,
         0,
+        0,
+        0
+      ],
+      [
+        3,
+        15,
+        0,
+        2,
+        0
+      ],
+      [
+        0,
+        0,
+        20,
+        0,
+        0
+      ],
+      [
+        0,
+        1,
+        0,
         17,
-        1
+        2
       ],
       [
         0,
         0,
         0,
-        1,
-        19
+        3,
+        17
       ]
     ]
   },
   "binary_fake_positive": {
     "positive_label": "誤り",
-    "precision": 0.95,
-    "recall": 0.95,
-    "f1": 0.95,
+    "precision": 0.8947,
+    "recall": 0.85,
+    "f1": 0.8718,
     "support": 20
   },
   "mismatches": [
+    {
+      "id": "positive-accurate-13-litmus230706",
+      "truth": "正確",
+      "pred": "ほぼ正確"
+    },
+    {
+      "id": "positive-accurate-19-ronald-mcdonald-name-japan",
+      "truth": "正確",
+      "pred": "ほぼ正確"
+    },
     {
       "id": "positive-mostly-accurate-06-jid211024-1",
       "truth": "ほぼ正確",
       "pred": "正確"
     },
     {
-      "id": "positive-mostly-accurate-10-infact220704",
+      "id": "positive-mostly-accurate-07-jid211029-01",
+      "truth": "ほぼ正確",
+      "pred": "不正確"
+    },
+    {
+      "id": "positive-mostly-accurate-13-infact220823",
       "truth": "ほぼ正確",
       "pred": "正確"
     },
     {
-      "id": "positive-mostly-accurate-13-infact220823",
+      "id": "positive-mostly-accurate-18-kobe-pension-standardly-nontaxable",
       "truth": "ほぼ正確",
       "pred": "正確"
     },
@@ -124,22 +139,7 @@
       "pred": "不正確"
     },
     {
-      "id": "positive-mostly-accurate-20-blobfish-natural-environment",
-      "truth": "ほぼ正確",
-      "pred": "正確"
-    },
-    {
-      "id": "jfc-hold-09-baseless-uniqlo-china-factory-exit",
-      "truth": "判断保留",
-      "pred": "不正確"
-    },
-    {
       "id": "jfc-inaccurate-12-matsumoto-chief-cabinet-secretary-great-kanto-earthquake-korean-massacre-records-inaccurate",
-      "truth": "不正確",
-      "pred": "ほぼ正確"
-    },
-    {
-      "id": "jfc-inaccurate-13-ohio-train-derailment-disaster-hidden-reporter-arrested-false",
       "truth": "不正確",
       "pred": "ほぼ正確"
     },
@@ -149,7 +149,22 @@
       "pred": "誤り"
     },
     {
-      "id": "jfc-false-10-false-lee-jaemyung-setagaya-comment",
+      "id": "jfc-inaccurate-19-factcheck-us-department-of-state-officially-declared-islam-a-threat",
+      "truth": "不正確",
+      "pred": "誤り"
+    },
+    {
+      "id": "jfc-false-01-trump-im-the-last-to-use-nukes",
+      "truth": "誤り",
+      "pred": "不正確"
+    },
+    {
+      "id": "jfc-false-03-chemtrail-government-airborne-dispersion-harmful-substances-false",
+      "truth": "誤り",
+      "pred": "不正確"
+    },
+    {
+      "id": "jfc-false-04-japans-inflation-rate-is-not-the-highest",
       "truth": "誤り",
       "pred": "不正確"
     }
