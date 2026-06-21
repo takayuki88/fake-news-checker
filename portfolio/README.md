@@ -147,6 +147,7 @@ portfolio/
 
 - [評価JSON](evaluation_outputs/20260613-0023/eval_real_article_dataset_v2_use_gemini.json)
 - [予測結果JSON](evaluation_outputs/20260613-0023/predictions_real_article_dataset_v2_use_gemini.json)
+- [予測結果CSV](evaluation_outputs/20260613-0023/Ver4_real_article_dataset_v2_with_predicted_verdict_attention_score.csv)
 - [評価サマリー](docs/evaluation_summary.md)
 - [システム構成](docs/architecture.md)
 - [今後の改善](docs/future_work.md)
