@@ -8,6 +8,9 @@ Ver4の最新再評価では、5ラベル各20件、合計100件のbalanced data
 - evaluation result: `evaluation_outputs/20260613-0023/eval_real_article_dataset_v2_use_gemini.json`
 - model setting: GPT一次レビュー + Gemini外部根拠確認
 
+既存100件は改善過程でも確認に使った評価データです。
+今後は、改善に使っていない新規データでも性能を確認する予定です。
+
 ## 主要指標
 
 | 指標 | 結果 |
@@ -40,6 +43,6 @@ Ver4の最新再評価では、5ラベル各20件、合計100件のbalanced data
 
 ## 次の検証方針
 
-- 既存100件はdevデータとして、改善による既存性能の変化を見る
-- 新規blind test 100件を作成し、未知データでの性能を見る
+- 既存100件で、改善による既存性能の変化を見る
+- 改善に使っていない新規データ100件を作成し、未知データでの性能を見る
 - Ver2 / Ver3 / Ver4を同じblind setで比較する
